@@ -1,4 +1,3 @@
-# 内容
 resolves #0
 
 マージ時に削除しない場合はresolvesの代わりにissueを使う
