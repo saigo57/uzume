@@ -1,4 +1,7 @@
-
 # backend
 /backend/.envrc
 /backend/uzume_backend
+
+# frontend
+frontend/node_modules
+frontend/dist
