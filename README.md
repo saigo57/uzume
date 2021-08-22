@@ -19,4 +19,4 @@
 
 ## pushする前にすること
 ### backend/blueprint以下を編集したとき
-* `backend/blueprint/converter.sh`を実行し、生成される`backend/blueprint/output/api.html`をコミットに含める
+* `backend/blueprint/converter.sh`を実行し、生成される`docs/index.html`をコミットに含める
