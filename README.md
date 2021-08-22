@@ -16,3 +16,7 @@
 * issue番号0を作業する場合、`feature/0`ブランチを作成する。
 * 作業が終わったら`main`ブランチに対してPRを作成する。
 * PRに`resolves #0`と記載する。そうするとPRがマージされたときにissueを自動でクローズしてくれる。
+
+## pushする前にすること
+### backend/blueprint以下を編集したとき
+* `backend/blueprint/converter.sh`を実行し、生成される`backend/blueprint/output/api.html`をコミットに含める

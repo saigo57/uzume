@@ -1,3 +1,5 @@
+.DS_Store
+
 # backend
 /backend/.envrc
 /backend/uzume_backend
