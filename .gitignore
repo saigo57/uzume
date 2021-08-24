@@ -1,6 +1,7 @@
 .DS_Store
 
 # backend
+/backend/tmp/*
 /backend/.envrc
 /backend/uzume_backend
 
