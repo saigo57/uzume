@@ -22,6 +22,8 @@ func Init() *echo.Echo {
 	v1 := e.Group("/api/v1")
 	{
 		v1.GET("/workspaces", api.GetWorkspaces())
+		v1.POST("/workspaces", api.PostWorkspaces())
+		v1.POST("/workspaces/add", api.PostWorkspacesAdd())
 		v1.GET("/workspaces/login", api.GetWorkspacesLogin())
 	}
 

@@ -2,10 +2,14 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"uzume_backend/helper"
+	"uzume_backend/test_helper"
 )
 
 // JsonAccessor
@@ -15,9 +19,9 @@ type JsonAccessor interface {
 }
 
 func NewJsonAccessor() JsonAccessor {
-	if helper.IsTesting() {
-		return new(InMemory)
-	}
+	// if helper.IsTesting() {
+	// 	return new(InMemory)
+	// }
 
 	return new(FileSystem)
 }
@@ -36,6 +40,12 @@ func (fs *FileSystem) ReadJson(path string) ([]byte, error) {
 }
 
 func (fs *FileSystem) SaveJson(path string, v interface{}) error {
+	if helper.IsTesting() {
+		if !strings.HasPrefix(path, test_helper.BuildFilePath("")) {
+			return errors.New("テスト用フォルダ外へのアクセスです")
+		}
+	}
+
 	json_data, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -46,13 +56,23 @@ func (fs *FileSystem) SaveJson(path string, v interface{}) error {
 		return err
 	}
 
+	// フォルダが無ければ作成する
+	dir_path := filepath.Dir(path)
+	if !helper.DirExists(dir_path) {
+		if err := os.Mkdir(dir_path, 0777); err != nil {
+			return err
+		}
+	}
+
 	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	file.Write(([]byte)(json_indent))
+	if _, err := file.Write(([]byte)(json_indent)); err != nil {
+		return err
+	}
 
 	return nil
 }
