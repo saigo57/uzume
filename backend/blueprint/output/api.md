@@ -119,7 +119,7 @@ FORMAT: 1A
 
 ## ワークスペース追加 [/v1/workspaces/add]
 
-###　追加　[PUT]
+###　追加　[POST]
 
 #### 処理概要
 
