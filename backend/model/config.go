@@ -13,7 +13,7 @@ import (
 type WorkspaceInfo struct {
 	Path        string `json:"path"`
 	WorkspaceId string `json:"workspace_id"`
-	Name        string // 本来はworkspace modelの方にあるべき
+	Name        string `json:"name"`
 }
 
 type Config struct {
@@ -56,10 +56,8 @@ func (c *Config) GetWorkspaces() []WorkspaceInfo {
 }
 
 func (c *Config) AddWorkspace(w Workspace) error {
-	for _, conf_w := range c.WorkspaceList {
-		if w.Id == conf_w.WorkspaceId {
-			return errors.New(fmt.Sprintf("このワークスペースはすでに登録されています id[%s]", w.Id))
-		}
+	if c.WorkspaceIdExists(w.Id) {
+		return errors.New(fmt.Sprintf("このワークスペースはすでに登録されています id[%s]", w.Id))
 	}
 
 	wi := new(WorkspaceInfo)
@@ -71,11 +69,54 @@ func (c *Config) AddWorkspace(w Workspace) error {
 	return nil
 }
 
-func (c *Config) WorkspaceExists(path string) bool {
+func (c *Config) UpdateWorkspace(ws Workspace) error {
+	for i, _ := range c.WorkspaceList {
+		if c.WorkspaceList[i].WorkspaceId == ws.Id {
+			c.WorkspaceList[i].Name = ws.Name
+			c.WorkspaceList[i].Path = ws.Path
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) WorkspacePathExists(path string) bool {
 	for _, w := range c.WorkspaceList {
 		if w.Path == path {
 			return true
 		}
 	}
 	return false
+}
+
+func (c *Config) WorkspaceIdExists(id string) bool {
+	for _, conf_w := range c.WorkspaceList {
+		if id == conf_w.WorkspaceId {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Config) FindWorkspacePath(workspace_id string) (bool, string) {
+	for _, conf_w := range c.WorkspaceList {
+		if conf_w.WorkspaceId == workspace_id {
+			return true, conf_w.Path
+		}
+	}
+	return false, ""
+}
+
+func (c *Config) DeleteWorkspace(workspace_id string) error {
+	var workspace_list []WorkspaceInfo
+	for _, conf_w := range c.WorkspaceList {
+		if conf_w.WorkspaceId == workspace_id {
+			continue
+		}
+		workspace_list = append(workspace_list, conf_w)
+	}
+	c.WorkspaceList = workspace_list
+
+	return c.Save()
 }

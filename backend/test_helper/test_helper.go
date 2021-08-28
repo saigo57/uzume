@@ -1,6 +1,7 @@
 package test_helper
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,6 +17,11 @@ func InitializeTest() {
 	if err := os.Mkdir(test_work_dir, 0777); err != nil {
 		fmt.Println(err)
 	}
+}
+
+func BuildBasicAuthorization(id, token string) string {
+	authorization := fmt.Sprintf("%s:%s", id, token)
+	return "basic " + base64.StdEncoding.EncodeToString([]byte(authorization))
 }
 
 func BuildFilePath(path string) string {

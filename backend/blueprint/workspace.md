@@ -2,9 +2,9 @@ FORMAT: 1A
 
 # Group workspaces
 
-## ログイン [/v1/workspaces/login]
+## ログイン [/api/v1/workspaces/login]
 
-### アクセストークン取得 [GET]
+### アクセストークン取得 [POST]
 
 #### 処理概要
 
@@ -13,7 +13,7 @@ FORMAT: 1A
 
 * サーバー側でワークスペースへのアクセスを制限したい場合はトークンを返さない
 
-+ Request (text/json)
++ Request (application/json)
     + Attributes
         + workspace_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 
@@ -26,7 +26,7 @@ FORMAT: 1A
         + error_message: `エラーの内容` (string)
 
 
-## ワークスペース [/v1/workspaces]
+## ワークスペース [/api/v1/workspaces]
 
 ### 一覧取得 [GET]
 
@@ -47,10 +47,10 @@ FORMAT: 1A
 #### 処理概要
 
 * ワークスペースを新規作成する
+* ログイン不要
 * 下記の`Request`の例では`/path/to/workspace/ワークスペースの名前.uzume`が作成される
 
-
-+ Request (text/json)
++ Request (application/json)
     + Attributes
         + name: `ワークスペースの名前` (string)
         + path: `/path/to/workspace` (string)
@@ -69,9 +69,12 @@ FORMAT: 1A
 
 * ワークスペースの情報を更新する
 
-+ Request (text/json)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
     + Attributes
-        + access_token: `4y-2t8.h9_4j~zsh_89/y48=` (string)
         + name: `ワークスペースの名前` (string)
 
 + Response 204 (application/json)
@@ -82,7 +85,7 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーメッセージ` (string)
+        + message: `Unauthorized` (string)
 
 
 ### 削除 [DELETE]
@@ -90,12 +93,13 @@ FORMAT: 1A
 #### 処理概要
 
 * ワークスペースを削除する
-* ワークスペースとアプリの連携を切るだけで、ワークスペースアプリは削除しない
+* ワークスペースとアプリの連携を切るだけで、ワークスペースディレクトリ自体は削除しない
 
-+ Request (text/json)
-    + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
-        + name: `ワークスペースの名前` (string)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
 
 + Response 204 (application/json)
 
@@ -105,18 +109,19 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーメッセージ` (string)
+        + message: `Unauthorized` (string)
 
 
-## ワークスペース追加 [/v1/workspaces/add]
+## ワークスペース追加 [/api/v1/workspaces/add]
 
 ###　追加　[POST]
 
 #### 処理概要
 
 * 既存のワークスペースを追加する
+* ログイン不要
 
-+ Request (text/json)
++ Request (application/json)
     + Attributes
         + workspace_path: `/path/to/workspace/既存ワークスペース.uzume` (string)
 
