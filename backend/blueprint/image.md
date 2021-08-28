@@ -9,7 +9,7 @@ FORMAT: 1A
 
 # Group Images
 
-## 画像 [/v1/images]
+## 画像 [/api/v1/images]
 
 ### リスト取得 [GET]
 
@@ -17,9 +17,12 @@ FORMAT: 1A
 * 画像情報を取得する
 * 画像自体はリンクから改めて取得する
 
-+ Request (text/json)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
     + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
         + query (object)
             + tags (array)
                 + `550e8400-e29b-41d4-a716-446655440000` (string)
@@ -41,7 +44,7 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーの内容` (string)
+        + message: `Unauthorized` (string)
 
 ### 新規登録 [PATCH]
 
@@ -49,9 +52,12 @@ FORMAT: 1A
 * TODO: 編集中。おそらくmultipart/form-dataを使うが動作確認をしてから記載する
 * 画像の新規登録を行う
 
-+ Request (text/json)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
     + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
         + tags (array)
             + `550e8400-e29b-41d4-a716-446655440000` (string)
 
@@ -59,7 +65,7 @@ FORMAT: 1A
     + Attributes
         + image (Image)
 
-## 画像 [/v1/images/{image_id}{?image_size}]
+## 画像 [/api/v1/images/{image_id}{?image_size}]
 
 ### 画像取得 [GET]
 
@@ -69,9 +75,11 @@ FORMAT: 1A
 + Parameters
     + image_size: `original` (string) - `original, thumbnail`
 
-+ Request (text/json)
-    + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
 
 + Response 200 (image)
 
@@ -81,10 +89,10 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーの内容` (string)
+        + message: `Unauthorized` (string)
 
 
-## 画像タグ [/v1/images/{image_id}/tag]
+## 画像タグ [/api/v1/images/{image_id}/tag]
 
 ### 画像にタグを付与 [PATCH]
 * 画像に対して一つのタグを付与する
@@ -92,9 +100,12 @@ FORMAT: 1A
 + Parameters
     + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 
-+ Request (text/json)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
     + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
         + tag_id: `550e8400-e29b-41d4-a716-446655440000`
 
 + Response 204 (application/json)
@@ -105,7 +116,7 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーメッセージ` (string)
+        + message: `Unauthorized` (string)
 
 
 ### 画像からタグを削除 [DELETE]
@@ -114,9 +125,12 @@ FORMAT: 1A
 + Parameters
     + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 
-+ Request (text/json)
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
     + Attributes
-        + access_token: `4y2t8h94jzsh89y48` (string)
         + tag_id: `550e8400-e29b-41d4-a716-446655440000`
 
 + Response 200 (application/json)
@@ -127,5 +141,5 @@ FORMAT: 1A
 
 + Response 401 (application/json)
     + Attributes
-        + error_message: `エラーメッセージ` (string)
+        + message: `Unauthorized` (string)
 

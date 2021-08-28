@@ -1,9 +1,12 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"uzume_backend/model"
 	"uzume_backend/test_helper"
@@ -13,8 +16,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// ワークスペース一覧の取得に成功すること
 func TestGetWorkspaces(t *testing.T) {
 	test_helper.InitializeTest()
+	router := RouteInit()
 
 	json_accessor := model.NewJsonAccessor()
 	configFilePath := test_helper.BuildFilePath("/.uzume/config.json")
@@ -42,12 +47,9 @@ func TestGetWorkspaces(t *testing.T) {
 	w.Path = test_helper.BuildFilePath("workspace2.uzume")
 	w.Save()
 
-	e := echo.New()
-	e.GET("/workspaces", GetWorkspaces())
-
 	apitest.New().
-		Handler(e).
-		Get("/workspaces").
+		Handler(router).
+		Get("/api/v1/workspaces").
 		Expect(t).
 		Status(http.StatusOK).
 		Assert(func(res *http.Response, req *http.Request) error {
@@ -74,11 +76,10 @@ func TestGetWorkspaces(t *testing.T) {
 		End()
 }
 
+// ワークスペースの新規作成に成功すること
 func TestPostWorkspaces_Success(t *testing.T) {
 	test_helper.InitializeTest()
-
-	e := echo.New()
-	e.POST("/workspaces", PostWorkspaces())
+	router := RouteInit()
 
 	c := new(model.Config)
 	c.Save()
@@ -86,12 +87,22 @@ func TestPostWorkspaces_Success(t *testing.T) {
 	workspace_path := test_helper.BuildFilePath("workspace1.uzume")
 
 	apitest.New().
-		Handler(e).
-		Post("/workspaces").
+		Handler(router).
+		Post("/api/v1/workspaces").
 		FormData("name", "新規ワークスペース").
 		FormData("path", workspace_path).
 		Expect(t).
 		Status(http.StatusCreated).
+		Assert(func(res *http.Response, req *http.Request) error {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			w := new(model.Workspace)
+			json.Unmarshal(body, w)
+			assert.Equal(t, len(w.Id), 36)
+			return nil
+		}).
 		End()
 
 	w := new(model.Workspace)
@@ -103,11 +114,10 @@ func TestPostWorkspaces_Success(t *testing.T) {
 	assert.Equal(t, w.Path, workspace_path)
 }
 
+// ワークスペースがディスクに既に存在するとき、新規作成に失敗すること
 func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 	test_helper.InitializeTest()
-
-	e := echo.New()
-	e.POST("/workspaces", PostWorkspaces())
+	router := RouteInit()
 
 	c := new(model.Config)
 	c.Save()
@@ -120,8 +130,8 @@ func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 	workspace.CreateWorkspaceDir()
 
 	apitest.New().
-		Handler(e).
-		Post("/workspaces").
+		Handler(router).
+		Post("/api/v1/workspaces").
 		FormData("name", "新規ワークスペース").
 		FormData("path", workspace_path).
 		Expect(t).
@@ -129,43 +139,281 @@ func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 		End()
 }
 
+// 既存のワークスペースの登録に成功すること。また、既に存在するワークスペースだった場合はエラーになること
 func TestPostWorkspacesAdd(t *testing.T) {
 	test_helper.InitializeTest()
-
-	e := echo.New()
-	e.POST("/workspaces/add", PostWorkspacesAdd())
+	router := RouteInit()
 
 	c := new(model.Config)
 	c.Save()
 	assert.Equal(t, 0, len(c.WorkspaceList))
 
-	workspace_path := test_helper.BuildFilePath("workspace1.uzume")
+	workspace_path := test_helper.BuildFilePath("workspace10.uzume")
 
 	workspace := new(model.Workspace)
-	workspace.Name = "ワークスペース"
+	workspace.Name = "ワークスペース10"
 	workspace.Path = workspace_path
 	workspace.CreateWorkspaceDir()
 
 	// 1回目は成功
-	apitest.New().
-		Handler(e).
-		Post("/workspaces/add").
-		FormData("workspace_path", workspace_path).
-		Expect(t).
-		Status(http.StatusCreated).
-		End()
+	body, _ := json.Marshal(struct {
+		WorkspacePath string `json:"workspace_path"`
+	}{
+		WorkspacePath: workspace.Path,
+	})
+	req := httptest.NewRequest("POST", "/api/v1/workspaces/add", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
 
+	router.ServeHTTP(rec, req)
+
+	// 応答確認
+	assert.Equal(t, http.StatusCreated, rec.Code)
+	w := new(model.Workspace)
+	json.Unmarshal([]byte(rec.Body.String()), w)
+	assert.Equal(t, len(w.Id), 36)
+
+	// configファイル確認
 	c.Load()
 	assert.Equal(t, 1, len(c.WorkspaceList))
 
 	// 2回目はID重複エラー
+	req2 := httptest.NewRequest("POST", "/api/v1/workspaces/add", bytes.NewReader(body))
+	req2.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec2 := httptest.NewRecorder()
+	router.ServeHTTP(rec2, req2)
+	// 応答確認
+	assert.Equal(t, http.StatusBadRequest, rec2.Code)
+	// configファイル確認
+	c.Load()
+	assert.Equal(t, 1, len(c.WorkspaceList))
+}
+
+// 存在しないワークスペースを登録したときエラーになること
+func TestPostWorkspacesAdd_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	c := new(model.Config)
+	c.Save()
+	assert.Equal(t, 0, len(c.WorkspaceList))
+
+	workspace_path := test_helper.BuildFilePath("workspace10.uzume")
+
+	body, _ := json.Marshal(struct {
+		WorkspacePath string `json:"workspace_path"`
+	}{
+		WorkspacePath: workspace_path,
+	})
+	req := httptest.NewRequest("POST", "/api/v1/workspaces/add", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	// 応答確認
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	// configファイル確認
+	c.Load()
+	assert.Equal(t, 0, len(c.WorkspaceList))
+}
+
+// ワークスペースへのログインに成功すること
+func TestPostWorkspacesLogin_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	config.Save()
+
 	apitest.New().
-		Handler(e).
-		Post("/workspaces/add").
-		FormData("workspace_path", workspace_path).
+		Handler(router).
+		Post("/api/v1/workspaces/login").
+		FormData("workspace_id", workspace.Id).
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+}
+
+// ワークスペースIDが間違っているときログインに失敗すること
+func TestPostWorkspacesLogin_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	config.Save()
+
+	apitest.New().
+		Handler(router).
+		Post("/api/v1/workspaces/login").
+		FormData("workspace_id", "not-valid-workspace-id").
 		Expect(t).
 		Status(http.StatusBadRequest).
 		End()
-	c.Load()
-	assert.Equal(t, 1, len(c.WorkspaceList))
+}
+
+// ワークスペースのUPDATEに成功すること
+func TestPatchWorkspaces_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	config.Save()
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	body, _ := json.Marshal(struct {
+		Name string `json:"name"`
+	}{
+		Name: "新ワークスペース",
+	})
+	req := httptest.NewRequest("PATCH", "/api/v1/workspaces", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+
+	workspace.Load()
+	assert.Equal(t, "新ワークスペース", workspace.Name)
+
+	config.Load()
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	assert.Equal(t, "新ワークスペース", config.WorkspaceList[0].Name)
+}
+
+// access_tokenが間違っているとき、認証エラーになりデータはUPDATEされないこと
+func TestPatchWorkspaces_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	config.Save()
+
+	// 生成はするが使用しない
+	model.GenerateAccessToken(workspace.Id)
+
+	body, _ := json.Marshal(struct {
+		Name string `json:"name"`
+	}{
+		Name: "新ワークスペース",
+	})
+	req := httptest.NewRequest("PATCH", "/api/v1/workspaces", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid-access-token"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	workspace.Load()
+	assert.Equal(t, "ワークスペース", workspace.Name)
+
+	config.Load()
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	assert.Equal(t, "ワークスペース", config.WorkspaceList[0].Name)
+}
+
+// ワークスペースの削除に成功すること
+func TestDeleteWorkspaces_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	config.Save()
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	body, _ := json.Marshal(struct {
+		WorkspaceId string `json:"workspace_id"`
+	}{
+		WorkspaceId: workspace.Id,
+	})
+	req := httptest.NewRequest("DELETE", "/api/v1/workspaces", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+
+	config.Load()
+	assert.Equal(t, 0, len(config.WorkspaceList))
+}
+
+// access_tokenが間違っているとき、認証エラーになりデータはDELETEされないこと
+func TestDeleteWorkspaces_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	config.Save()
+
+	model.GenerateAccessToken(workspace.Id)
+
+	body, _ := json.Marshal(struct {
+		WorkspaceId string `json:"workspace_id"`
+	}{
+		WorkspaceId: workspace.Id,
+	})
+	req := httptest.NewRequest("DELETE", "/api/v1/workspaces", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid-access-token"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	config.Load()
+	assert.Equal(t, 1, len(config.WorkspaceList))
 }

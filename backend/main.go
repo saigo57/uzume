@@ -1,10 +1,10 @@
 package main
 
 import (
-	"uzume_backend/route"
+	"uzume_backend/api"
 )
 
 func main() {
-	router := route.Init()
+	router := api.RouteInit()
 	router.Logger.Fatal(router.Start(":1323"))
 }
