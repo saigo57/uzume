@@ -37,13 +37,24 @@ func RouteInit() *echo.Echo {
 		v1.POST("/workspaces", PostWorkspaces())
 		v1.POST("/workspaces/add", PostWorkspacesAdd())
 		v1.POST("/workspaces/login", PostWorkspacesLogin())
-		ws := v1.Group("")
-		ws.Use(middleware.BasicAuth(func(workspace_id, access_token string, c echo.Context) (bool, error) {
+		auth := v1.Group("")
+		auth.Use(middleware.BasicAuth(func(workspace_id, access_token string, c echo.Context) (bool, error) {
 			return workspaceAuth(workspace_id, access_token)
 		}))
 		{
-			ws.PATCH("/workspaces", PatchWorkspaces())
-			ws.DELETE("/workspaces", DeleteWorkspaces())
+			auth.PATCH("/workspaces", PatchWorkspaces())
+			auth.DELETE("/workspaces", DeleteWorkspaces())
+
+			auth.POST("/images", PostImages())
+			auth.GET("/images", GetImages())
+			auth.GET("/images/:id", GetImageFile())
+			auth.PATCH("/images/:id/tags", PatchImageTag())
+			auth.DELETE("/images/:image_id/tags/:tag_id", DeleteImageTag())
+
+			auth.GET("/tags", GetTags())
+			auth.POST("/tags", PostTag())
+			auth.PATCH("/tags/:id", PatchTag())
+			auth.DELETE("/tags/:id", DeleteTag())
 		}
 	}
 

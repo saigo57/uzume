@@ -15,6 +15,22 @@ type Workspace struct {
 	Path string `json:"path"`
 }
 
+func NewWorkspaceById(workspace_id string) (*Workspace, error) {
+	config := new(Config)
+	config.Load()
+	ok, workspace_path := config.FindWorkspacePath(workspace_id)
+	if !ok {
+		return nil, errors.New("")
+	}
+
+	workspace := new(Workspace)
+	workspace.Id = workspace_id
+	workspace.Path = workspace_path
+	workspace.Load()
+
+	return workspace, nil
+}
+
 func (w *Workspace) Load() error {
 	json_accessor := NewJsonAccessor()
 	bytes, err := json_accessor.ReadJson(w.workspaceJsonPath())

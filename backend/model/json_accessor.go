@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"uzume_backend/helper"
 	"uzume_backend/test_helper"
@@ -56,12 +55,8 @@ func (fs *FileSystem) SaveJson(path string, v interface{}) error {
 		return err
 	}
 
-	// フォルダが無ければ作成する
-	dir_path := filepath.Dir(path)
-	if !helper.DirExists(dir_path) {
-		if err := os.Mkdir(dir_path, 0777); err != nil {
-			return err
-		}
+	if err := helper.MakeRouteDir(path); err != nil {
+		return err
 	}
 
 	file, err := os.Create(path)

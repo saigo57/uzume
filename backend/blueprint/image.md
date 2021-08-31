@@ -3,7 +3,8 @@ FORMAT: 1A
 # Data Structures
 ## Image (object)
 + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
-+ url: `localhost:3000/image/550e8400-e29b-41d4-a716-446655440000` (string)
++ file_name: `IMG0000` (string)
++ ext: `png` (string)
 + tags (array)
     + `550e8400-e29b-41d4-a716-446655440000` (string)
 
@@ -16,6 +17,7 @@ FORMAT: 1A
 #### 処理概要
 * 画像情報を取得する
 * 画像自体はリンクから改めて取得する
+* tag_search_typeにはandかorを指定する
 
 + Request (application/json)
     + Headers
@@ -27,14 +29,10 @@ FORMAT: 1A
             + tags (array)
                 + `550e8400-e29b-41d4-a716-446655440000` (string)
             + tag_search_type: `and` (string)
-            + count: 100 (number)
-            + offset: 100 (number)
 
 + Response 200 (application/json)
     + Attributes
         + query (object)
-            + count: 100 (number)
-            + offset: 100 (number)
             + images (array)
                 + (Image)
 
@@ -46,24 +44,34 @@ FORMAT: 1A
     + Attributes
         + message: `Unauthorized` (string)
 
-### 新規登録 [PATCH]
+### 新規登録 [POST]
 
 #### 処理概要
-* TODO: 編集中。おそらくmultipart/form-dataを使うが動作確認をしてから記載する
+* TODO: 編集中。
 * 画像の新規登録を行う
+* multipart/form-dataで画像と通常の文字などをまとめて通信する
 
-+ Request (application/json)
++ Request (multipart/form-data; boundary=------Boundary)
     + Headers
         ```
         Authorization: Basic access_token_string
         ```
-    + Attributes
-        + tags (array)
-            + `550e8400-e29b-41d4-a716-446655440000` (string)
+    + Body
+        ```
+        ------Boundary
+        Content-Disposition: form-data; name="tags"
+
+        450b2c21-8f8a-4f34-aa16-6a6aa3e7b57c,6657ee81-3a94-4c72-89ef-b1a8c2669efc
+        ------Boundary
+        Content-Disposition: form-data; name="file"; filename="filename.png"
+
+        [画像バイナリデータ]
+        ------Boundary--
+        ```
 
 + Response 200 (application/json)
     + Attributes
-        + image (Image)
+        + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 
 ## 画像 [/api/v1/images/{image_id}{?image_size}]
 
@@ -73,6 +81,7 @@ FORMAT: 1A
 * 画像自体を取得する
 
 + Parameters
+    + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
     + image_size: `original` (string) - `original, thumbnail`
 
 + Request (application/json)

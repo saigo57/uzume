@@ -33,8 +33,33 @@ FORMAT: 1A
     + Attributes
         + message: `Unauthorized` (string)
 
+### 新規登録 [POST]
 
-## タグ [/api/v1/tags{?tag_id}]
+#### 処理概要
+* タグを新規作成する
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
+    + Attributes
+        + name: `タグ名` (string)
+
++ Response 200 (application/json)
+    + Attributes
+        + tag(Tag)
+
++ Response 400 (application/json)
+    + Attributes
+        + error_message: `エラーの内容` (string)
+
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
+
+
+## タグ [/api/v1/tags/{tag_id}]
 
 ### 変更 [PATCH]
 
@@ -52,9 +77,7 @@ FORMAT: 1A
     + Attributes
         + name: `新タグ名` (string)
 
-+ Response 200 (application/json)
-    + Attributes
-        + tag (Tag)
++ Response 204 (application/json)
 
 + Response 400 (application/json)
     + Attributes
@@ -78,7 +101,7 @@ FORMAT: 1A
         Authorization: Basic access_token_string
         ```
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
 + Response 400 (application/json)
     + Attributes
