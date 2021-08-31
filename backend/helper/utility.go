@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -76,4 +77,15 @@ func LoggedinWrokspaceId(c echo.Context) string {
 	}
 
 	return ""
+}
+
+func MakeRouteDir(path string) error {
+	dir_path := filepath.Dir(path)
+	if !DirExists(dir_path) {
+		if err := os.Mkdir(dir_path, 0777); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
