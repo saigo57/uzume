@@ -1,0 +1,76 @@
+@import 'const';
+
+html {
+  font-family: "Courier New";
+  background-color: $main-background-color;
+}
+
+.split-bar {
+  height: calc(100% - $footer-height);
+  width: 5px;
+  cursor: col-resize;
+  background-color: $edge-gray;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  margin: 0;
+}
+
+.server-list {
+  display: block;
+  width: 50px;
+  height: calc(100% - $footer-height);
+  background-color: $edge-gray;
+}
+
+.flex-container {
+  display: block;
+  justify-content: space-around;
+  flex-wrap: nowrap;
+  height: 100%;
+  width: calc(100% - 50px);
+  left: 0;
+}
+
+#main-menu {
+  display: block;
+  height: calc(100% - $footer-height);
+  width: 200px;
+  flex-basis: auto;
+  left: 0;
+  margin: 0;
+  background-color: $main-background-color;
+}
+
+#main {
+  display: block;
+  height: calc(100% - $footer-height);
+  flex: 1;
+  right: 0;
+  left: 0;
+  margin: 0;
+  margin-bottom: $footer-height;
+  background-color: $main-background-color;
+}
+
+#side-bar {
+  display: block;
+  height: calc(100% - $footer-height);
+  width: 300px;
+  right: 0;
+  margin-bottom: $footer-height;
+  min-width: 150px;
+  color: black;
+  background-color: $main-background-color;
+  overflow-y: scroll;
+}
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: $footer-height;
+  background-color: #00785C;
+}

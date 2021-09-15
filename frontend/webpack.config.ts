@@ -17,7 +17,7 @@ const base: Configuration = {
     __filename: false,
   },
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss'],
   },
   output: {
     // バンドルファイルの出力先（ここではプロジェクト直下の 'dist' ディレクトリ）
@@ -51,6 +51,20 @@ const base: Configuration = {
             options: { sourceMap: isDev },
           },
         ],
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: { sourceMap: isDev },
+          },
+          {
+            loader: 'sass-loader',
+            options: { sourceMap: isDev },
+          },
+        ]
       },
       {
         /** 画像やフォントなどのアセット類 */

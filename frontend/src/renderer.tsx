@@ -1,6 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import DesignApp from './design/design_app';
+import '../src/scss/reset.scss';
+import '../src/scss/main.scss';
 
-const App: React.FC = () => <h1>Hello Electron!</h1>;
+import draggableSplitBar from './design/draggable_split_bar';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<DesignApp />, document.getElementById('root'));
+
+
+draggableSplitBar("#before-main.split-bar", "#main-menu", "#main");
+draggableSplitBar("#after-main.split-bar", "#main", "#side-bar");
