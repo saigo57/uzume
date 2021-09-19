@@ -3,6 +3,9 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"mime/multipart"
+	"os"
 	"path/filepath"
 	"uzume_backend/helper"
 
@@ -74,4 +77,50 @@ func (w *Workspace) CreateWorkspaceDir() error {
 
 func (w Workspace) workspaceJsonPath() string {
 	return filepath.Join(w.Path, "workspace.json")
+}
+
+func (this *Workspace) UpdateWorkspaceIcon(img *multipart.FileHeader) error {
+	config := new(Config)
+	config.Load()
+
+	src, err := img.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	_, ext := helper.SplitFileNameAndExt(img.Filename)
+
+	icon_files, err := this.WorkspaceIconFiles()
+	if err != nil {
+		return err
+	}
+	for _, f := range icon_files {
+		if err := os.Remove(f); err != nil {
+			return err
+		}
+	}
+
+	file_path := filepath.Join(this.Path, "icon."+ext)
+
+	dst, err := os.Create(file_path)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *Workspace) WorkspaceIconFiles() ([]string, error) {
+	icon_files, err := filepath.Glob(filepath.Join(this.Path, "icon.*"))
+	if err != nil {
+		return nil, err
+	}
+
+	return icon_files, nil
 }

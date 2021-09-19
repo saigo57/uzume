@@ -156,12 +156,59 @@ Authorization: Basic OTYxNzRkZTUtYzMzYi1mNjQyLWIxZTMtYzUxNGIxMDBlNWVlOjczYjkxMTA
     + Attributes
         + error_message: `エラーメッセージ` (string)
 
+## ワークスペースicon [/api/v1/workspaces/icon]
+
+### 取得 [GET]
+
+#### 処理概要
+
+* ワークスペースのアイコン画像を返す
+* 404のときはまだiconが登録されていないので、代替画像を出すなどする。
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
++ Response 200 (image)
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
++ Response 404 (application/json)
+
+### 更新 [POST]
+
+#### 処理概要
+
+* ワークスペースのアイコン画像を更新する
+
++ Request (multipart/form-data; boundary=------Boundary)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
+    + Body
+        ```
+        ------Boundary
+        Content-Disposition: form-data; name="icon"; filename="filename.png"
+
+        [画像バイナリデータ]
+        ------Boundary--
+        ```
++ Response 201 (application/json)
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
+
 
 # Data Structures
 ## Image (object)
 + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 + file_name: `IMG0000` (string)
 + ext: `png` (string)
++ memo: `画像についてのメモ` (string)
++ author: `作者名` (string)
++ CreatedAt: `2021-09-19T23:41:17.622003+09:00` (string)
 + tags (array)
     + `550e8400-e29b-41d4-a716-446655440000` (string)
 

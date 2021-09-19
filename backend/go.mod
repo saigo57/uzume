@@ -9,6 +9,7 @@ require (
 	github.com/labstack/gommon v0.3.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/steinfletcher/apitest v1.5.11
 	github.com/stretchr/testify v1.4.0
 	github.com/valyala/fasttemplate v1.2.1 // indirect

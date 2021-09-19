@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strings"
+	"time"
 	"uzume_backend/helper"
 	"uzume_backend/model"
 
@@ -18,7 +19,12 @@ func GetImages() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		tag_search_type := c.QueryParam("tag_search_type")
 		tags := c.QueryParam("tags")
-		tag_list := strings.Split(tags, ",")
+		var tag_list []string
+		for _, tag := range strings.Split(tags, ",") {
+			if len(tag) > 0 {
+				tag_list = append(tag_list, tag)
+			}
+		}
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
 		workspace, err := model.NewWorkspaceById(workspace_id)
@@ -56,9 +62,7 @@ func GetImageFile() echo.HandlerFunc {
 		option := ""
 		switch image_size {
 		case "thumb":
-			// TODO: Imageモデルでthumbが実装されたら修正する
-			//option = "thumb"
-			option = ""
+			option = "thumb"
 		default:
 			option = ""
 		}
@@ -74,6 +78,8 @@ func PostImages() echo.HandlerFunc {
 			return err
 		}
 		tags := c.FormValue("tags")
+		author := c.FormValue("author")
+		memo := c.FormValue("memo")
 		tag_list := strings.Split(tags, ",")
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
@@ -92,6 +98,11 @@ func PostImages() echo.HandlerFunc {
 				return err
 			}
 		}
+
+		image.Memo = memo
+		image.Author = author
+		image.CreatedAt = time.Now()
+		image.Save()
 
 		if len(tag_list) == 0 {
 			//

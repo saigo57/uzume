@@ -205,3 +205,41 @@ func DeleteWorkspaces() echo.HandlerFunc {
 		return c.JSON(http.StatusNoContent, "")
 	}
 }
+
+func GetWorkspaceIcon() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		workspace_id := helper.LoggedinWrokspaceId(c)
+		workspace, err := model.NewWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		icon_files, err := workspace.WorkspaceIconFiles()
+		if err != nil {
+			return err
+		}
+
+		if len(icon_files) == 0 {
+			return c.JSON(http.StatusNotFound, "")
+		}
+
+		return c.File(icon_files[0])
+	}
+}
+
+func PostWorkspaceIcon() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		icon_file, err := c.FormFile("icon")
+		if err != nil {
+			return err
+		}
+		workspace_id := helper.LoggedinWrokspaceId(c)
+		workspace, err := model.NewWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		workspace.UpdateWorkspaceIcon(icon_file)
+		return c.JSON(http.StatusCreated, "")
+	}
+}

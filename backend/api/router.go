@@ -44,6 +44,8 @@ func RouteInit() *echo.Echo {
 		{
 			auth.PATCH("/workspaces", PatchWorkspaces())
 			auth.DELETE("/workspaces", DeleteWorkspaces())
+			auth.GET("/workspaces/icon", GetWorkspaceIcon())
+			auth.POST("/workspaces/icon", PostWorkspaceIcon())
 
 			auth.POST("/images", PostImages())
 			auth.GET("/images", GetImages())

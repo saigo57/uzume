@@ -5,6 +5,9 @@ FORMAT: 1A
 + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 + file_name: `IMG0000` (string)
 + ext: `png` (string)
++ memo: `画像についてのメモ` (string)
++ author: `作者名` (string)
++ CreatedAt: `2021-09-19T23:41:17.622003+09:00` (string)
 + tags (array)
     + `550e8400-e29b-41d4-a716-446655440000` (string)
 
