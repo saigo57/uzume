@@ -4,25 +4,35 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	_ "image/gif"
+	"image/jpeg"
+	_ "image/png"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	"uzume_backend/helper"
 
 	"github.com/google/uuid"
+	"github.com/nfnt/resize"
 )
 
 const (
-	IMAGE_DIR_EXT = ".image"
+	IMAGE_DIR_EXT     = ".image"
+	THUMB_HEIGHT_SIZE = 300
 )
 
 type Image struct {
 	Id        string     `json:"image_id"`
 	FileName  string     `json:"file_name"`
 	Ext       string     `json:"ext"`
+	Memo      string     `json:"memo"`
+	Author    string     `json:"author"`
+	CreatedAt time.Time  `json:"created_at"`
 	Tags      []string   `json:"tags"`
 	Workspace *Workspace `json:"-"`
 }
@@ -114,14 +124,9 @@ func (this *Image) CreateImage(img *multipart.FileHeader) error {
 
 	// TODO: 類似画像があるか確認
 
-	ext := filepath.Ext(img.Filename)
-	if len(ext) > 1 && ext[0] == '.' {
-		this.Ext = ext[1:]
-	} else {
-		this.Ext = ""
-	}
-	basename := filepath.Base(img.Filename)
-	this.FileName = basename[0 : len(basename)-len(this.Ext)-1]
+	file_name, ext := helper.SplitFileNameAndExt(img.Filename)
+	this.FileName = file_name
+	this.Ext = ext
 
 	// 画像ファイル保存
 	file_path := this.ImagePath("")
@@ -145,8 +150,29 @@ func (this *Image) CreateImage(img *multipart.FileHeader) error {
 		return err
 	}
 
-	// TODO: サムネイルサイズの画像を作る
-	// thumb_file_path := this.ImagePath("thumb")
+	// サムネイルサイズの画像を作る
+	thumb_file_path := this.ImagePath("thumb")
+	org_file_data, err := os.Open(file_path)
+	if err != nil {
+		return err
+	}
+
+	thumb_img, _, err := image.Decode(org_file_data)
+	if err != nil {
+		return err
+	}
+
+	resizedImg := resize.Resize(0, THUMB_HEIGHT_SIZE, thumb_img, resize.NearestNeighbor)
+	output, err := os.Create(thumb_file_path)
+	if err != nil {
+		return err
+	}
+	defer output.Close()
+
+	opts := &jpeg.Options{Quality: 85}
+	if err := jpeg.Encode(output, resizedImg, opts); err != nil {
+		return err
+	}
 
 	this.Save()
 
@@ -234,5 +260,9 @@ func (this *Image) ImagePath(option string) string {
 	if len(option) > 0 {
 		o = "_" + option
 	}
-	return filepath.Join(this.ImagesDirPath(), this.ImageDirName(), fmt.Sprintf("%s%s.%s", this.FileName, o, this.Ext))
+	ext := this.Ext
+	if option == "thumb" {
+		ext = "jpg"
+	}
+	return filepath.Join(this.ImagesDirPath(), this.ImageDirName(), fmt.Sprintf("%s%s.%s", this.FileName, o, ext))
 }
