@@ -15,16 +15,22 @@ type ImageResponse struct {
 	Tags    []string `json:"tags"`
 }
 
+func GetQueryParamTags(c echo.Context) []string {
+	tags := c.QueryParam("tags")
+	var tag_list []string
+	for _, tag := range strings.Split(tags, ",") {
+		if len(tag) > 0 {
+			tag_list = append(tag_list, tag)
+		}
+	}
+
+	return tag_list
+}
+
 func GetImages() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		tag_search_type := c.QueryParam("tag_search_type")
-		tags := c.QueryParam("tags")
-		var tag_list []string
-		for _, tag := range strings.Split(tags, ",") {
-			if len(tag) > 0 {
-				tag_list = append(tag_list, tag)
-			}
-		}
+		var tag_list = GetQueryParamTags(c)
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
 		workspace, err := model.NewWorkspaceById(workspace_id)
@@ -77,10 +83,9 @@ func PostImages() echo.HandlerFunc {
 		if err != nil {
 			return err
 		}
-		tags := c.FormValue("tags")
 		author := c.FormValue("author")
 		memo := c.FormValue("memo")
-		tag_list := strings.Split(tags, ",")
+		var tag_list = GetQueryParamTags(c)
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
 		workspace, err := model.NewWorkspaceById(workspace_id)
@@ -95,6 +100,9 @@ func PostImages() echo.HandlerFunc {
 
 		for _, tag := range tag_list {
 			if err := image.AddTag(tag); err != nil {
+				if err.Error() == "invalid tag_id" {
+					return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
+				}
 				return err
 			}
 		}
@@ -105,7 +113,12 @@ func PostImages() echo.HandlerFunc {
 		image.Save()
 
 		if len(tag_list) == 0 {
-			//
+			if err := image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED); err != nil {
+				if err.Error() == "invalid tag_id" {
+					return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
+				}
+				return err
+			}
 		}
 
 		return c.JSON(http.StatusCreated, struct {
@@ -136,6 +149,9 @@ func PatchImageTag() echo.HandlerFunc {
 		image.Id = image_id
 		image.Load()
 		if err := image.AddTag(param.TagId); err != nil {
+			if err.Error() == "invalid tag_id" {
+				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
+			}
 			return err
 		}
 

@@ -15,6 +15,10 @@ import (
 	"github.com/labstack/echo"
 )
 
+type ErrorMessage struct {
+	ErrorMessage string `json:"error_message"`
+}
+
 func JsonIndent(json_byte []byte) (string, error) {
 	var buf bytes.Buffer
 	err := json.Indent(&buf, json_byte, "", "  ")

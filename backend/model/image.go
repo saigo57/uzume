@@ -221,6 +221,10 @@ func (this *Image) HaveTag(tag_id string) bool {
 }
 
 func (this *Image) AddTag(tag_id string) error {
+	tags := NewTags(this.Workspace)
+	if !tags.IsValidTag(tag_id) {
+		return errors.New("invalid tag_id")
+	}
 	for _, tag := range this.Tags {
 		if tag == tag_id {
 			return errors.New("このタグは既に登録されています")
