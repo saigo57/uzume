@@ -7,6 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	SYSTEM_TAG_UNCATEGORIZED = "_system_tag_uncategorized"
+)
+
 type Tag struct {
 	Id   string `json:"tag_id"`
 	Name string `json:"name"`
@@ -81,4 +85,32 @@ func (this *Tags) DeleteTag(tag_id string) error {
 
 func (this *Tags) TagsJsonPath() string {
 	return filepath.Join(this.Workspace.Path, "tags.json")
+}
+
+func (this *Tags) IsValidTag(tag_id string) bool {
+	if IsSystemTag(tag_id) {
+		return true
+	}
+
+	for _, t := range this.List {
+		if t.Id == tag_id {
+			return true
+		}
+	}
+
+	return false
+}
+
+func IsSystemTag(tag_id string) bool {
+	system_tag_list := [...]string{
+		SYSTEM_TAG_UNCATEGORIZED,
+	}
+
+	for _, system_tag := range system_tag_list {
+		if tag_id == system_tag {
+			return true
+		}
+	}
+
+	return false
 }

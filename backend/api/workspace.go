@@ -21,10 +21,6 @@ type workspacePath struct {
 	WorkspacePath string `json:"workspace_path"`
 }
 
-type ErrorMessage struct {
-	ErrorMessage string `json:"error_message"`
-}
-
 type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 }
@@ -67,12 +63,12 @@ func PostWorkspaces() echo.HandlerFunc {
 		}
 
 		if config.WorkspacePathExists(workspace.Path) {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "configに既に存在しています"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "configに既に存在しています"})
 		}
 
 		// workspace作成
 		if err := workspace.CreateWorkspaceDir(); err != nil {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "ディスクに既に存在しています"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ディスクに既に存在しています"})
 		}
 
 		// configにworkspace情報を追記
@@ -101,7 +97,7 @@ func PostWorkspacesAdd() echo.HandlerFunc {
 		}
 
 		if !helper.DirExists(param.WorkspacePath) {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "指定されたワークスペースが存在しません"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "指定されたワークスペースが存在しません"})
 		}
 
 		workspace := new(model.Workspace)
@@ -113,7 +109,7 @@ func PostWorkspacesAdd() echo.HandlerFunc {
 		// configにworkspace情報を追記
 		if err := config.AddWorkspace(*workspace); err != nil {
 			return c.JSON(http.StatusBadRequest,
-				ErrorMessage{ErrorMessage: fmt.Sprintf("%s", err)})
+				helper.ErrorMessage{ErrorMessage: fmt.Sprintf("%s", err)})
 		}
 
 		config.Save()
@@ -138,7 +134,7 @@ func PostWorkspacesLogin() echo.HandlerFunc {
 		config.Load()
 
 		if !config.WorkspaceIdExists(workspace_id) {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "ワークスペースIDが登録されていません"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースIDが登録されていません"})
 		}
 
 		access_token, err := model.GenerateAccessToken(workspace_id)
@@ -166,7 +162,7 @@ func PatchWorkspaces() echo.HandlerFunc {
 		config.Load()
 		ok, workspace_path := config.FindWorkspacePath(workspace_id)
 		if !ok {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "ワークスペースがありません"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースがありません"})
 		}
 
 		// workspace_pathからworkspaceフォルダにアクセスし、データを書き換える
@@ -199,7 +195,7 @@ func DeleteWorkspaces() echo.HandlerFunc {
 		config.Load()
 
 		if err := config.DeleteWorkspace(workspace_id); err != nil {
-			return c.JSON(http.StatusBadRequest, ErrorMessage{ErrorMessage: "ワークスペースの削除に失敗しました"})
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースの削除に失敗しました"})
 		}
 
 		return c.JSON(http.StatusNoContent, "")
