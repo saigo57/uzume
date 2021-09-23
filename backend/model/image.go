@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	_ "image/png"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -105,15 +105,9 @@ func (this *Image) Save() error {
 	return nil
 }
 
-func (this *Image) CreateImage(img *multipart.FileHeader) error {
+func (this *Image) CreateImage(file_name string, image_buffer *bytes.Buffer) error {
 	config := new(Config)
 	config.Load()
-
-	src, err := img.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
 
 	// ID生成
 	new_uuid, err := uuid.NewRandom()
@@ -124,7 +118,7 @@ func (this *Image) CreateImage(img *multipart.FileHeader) error {
 
 	// TODO: 類似画像があるか確認
 
-	file_name, ext := helper.SplitFileNameAndExt(img.Filename)
+	file_name, ext := helper.SplitFileNameAndExt(file_name)
 	this.FileName = file_name
 	this.Ext = ext
 
@@ -146,7 +140,7 @@ func (this *Image) CreateImage(img *multipart.FileHeader) error {
 	}
 	defer dst.Close()
 
-	if _, err := io.Copy(dst, src); err != nil {
+	if _, err := io.Copy(dst, image_buffer); err != nil {
 		return err
 	}
 
@@ -225,12 +219,17 @@ func (this *Image) AddTag(tag_id string) error {
 	if !tags.IsValidTag(tag_id) {
 		return errors.New("invalid tag_id")
 	}
+	var new_tag_list []string
 	for _, tag := range this.Tags {
 		if tag == tag_id {
 			return errors.New("このタグは既に登録されています")
 		}
+		if !IsSystemTag(tag) {
+			new_tag_list = append(new_tag_list, tag)
+		}
 	}
-	this.Tags = append(this.Tags, tag_id)
+	new_tag_list = append(new_tag_list, tag_id)
+	this.Tags = new_tag_list
 	this.Save()
 	return nil
 }

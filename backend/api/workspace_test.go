@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -416,4 +417,91 @@ func TestDeleteWorkspaces_fail(t *testing.T) {
 
 	config.Load()
 	assert.Equal(t, 1, len(config.WorkspaceList))
+}
+
+// ワークスペースiconのアップロードと取得に成功すること
+func TestPostAndGetWorkspaceIcon(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	config.Save()
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	multipart_body := new(bytes.Buffer)
+	multipart_writer := multipart.NewWriter(multipart_body)
+	image_file_binary := test_helper.WriteMultipartImageField(t, multipart_writer, "icon", "../fixture/testimage1.png")
+	multipart_writer.Close() // ここでCloseしないとc.FormFileでunexpected EOFとなる
+
+	// post
+	req_post := httptest.NewRequest("POST", "/api/v1/workspaces/icon", multipart_body)
+	req_post.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req_post.Header.Set(echo.HeaderContentType, multipart_writer.FormDataContentType())
+
+	rec_post := httptest.NewRecorder()
+	router.ServeHTTP(rec_post, req_post)
+
+	assert.Equal(t, http.StatusCreated, rec_post.Code)
+
+	// get
+	req_get := httptest.NewRequest("GET", "/api/v1/workspaces/icon", nil)
+	req_get.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req_get.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	rec_get := httptest.NewRecorder()
+	router.ServeHTTP(rec_get, req_get)
+	assert.Equal(t, http.StatusOK, rec_get.Code)
+	test_helper.EqualBuffer(t, image_file_binary, rec_get.Body)
+}
+
+// access_tokenが間違っているとき、ワークスペースiconのアップロードと取得に失敗すること
+func TestPostAndGetWorkspaceIcon_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDir()
+
+	config := new(model.Config)
+	config.Load()
+	config.AddWorkspace(*workspace)
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	config.Save()
+
+	model.GenerateAccessToken(workspace.Id)
+
+	multipart_body := new(bytes.Buffer)
+	multipart_writer := multipart.NewWriter(multipart_body)
+	test_helper.WriteMultipartImageField(t, multipart_writer, "icon", "../fixture/testimage1.png")
+	multipart_writer.Close() // ここでCloseしないとc.FormFileでunexpected EOFとなる
+
+	// post
+	req_post := httptest.NewRequest("POST", "/api/v1/workspaces/icon", multipart_body)
+	req_post.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid-access-token"))
+	req_post.Header.Set(echo.HeaderContentType, multipart_writer.FormDataContentType())
+
+	rec_post := httptest.NewRecorder()
+	router.ServeHTTP(rec_post, req_post)
+
+	assert.Equal(t, http.StatusUnauthorized, rec_post.Code)
+
+	// get
+	req_get := httptest.NewRequest("GET", "/api/v1/workspaces/icon", nil)
+	req_get.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid-access-token"))
+	req_get.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	rec_get := httptest.NewRecorder()
+	router.ServeHTTP(rec_get, req_get)
+	assert.Equal(t, http.StatusUnauthorized, rec_get.Code)
 }
