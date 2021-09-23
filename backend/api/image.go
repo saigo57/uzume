@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -15,8 +17,7 @@ type ImageResponse struct {
 	Tags    []string `json:"tags"`
 }
 
-func GetQueryParamTags(c echo.Context) []string {
-	tags := c.QueryParam("tags")
+func GetQueryParamTags(tags string) []string {
 	var tag_list []string
 	for _, tag := range strings.Split(tags, ",") {
 		if len(tag) > 0 {
@@ -30,7 +31,7 @@ func GetQueryParamTags(c echo.Context) []string {
 func GetImages() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		tag_search_type := c.QueryParam("tag_search_type")
-		var tag_list = GetQueryParamTags(c)
+		var tag_list = GetQueryParamTags(c.QueryParam("tags"))
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
 		workspace, err := model.NewWorkspaceById(workspace_id)
@@ -85,7 +86,7 @@ func PostImages() echo.HandlerFunc {
 		}
 		author := c.FormValue("author")
 		memo := c.FormValue("memo")
-		var tag_list = GetQueryParamTags(c)
+		var tag_list = GetQueryParamTags(c.FormValue("tags"))
 
 		workspace_id := helper.LoggedinWrokspaceId(c)
 		workspace, err := model.NewWorkspaceById(workspace_id)
@@ -94,7 +95,17 @@ func PostImages() echo.HandlerFunc {
 		}
 
 		image := model.NewImage(workspace)
-		if err := image.CreateImage(image_file); err != nil {
+
+		src, err := image_file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+		image_buffer := new(bytes.Buffer)
+		if _, err := io.Copy(image_buffer, src); err != nil {
+			return err
+		}
+		if err := image.CreateImage(image_file.Filename, image_buffer); err != nil {
 			return err
 		}
 
@@ -149,7 +160,7 @@ func PatchImageTag() echo.HandlerFunc {
 		image.Id = image_id
 		image.Load()
 		if err := image.AddTag(param.TagId); err != nil {
-			if err.Error() == "invalid tag_id" {
+			if err.Error() == "invalid tag_id" || err.Error() == "このタグは既に登録されています" {
 				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
 			}
 			return err

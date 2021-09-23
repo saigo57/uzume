@@ -23,7 +23,7 @@ func NewWorkspaceById(workspace_id string) (*Workspace, error) {
 	config.Load()
 	ok, workspace_path := config.FindWorkspacePath(workspace_id)
 	if !ok {
-		return nil, errors.New("")
+		return nil, errors.New("workspaceが見つかりませんでした")
 	}
 
 	workspace := new(Workspace)

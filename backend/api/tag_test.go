@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"uzume_backend/fixture"
 	"uzume_backend/model"
 	"uzume_backend/test_helper"
 
@@ -275,16 +276,7 @@ func TestDeleteTags_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	workspace := new(model.Workspace)
-	workspace.Name = "ワークスペース"
-	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
-
-	config := new(model.Config)
-	config.Load()
-	config.AddWorkspace(*workspace)
-	assert.Equal(t, 1, len(config.WorkspaceList))
-	config.Save()
+	_, workspace := fixture.SetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -309,16 +301,7 @@ func TestDeleteTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	workspace := new(model.Workspace)
-	workspace.Name = "ワークスペース"
-	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
-
-	config := new(model.Config)
-	config.Load()
-	config.AddWorkspace(*workspace)
-	assert.Equal(t, 1, len(config.WorkspaceList))
-	config.Save()
+	_, workspace := fixture.SetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
