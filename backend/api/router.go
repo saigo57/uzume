@@ -49,7 +49,8 @@ func RouteInit() *echo.Echo {
 
 			auth.POST("/images", PostImages())
 			auth.GET("/images", GetImages())
-			auth.GET("/images/:id", GetImageFile())
+			auth.PATCH("/images/:id", PatchImages())
+			auth.GET("/images/:id/file", GetImageFile())
 			auth.PATCH("/images/:id/tags", PatchImageTag())
 			auth.DELETE("/images/:image_id/tags/:tag_id", DeleteImageTag())
 

@@ -277,7 +277,31 @@ Authorization: Basic OTYxNzRkZTUtYzMzYi1mNjQyLWIxZTMtYzUxNGIxMDBlNWVlOjczYjkxMTA
     + Attributes
         + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
 
-## 画像 [/api/v1/images/{image_id}{?image_size}]
+## 画像 [/api/v1/images/{image_id}]
+
+### 情報更新 [PATCH]
+
+#### 処理概要
+* 画像情報の更新を行う
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
+    + Attributes
+        + Author: `作者` (string)
+        + Memo: `メモ` (string)
+
++ Response 200 (application/json)
+    + Attributes
+        + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
+
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
+
+## 画像 [/api/v1/images/{image_id}/file{?image_size}]
 
 ### 画像取得 [GET]
 
