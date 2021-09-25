@@ -95,6 +95,77 @@ func TestGetImages_fail(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
+// 画像情報の更新に成功すること
+func TestPatchImages_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	assert.NoError(t, err)
+	image.Memo = "テストメモ"
+	image.Author = "テスト作者"
+	image.CreatedAt = time.Now()
+	image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED)
+	image.Save()
+
+	body, _ := json.Marshal(struct {
+		Memo   string `json:"memo"`
+		Author string `json:"author"`
+	}{
+		Memo:   "メモ2",
+		Author: "作者2",
+	})
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/api/v1/images/%s", image.Id), bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	rec_image := new(model.Image)
+	json.Unmarshal([]byte(rec.Body.String()), rec_image)
+	assert.Equal(t, "メモ2", rec_image.Memo)
+	assert.Equal(t, "作者2", rec_image.Author)
+}
+
+// access_tokenが間違っているとき、画像情報の更新に失敗すること
+func TestPatchImages_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+	model.GenerateAccessToken(workspace.Id)
+
+	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	assert.NoError(t, err)
+	image.Memo = "テストメモ"
+	image.Author = "テスト作者"
+	image.CreatedAt = time.Now()
+	image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED)
+	image.Save()
+
+	body, _ := json.Marshal(struct {
+		Memo   string `json:"memo"`
+		Author string `json:"author"`
+	}{
+		Memo:   "メモ2",
+		Author: "作者2",
+	})
+	req := httptest.NewRequest("PATCH", fmt.Sprintf("/api/v1/images/%s", image.Id), bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid_access_token"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 // 画像自体の取得に成功すること
 func TestGetImageFile_success(t *testing.T) {
 	test_helper.InitializeTest()
@@ -117,7 +188,7 @@ func TestGetImageFile_success(t *testing.T) {
 	image_buffer := new(bytes.Buffer)
 	_, err = io.Copy(image_buffer, image_file)
 
-	req := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s?image_size=original", image.Id), nil)
+	req := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s/file?image_size=original", image.Id), nil)
 	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
@@ -127,7 +198,7 @@ func TestGetImageFile_success(t *testing.T) {
 	test_helper.EqualBuffer(t, image_buffer, rec.Body)
 
 	// サムネイル
-	req_thumb := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s?image_size=thumb", image.Id), nil)
+	req_thumb := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s/file?image_size=thumb", image.Id), nil)
 	req_thumb.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
 	req_thumb.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec_thumb := httptest.NewRecorder()
@@ -159,7 +230,7 @@ func TestGetImageFile_fail(t *testing.T) {
 	image_buffer := new(bytes.Buffer)
 	_, err = io.Copy(image_buffer, image_file)
 
-	req := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s?image_size=original", image.Id), nil)
+	req := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s/file?image_size=original", image.Id), nil)
 	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid_access_token"))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()

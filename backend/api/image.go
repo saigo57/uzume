@@ -51,6 +51,35 @@ func GetImages() echo.HandlerFunc {
 	}
 }
 
+func PatchImages() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		image_id := c.Param("id")
+		param := new(struct {
+			Author string `json:"author"`
+			Memo   string `json:"memo"`
+		})
+		if err := c.Bind(param); err != nil {
+			return err
+		}
+
+		workspace_id := helper.LoggedinWrokspaceId(c)
+		workspace, err := model.NewWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		image := model.NewImage(workspace)
+		image.Id = image_id
+		image.Load()
+
+		image.Author = param.Author
+		image.Memo = param.Memo
+		image.Save()
+
+		return c.JSON(http.StatusOK, image)
+	}
+}
+
 func GetImageFile() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		image_id := c.Param("id")
