@@ -10,8 +10,10 @@ import (
 )
 
 func workspaceAuth(workspace_id, token string) (bool, error) {
-	access_token := new(model.AccessToken)
-	access_token.Load()
+	access_token, err := model.NewAccessToken()
+	if err != nil {
+		return false, err
+	}
 	ok, ws_id := access_token.GetWorkspaceId(token)
 	if ok && workspace_id == ws_id {
 		return true, nil

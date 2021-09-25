@@ -21,6 +21,17 @@ type Config struct {
 	WorkspaceList  []WorkspaceInfo `json:"workspace_list"`
 }
 
+func NewConfig() (*Config, error) {
+	config := new(Config)
+	if err := config.Load(); err != nil {
+		if err := config.Save(); err != nil {
+			return nil, err
+		}
+	}
+
+	return config, nil
+}
+
 func (c *Config) Load() error {
 	if helper.IsTesting() {
 		c.configFilePath = test_helper.BuildFilePath("/.uzume/config.json")
@@ -108,7 +119,7 @@ func (c *Config) FindWorkspacePath(workspace_id string) (bool, string) {
 	return false, ""
 }
 
-func (c *Config) DeleteWorkspace(workspace_id string) error {
+func (c *Config) DeleteWorkspaceAndSave(workspace_id string) error {
 	var workspace_list []WorkspaceInfo
 	for _, conf_w := range c.WorkspaceList {
 		if conf_w.WorkspaceId == workspace_id {

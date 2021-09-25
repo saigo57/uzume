@@ -1,64 +1,53 @@
 package api
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"uzume_backend/helper"
 	"uzume_backend/model"
 
 	"github.com/labstack/echo"
 )
 
-type workspace struct {
-	Workspace_id string `json:"workspace_id"`
-	Name         string `json:"name"`
-	Available    bool   `json:"available"`
-}
-
-type workspacePath struct {
-	WorkspacePath string `json:"workspace_path"`
-}
-
-type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-}
-
-// TODO:workspace modelの方に移動したい
-func checkAliveWorkspace(path string) bool {
-	_, err := ioutil.ReadFile(filepath.Join(path, "workspace.json"))
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func GetWorkspaces() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		config := new(model.Config)
-		config.Load()
-
-		workspaces := make([]workspace, 0, 5)
-		for _, ws_info := range config.GetWorkspaces() {
-			w := new(workspace)
-			w.Workspace_id = ws_info.WorkspaceId
-			w.Name = ws_info.Name
-			w.Available = checkAliveWorkspace(ws_info.Path)
-			workspaces = append(workspaces, *w)
+		config, err := model.NewConfig()
+		if err != nil {
+			return err
 		}
 
-		return c.JSON(http.StatusOK, workspaces)
+		type resWorkspace struct {
+			Workspace_id string `json:"workspace_id"`
+			Name         string `json:"name"`
+			Available    bool   `json:"available"`
+		}
+
+		res_workspaces := make([]resWorkspace, 0, 5)
+		for _, conf_ws := range config.GetWorkspaces() {
+			ws, err := model.FindWorkspaceById(conf_ws.WorkspaceId)
+			if err != nil {
+				return err
+			}
+
+			res_ws := new(resWorkspace)
+			res_ws.Workspace_id = conf_ws.WorkspaceId
+			res_ws.Name = conf_ws.Name
+			res_ws.Available = ws.IsAlive()
+			res_workspaces = append(res_workspaces, *res_ws)
+		}
+
+		return c.JSON(http.StatusOK, res_workspaces)
 	}
 }
 
 func PostWorkspaces() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		config := new(model.Config)
-		config.Load()
-
 		workspace := new(model.Workspace)
 		if err := c.Bind(workspace); err != nil {
+			return err
+		}
+
+		config, err := model.NewConfig()
+		if err != nil {
 			return err
 		}
 
@@ -67,7 +56,7 @@ func PostWorkspaces() echo.HandlerFunc {
 		}
 
 		// workspace作成
-		if err := workspace.CreateWorkspaceDir(); err != nil {
+		if err := workspace.CreateWorkspaceDirAndSave(); err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ディスクに既に存在しています"})
 		}
 
@@ -76,7 +65,9 @@ func PostWorkspaces() echo.HandlerFunc {
 			return err
 		}
 
-		config.Save()
+		if err := config.Save(); err != nil {
+			return err
+		}
 
 		return c.JSON(http.StatusCreated, struct {
 			WorkspaceId string `json:"workspace_id"`
@@ -88,31 +79,35 @@ func PostWorkspaces() echo.HandlerFunc {
 
 func PostWorkspacesAdd() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		config := new(model.Config)
-		config.Load()
-
-		param := new(workspacePath)
+		param := new(struct {
+			WorkspacePath string `json:"workspace_path"`
+		})
 		if err := c.Bind(param); err != nil {
 			return err
 		}
 
-		if !helper.DirExists(param.WorkspacePath) {
-			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "指定されたワークスペースが存在しません"})
+		config, err := model.NewConfig()
+		if err != nil {
+			return err
 		}
 
-		workspace := new(model.Workspace)
-		workspace.Path = param.WorkspacePath
-		if err := workspace.Load(); err != nil {
+		workspace, err := model.FindWorkspaceByPath(param.WorkspacePath)
+		if err != nil {
+			if err.Error() == "The workspace doesn't exist." {
+				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
+			}
 			return err
 		}
 
 		// configにworkspace情報を追記
 		if err := config.AddWorkspace(*workspace); err != nil {
 			return c.JSON(http.StatusBadRequest,
-				helper.ErrorMessage{ErrorMessage: fmt.Sprintf("%s", err)})
+				helper.ErrorMessage{ErrorMessage: err.Error()})
 		}
 
-		config.Save()
+		if err := config.Save(); err != nil {
+			return err
+		}
 
 		return c.JSON(http.StatusCreated, struct {
 			WorkspaceId string `json:"workspace_id"`
@@ -124,25 +119,32 @@ func PostWorkspacesAdd() echo.HandlerFunc {
 
 func PostWorkspacesLogin() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		param := new(workspace)
+		param := new(struct {
+			Workspace_id string `json:"workspace_id"`
+		})
 		if err := c.Bind(param); err != nil {
 			return err
 		}
-		workspace_id := param.Workspace_id
 
-		config := new(model.Config)
-		config.Load()
-
-		if !config.WorkspaceIdExists(workspace_id) {
-			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースIDが登録されていません"})
-		}
-
-		access_token, err := model.GenerateAccessToken(workspace_id)
+		config, err := model.NewConfig()
 		if err != nil {
 			return err
 		}
 
-		return c.JSON(http.StatusOK, AccessTokenResponse{AccessToken: access_token})
+		if !config.WorkspaceIdExists(param.Workspace_id) {
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースIDが登録されていません"})
+		}
+
+		access_token, err := model.GenerateAccessToken(param.Workspace_id)
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, struct {
+			AccessToken string `json:"access_token"`
+		}{
+			AccessToken: access_token,
+		})
 	}
 }
 
@@ -154,27 +156,33 @@ func PatchWorkspaces() echo.HandlerFunc {
 		if err := c.Bind(param); err != nil {
 			return err
 		}
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
 
 		// configファイルを用いてworkspace_idからworkspace_pathを取得
-		config := new(model.Config)
-		config.Load()
+		config, err := model.NewConfig()
+		if err != nil {
+			return err
+		}
 		ok, workspace_path := config.FindWorkspacePath(workspace_id)
 		if !ok {
 			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースがありません"})
 		}
 
 		// workspace_pathからworkspaceフォルダにアクセスし、データを書き換える
-		workspace := new(model.Workspace)
-		workspace.Path = workspace_path
-		workspace.Load()
+		workspace, err := model.FindWorkspaceByPath(workspace_path)
+		if err != nil {
+			return err
+		}
 		workspace.Name = param.Name
-		workspace.Save()
+		if err := workspace.Save(); err != nil {
+			return err
+		}
 
 		// workspaceに行った変更をconfigファイルに反映させる
 		config.UpdateWorkspace(*workspace)
-		config.Save()
+		if err := config.Save(); err != nil {
+			return err
+		}
 
 		return c.JSON(http.StatusNoContent, "")
 	}
@@ -191,10 +199,12 @@ func DeleteWorkspaces() echo.HandlerFunc {
 		workspace_id := helper.LoggedinWrokspaceId(c)
 
 		// configファイルを用いてworkspace_idからworkspace_pathを取得
-		config := new(model.Config)
-		config.Load()
+		config, err := model.NewConfig()
+		if err != nil {
+			return err
+		}
 
-		if err := config.DeleteWorkspace(workspace_id); err != nil {
+		if err := config.DeleteWorkspaceAndSave(workspace_id); err != nil {
 			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "ワークスペースの削除に失敗しました"})
 		}
 
@@ -205,21 +215,22 @@ func DeleteWorkspaces() echo.HandlerFunc {
 func GetWorkspaceIcon() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
 
-		icon_files, err := workspace.WorkspaceIconFiles()
+		icon_file_paths, err := workspace.WorkspaceIconFilePaths()
 		if err != nil {
 			return err
 		}
 
-		if len(icon_files) == 0 {
+		if len(icon_file_paths) == 0 {
 			return c.JSON(http.StatusNotFound, "")
 		}
 
-		return c.File(icon_files[0])
+		return c.File(icon_file_paths[0])
 	}
 }
 
@@ -230,7 +241,8 @@ func PostWorkspaceIcon() echo.HandlerFunc {
 			return err
 		}
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}

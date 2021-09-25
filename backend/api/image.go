@@ -32,9 +32,9 @@ func GetImages() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		tag_search_type := c.QueryParam("tag_search_type")
 		var tag_list = GetQueryParamTags(c.QueryParam("tags"))
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
@@ -42,11 +42,12 @@ func GetImages() echo.HandlerFunc {
 		model.LoadAllImages(workspace) // TODO: 更新時にcacheも適切に更新できたら削除
 
 		image := model.NewImage(workspace)
+		images := image.SearchImages(tag_list, tag_search_type)
 
 		return c.JSON(http.StatusOK, struct {
 			Images []*model.Image `json:"images"`
 		}{
-			Images: image.SearchImages(tag_list, tag_search_type),
+			Images: images,
 		})
 	}
 }
@@ -61,17 +62,17 @@ func PatchImages() echo.HandlerFunc {
 		if err := c.Bind(param); err != nil {
 			return err
 		}
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
 
-		image := model.NewImage(workspace)
-		image.Id = image_id
-		image.Load()
-
+		image, err := model.FindImageById(workspace, image_id)
+		if err != nil {
+			return err
+		}
 		image.Author = param.Author
 		image.Memo = param.Memo
 		image.Save()
@@ -84,23 +85,26 @@ func GetImageFile() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		image_id := c.Param("id")
 		image_size := c.QueryParam("image_size")
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
 
-		image := model.NewImage(workspace)
-		image.Id = image_id
-		image.Load()
+		image, err := model.FindImageById(workspace, image_id)
+		if err != nil {
+			return err
+		}
 
 		option := ""
 		switch image_size {
-		case "thumb":
+		case "thumbnail":
 			option = "thumb"
-		default:
+		case "original":
 			option = ""
+		default:
+			return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: "invalid option."})
 		}
 
 		return c.File(image.ImagePath(option))
@@ -116,9 +120,9 @@ func PostImages() echo.HandlerFunc {
 		author := c.FormValue("author")
 		memo := c.FormValue("memo")
 		var tag_list = GetQueryParamTags(c.FormValue("tags"))
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
@@ -134,7 +138,7 @@ func PostImages() echo.HandlerFunc {
 		if _, err := io.Copy(image_buffer, src); err != nil {
 			return err
 		}
-		if err := image.CreateImage(image_file.Filename, image_buffer); err != nil {
+		if err := image.CreateImageAndSave(image_file.Filename, image_buffer); err != nil {
 			return err
 		}
 
@@ -146,17 +150,22 @@ func PostImages() echo.HandlerFunc {
 				return err
 			}
 		}
+		if err := image.Save(); err != nil {
+			return err
+		}
 
 		image.Memo = memo
 		image.Author = author
 		image.CreatedAt = time.Now()
-		image.Save()
+		if err := image.Save(); err != nil {
+			return err
+		}
 
 		if len(tag_list) == 0 {
 			if err := image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED); err != nil {
-				if err.Error() == "invalid tag_id" {
-					return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
-				}
+				return err
+			}
+			if err := image.Save(); err != nil {
 				return err
 			}
 		}
@@ -178,20 +187,25 @@ func PatchImageTag() echo.HandlerFunc {
 		if err := c.Bind(param); err != nil {
 			return err
 		}
-
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
 
-		image := model.NewImage(workspace)
-		image.Id = image_id
-		image.Load()
+		image, err := model.FindImageById(workspace, image_id)
+		if err != nil {
+			return err
+		}
+
 		if err := image.AddTag(param.TagId); err != nil {
 			if err.Error() == "invalid tag_id" || err.Error() == "このタグは既に登録されています" {
 				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
 			}
+			return err
+		}
+		if err := image.Save(); err != nil {
 			return err
 		}
 
@@ -204,15 +218,20 @@ func DeleteImageTag() echo.HandlerFunc {
 		image_id := c.Param("image_id")
 		tag_id := c.Param("tag_id")
 		workspace_id := helper.LoggedinWrokspaceId(c)
-		workspace, err := model.NewWorkspaceById(workspace_id)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
 		if err != nil {
 			return err
 		}
 
-		image := model.NewImage(workspace)
-		image.Id = image_id
-		image.Load()
+		image, err := model.FindImageById(workspace, image_id)
+		if err != nil {
+			return err
+		}
 		image.RemoveTag(tag_id)
+		if err := image.Save(); err != nil {
+			return err
+		}
 
 		return c.JSON(http.StatusNoContent, "")
 	}

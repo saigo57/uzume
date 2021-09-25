@@ -10,8 +10,7 @@ import (
 )
 
 func CreateConfig() *model.Config {
-	config := new(model.Config)
-	config.Load()
+	config, _ := model.NewConfig()
 	config.Save()
 	return config
 }
@@ -20,7 +19,7 @@ func CreateWorkspace() *model.Workspace {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 	return workspace
 }
 
@@ -35,7 +34,7 @@ func CreateImage(workspace *model.Workspace, image_name string) (*model.Image, e
 	}
 
 	image := model.NewImage(workspace)
-	if err := image.CreateImage(image_name, buffer); err != nil {
+	if err := image.CreateImageAndSave(image_name, buffer); err != nil {
 		return nil, err
 	}
 	return image, nil

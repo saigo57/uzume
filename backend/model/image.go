@@ -82,6 +82,14 @@ func NewImage(workspace *Workspace) *Image {
 	return image
 }
 
+func FindImageById(workspace *Workspace, image_id string) (*Image, error) {
+	image := NewImage(workspace)
+	image.Id = image_id
+	image.Load()
+
+	return image, nil
+}
+
 func (this *Image) Load() error {
 	json_accessor := NewJsonAccessor()
 	bytes, err := json_accessor.ReadJson(this.ImageJsonPath())
@@ -105,10 +113,7 @@ func (this *Image) Save() error {
 	return nil
 }
 
-func (this *Image) CreateImage(file_name string, image_buffer *bytes.Buffer) error {
-	config := new(Config)
-	config.Load()
-
+func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buffer) error {
 	// ID生成
 	new_uuid, err := uuid.NewRandom()
 	if err != nil {
@@ -168,9 +173,7 @@ func (this *Image) CreateImage(file_name string, image_buffer *bytes.Buffer) err
 		return err
 	}
 
-	this.Save()
-
-	return nil
+	return this.Save()
 }
 
 func (this *Image) SearchImages(tag_list []string, search_type string) []*Image {
@@ -230,7 +233,6 @@ func (this *Image) AddTag(tag_id string) error {
 	}
 	new_tag_list = append(new_tag_list, tag_id)
 	this.Tags = new_tag_list
-	this.Save()
 	return nil
 }
 
@@ -243,7 +245,6 @@ func (this *Image) RemoveTag(tag_id string) {
 		new_tags = append(new_tags, tag)
 	}
 	this.Tags = new_tags
-	this.Save()
 }
 
 func (this *Image) ImageDirName() string {

@@ -198,7 +198,7 @@ func TestGetImageFile_success(t *testing.T) {
 	test_helper.EqualBuffer(t, image_buffer, rec.Body)
 
 	// サムネイル
-	req_thumb := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s/file?image_size=thumb", image.Id), nil)
+	req_thumb := httptest.NewRequest("GET", fmt.Sprintf("/api/v1/images/%s/file?image_size=thumbnail", image.Id), nil)
 	req_thumb.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
 	req_thumb.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec_thumb := httptest.NewRecorder()
@@ -249,9 +249,9 @@ func TestPostImages_success(t *testing.T) {
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
-	tag1, err := tags.CreateNewTag("タグ1")
-	assert.NoError(t, err)
-	tag2, err := tags.CreateNewTag("タグ2")
+	tag1, _ := tags.CreateNewTag("タグ1")
+	tag2, _ := tags.CreateNewTag("タグ2")
+	err := tags.Save()
 	assert.NoError(t, err)
 
 	multipart_body := new(bytes.Buffer)
@@ -347,9 +347,9 @@ func TestPostImages_fail(t *testing.T) {
 	model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
-	tag1, err := tags.CreateNewTag("タグ1")
-	assert.NoError(t, err)
-	tag2, err := tags.CreateNewTag("タグ2")
+	tag1, _ := tags.CreateNewTag("タグ1")
+	tag2, _ := tags.CreateNewTag("タグ2")
+	err := tags.Save()
 	assert.NoError(t, err)
 
 	multipart_body := new(bytes.Buffer)
@@ -377,11 +377,14 @@ func TestPatchImageTag_success(t *testing.T) {
 	router := RouteInit()
 
 	_, workspace := fixture.SetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	image, err := fixture.CreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -459,6 +462,8 @@ func TestPatchImageTag_fail(t *testing.T) {
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
+	err := tags.Save()
+	assert.NoError(t, err)
 
 	image, err := fixture.CreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -493,11 +498,14 @@ func TestDeleteImageTag_success(t *testing.T) {
 	router := RouteInit()
 
 	_, workspace := fixture.SetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	image, err := fixture.CreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -541,6 +549,8 @@ func TestDeleteImageTag_fail(t *testing.T) {
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
+	err := tags.Save()
+	assert.NoError(t, err)
 
 	image, err := fixture.CreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
