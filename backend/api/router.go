@@ -10,8 +10,10 @@ import (
 )
 
 func workspaceAuth(workspace_id, token string) (bool, error) {
-	access_token := new(model.AccessToken)
-	access_token.Load()
+	access_token, err := model.NewAccessToken()
+	if err != nil {
+		return false, err
+	}
 	ok, ws_id := access_token.GetWorkspaceId(token)
 	if ok && workspace_id == ws_id {
 		return true, nil
@@ -46,6 +48,7 @@ func RouteInit() *echo.Echo {
 			auth.DELETE("/workspaces", DeleteWorkspaces())
 			auth.GET("/workspaces/icon", GetWorkspaceIcon())
 			auth.POST("/workspaces/icon", PostWorkspaceIcon())
+			auth.POST("/workspaces/reflesh_cache", PostWorkspaceRefleshCache())
 
 			auth.POST("/images", PostImages())
 			auth.GET("/images", GetImages())

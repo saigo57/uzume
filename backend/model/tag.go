@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"path/filepath"
 
 	"github.com/google/uuid"
@@ -17,8 +18,8 @@ type Tag struct {
 }
 
 type Tags struct {
-	List      []*Tag     `json:"tags"`
 	Workspace *Workspace `json:"-"`
+	List      []*Tag     `json:"tags"`
 }
 
 func NewTags(workspace *Workspace) *Tags {
@@ -64,9 +65,19 @@ func (this *Tags) CreateNewTag(name string) (*Tag, error) {
 	tag.Id = new_uuid.String()
 	tag.Name = name
 	this.List = append(this.List, tag)
-	this.Save()
 
 	return tag, nil
+}
+
+func (this *Tags) UpdateTag(tag_id, name string) error {
+	for _, t := range this.List {
+		if t.Id == tag_id {
+			t.Name = name
+			return nil
+		}
+	}
+
+	return errors.New("The tag_id doesn't exist.")
 }
 
 func (this *Tags) DeleteTag(tag_id string) error {
@@ -78,7 +89,6 @@ func (this *Tags) DeleteTag(tag_id string) error {
 	}
 
 	this.List = new_tag_list
-	this.Save()
 
 	return nil
 }

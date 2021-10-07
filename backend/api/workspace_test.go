@@ -128,7 +128,7 @@ func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = workspace_path
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
 	apitest.New().
 		Handler(router).
@@ -154,7 +154,7 @@ func TestPostWorkspacesAdd(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース10"
 	workspace.Path = workspace_path
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
 	// 1回目は成功
 	body, _ := json.Marshal(struct {
@@ -228,10 +228,10 @@ func TestPostWorkspacesLogin_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	config.Save()
 
@@ -252,10 +252,10 @@ func TestPostWorkspacesLogin_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	config.Save()
 
@@ -276,10 +276,10 @@ func TestPatchWorkspaces_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	config.Save()
 
@@ -315,10 +315,10 @@ func TestPatchWorkspaces_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	config.Save()
 
@@ -355,10 +355,10 @@ func TestDeleteWorkspaces_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -391,10 +391,10 @@ func TestDeleteWorkspaces_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -427,10 +427,10 @@ func TestPostAndGetWorkspaceIcon(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -471,10 +471,10 @@ func TestPostAndGetWorkspaceIcon_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()

@@ -24,6 +24,15 @@ type AccessToken struct {
 	AccessTokenList []AccessTokenInfo `json:"access_token_list"`
 }
 
+func NewAccessToken() (*AccessToken, error) {
+	access_token := new(AccessToken)
+	if err := access_token.Load(); err != nil {
+		return nil, err
+	}
+
+	return access_token, nil
+}
+
 func (a *AccessToken) Load() error {
 	if helper.IsTesting() {
 		a.FilePath = test_helper.BuildFilePath("/.uzume/access_token.json")

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -18,9 +19,11 @@ type Workspace struct {
 	Path string `json:"path"`
 }
 
-func NewWorkspaceById(workspace_id string) (*Workspace, error) {
-	config := new(Config)
-	config.Load()
+func FindWorkspaceById(workspace_id string) (*Workspace, error) {
+	config, err := NewConfig()
+	if err != nil {
+		return nil, err
+	}
 	ok, workspace_path := config.FindWorkspacePath(workspace_id)
 	if !ok {
 		return nil, errors.New("workspaceが見つかりませんでした")
@@ -30,6 +33,20 @@ func NewWorkspaceById(workspace_id string) (*Workspace, error) {
 	workspace.Id = workspace_id
 	workspace.Path = workspace_path
 	workspace.Load()
+
+	return workspace, nil
+}
+
+func FindWorkspaceByPath(workspace_path string) (*Workspace, error) {
+	if !helper.DirExists(workspace_path) {
+		return nil, errors.New("The workspace doesn't exist.")
+	}
+
+	workspace := new(Workspace)
+	workspace.Path = workspace_path
+	if err := workspace.Load(); err != nil {
+		return nil, err
+	}
 
 	return workspace, nil
 }
@@ -57,7 +74,7 @@ func (w *Workspace) Save() error {
 	return nil
 }
 
-func (w *Workspace) CreateWorkspaceDir() error {
+func (w *Workspace) CreateWorkspaceDirAndSave() error {
 	if helper.DirExists(w.Path) {
 		return errors.New("ワークスペースはすでに存在しています")
 	}
@@ -75,14 +92,27 @@ func (w *Workspace) CreateWorkspaceDir() error {
 	return nil
 }
 
+func (w Workspace) IsAlive() bool {
+	_, err := ioutil.ReadFile(w.workspaceJsonPath())
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (w *Workspace) RefleshCache() error {
+	if err := refleshImageCache(w); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (w Workspace) workspaceJsonPath() string {
 	return filepath.Join(w.Path, "workspace.json")
 }
 
 func (this *Workspace) UpdateWorkspaceIcon(img *multipart.FileHeader) error {
-	config := new(Config)
-	config.Load()
-
 	src, err := img.Open()
 	if err != nil {
 		return err
@@ -91,11 +121,11 @@ func (this *Workspace) UpdateWorkspaceIcon(img *multipart.FileHeader) error {
 
 	_, ext := helper.SplitFileNameAndExt(img.Filename)
 
-	icon_files, err := this.WorkspaceIconFiles()
+	icon_file_paths, err := this.WorkspaceIconFilePaths()
 	if err != nil {
 		return err
 	}
-	for _, f := range icon_files {
+	for _, f := range icon_file_paths {
 		if err := os.Remove(f); err != nil {
 			return err
 		}
@@ -116,7 +146,7 @@ func (this *Workspace) UpdateWorkspaceIcon(img *multipart.FileHeader) error {
 	return nil
 }
 
-func (this *Workspace) WorkspaceIconFiles() ([]string, error) {
+func (this *Workspace) WorkspaceIconFilePaths() ([]string, error) {
 	icon_files, err := filepath.Glob(filepath.Join(this.Path, "icon.*"))
 	if err != nil {
 		return nil, err

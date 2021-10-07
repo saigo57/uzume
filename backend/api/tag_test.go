@@ -23,10 +23,10 @@ func TestGetTags_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -36,6 +36,8 @@ func TestGetTags_success(t *testing.T) {
 	tag2, _ := tags.CreateNewTag("タグ2")
 	tag3, _ := tags.CreateNewTag("タグ3")
 	tag4, _ := tags.CreateNewTag("タグ4")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
@@ -85,10 +87,10 @@ func TestGetTags_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -98,6 +100,8 @@ func TestGetTags_fail(t *testing.T) {
 	tags.CreateNewTag("タグ2")
 	tags.CreateNewTag("タグ3")
 	tags.CreateNewTag("タグ4")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	model.GenerateAccessToken(workspace.Id)
 
@@ -123,10 +127,10 @@ func TestPostTags_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -162,10 +166,10 @@ func TestPostTags_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
@@ -199,16 +203,18 @@ func TestPatchTags_success(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
@@ -239,16 +245,18 @@ func TestPatchTags_fail(t *testing.T) {
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
 	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
-	workspace.CreateWorkspaceDir()
+	workspace.CreateWorkspaceDirAndSave()
 
-	config := new(model.Config)
-	config.Load()
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
 	config.AddWorkspace(*workspace)
 	assert.Equal(t, 1, len(config.WorkspaceList))
 	config.Save()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
+	err = tags.Save()
+	assert.NoError(t, err)
 
 	model.GenerateAccessToken(workspace.Id)
 
@@ -280,6 +288,8 @@ func TestDeleteTags_success(t *testing.T) {
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
+	err := tags.Save()
+	assert.NoError(t, err)
 
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
@@ -305,6 +315,8 @@ func TestDeleteTags_fail(t *testing.T) {
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
+	err := tags.Save()
+	assert.NoError(t, err)
 
 	model.GenerateAccessToken(workspace.Id)
 
