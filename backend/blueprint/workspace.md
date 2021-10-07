@@ -177,3 +177,21 @@ FORMAT: 1A
     + Attributes
         + message: `Unauthorized` (string)
 
+
+
+## ワークスペース追加 [/api/v1/workspaces/reflesh_cache]
+### キャッシュクリア [POST]
+
+#### 処理概要
+
+* ワークスペースに紐づくキャッシュをすべてクリアする
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
++ Response 200 (application/json)
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)

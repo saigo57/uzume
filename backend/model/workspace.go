@@ -100,6 +100,14 @@ func (w Workspace) IsAlive() bool {
 	return true
 }
 
+func (w *Workspace) RefleshCache() error {
+	if err := refleshImageCache(w); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (w Workspace) workspaceJsonPath() string {
 	return filepath.Join(w.Path, "workspace.json")
 }

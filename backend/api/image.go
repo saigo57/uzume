@@ -39,10 +39,14 @@ func GetImages() echo.HandlerFunc {
 			return err
 		}
 
-		model.LoadAllImages(workspace) // TODO: 更新時にcacheも適切に更新できたら削除
-
 		image := model.NewImage(workspace)
-		images := image.SearchImages(tag_list, tag_search_type)
+		images, err := image.SearchImages(tag_list, tag_search_type)
+		if err != nil {
+			if err.Error() == "Unknown search type." {
+				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
+			}
+			return err
+		}
 
 		return c.JSON(http.StatusOK, struct {
 			Images []*model.Image `json:"images"`

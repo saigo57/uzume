@@ -43,6 +43,7 @@ func TestGetImages_success(t *testing.T) {
 		TagSearchType: "or",
 		Tags:          model.SYSTEM_TAG_UNCATEGORIZED,
 	})
+	workspace.RefleshCache()
 	req := httptest.NewRequest("GET", "/api/v1/images", bytes.NewReader(body))
 	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -272,10 +273,11 @@ func TestPostImages_success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, rec_post.Code)
 
-	model.LoadAllImages(workspace)
+	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images := image.SearchImages([]string{}, "or")
+	images, err := image.SearchImages([]string{}, "or")
+	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
 	assert.Equal(t, "png", images[0].Ext)
@@ -316,10 +318,11 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, rec_post.Code)
 
-	model.LoadAllImages(workspace)
+	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images := image.SearchImages([]string{}, "or")
+	images, err := image.SearchImages([]string{}, "or")
+	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
 	assert.Equal(t, "png", images[0].Ext)

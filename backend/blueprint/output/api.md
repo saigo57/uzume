@@ -201,6 +201,24 @@ Authorization: Basic OTYxNzRkZTUtYzMzYi1mNjQyLWIxZTMtYzUxNGIxMDBlNWVlOjczYjkxMTA
         + message: `Unauthorized` (string)
 
 
+
+## ワークスペース追加 [/api/v1/workspaces/reflesh_cache]
+### キャッシュクリア [POST]
+
+#### 処理概要
+
+* ワークスペースに紐づくキャッシュをすべてクリアする
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
++ Response 200 (application/json)
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
+
 # Data Structures
 ## Image (object)
 + image_id: `550e8400-e29b-41d4-a716-446655440000` (string)
@@ -251,7 +269,6 @@ Authorization: Basic OTYxNzRkZTUtYzMzYi1mNjQyLWIxZTMtYzUxNGIxMDBlNWVlOjczYjkxMTA
 ### 新規登録 [POST]
 
 #### 処理概要
-* TODO: 編集中。
 * 画像の新規登録を行う
 * multipart/form-dataで画像と通常の文字などをまとめて通信する
 

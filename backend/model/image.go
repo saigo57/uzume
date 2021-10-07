@@ -10,10 +10,8 @@ import (
 	"image/jpeg"
 	_ "image/png"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 	"uzume_backend/helper"
 
@@ -37,44 +35,6 @@ type Image struct {
 	Workspace *Workspace `json:"-"`
 }
 
-type ImageCache struct {
-	// Tag[tag_id] = []Image
-	Images []*Image
-	Tag    map[string][]*Image
-}
-
-// images_cache[workspace_id] = ImageCache
-var images_cache = make(map[string]ImageCache)
-
-func LoadAllImages(workspace *Workspace) error {
-	image := NewImage(workspace)
-	all, err := ioutil.ReadDir(image.ImagesDirPath())
-	if err != nil {
-		return err
-	}
-
-	cache := new(ImageCache)
-	cache.Tag = make(map[string][]*Image)
-
-	for _, f := range all {
-		file_name := f.Name()
-		if !strings.HasSuffix(file_name, IMAGE_DIR_EXT) {
-			continue
-		}
-
-		image := NewImage(workspace)
-		image.Id = file_name[:len(file_name)-len(IMAGE_DIR_EXT)]
-		image.Load()
-
-		cache.Images = append(cache.Images, image)
-		// TODO: tagによって振り分ける
-	}
-
-	images_cache[workspace.Id] = *cache
-
-	return nil
-}
-
 func NewImage(workspace *Workspace) *Image {
 	image := new(Image)
 	image.Workspace = workspace
@@ -85,7 +45,9 @@ func NewImage(workspace *Workspace) *Image {
 func FindImageById(workspace *Workspace, image_id string) (*Image, error) {
 	image := NewImage(workspace)
 	image.Id = image_id
-	image.Load()
+	if err := image.Load(); err != nil {
+		return nil, err
+	}
 
 	return image, nil
 }
@@ -105,9 +67,31 @@ func (this *Image) Load() error {
 
 func (this *Image) Save() error {
 	json_path := this.ImageJsonPath()
+
+	is_update := helper.FileExists(json_path)
+
+	var prev_image *Image
+	if is_update {
+		// 必ずファイルから取得する
+		var err error
+		prev_image, err = FindImageById(this.Workspace, this.Id)
+		if err != nil {
+			return err
+		}
+
+		// TODO: 意図しないデータを変更しようとした場合は、差分キャッシュ更新ではなくキャッシュを破棄する
+	}
+
 	json_accessor := NewJsonAccessor()
 	if err := json_accessor.SaveJson(json_path, this); err != nil {
 		return err
+	}
+
+	// キャッシュを更新
+	if is_update {
+		updateImageCache(this, prev_image)
+	} else {
+		createImageCache(this)
 	}
 
 	return nil
@@ -176,36 +160,66 @@ func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buff
 	return this.Save()
 }
 
-func (this *Image) SearchImages(tag_list []string, search_type string) []*Image {
-	images := images_cache[this.Workspace.Id].Images
+func (this *Image) SearchImages(tag_list []string, search_type string) ([]*Image, error) {
+	// tag指定なしの場合全画像を返す
 	if len(tag_list) == 0 {
-		return images
+		images, err := getAllImageCache(this.Workspace)
+		if err != nil {
+			return nil, err
+		}
+
+		return images, nil
 	}
 
-	// TODO: このコードはヤバすぎるので仕様が固まったら最適化する
 	var ans []*Image
-	for _, image := range images {
-		if search_type == "and" {
-			flg := true
-			for _, tag := range tag_list {
-				if !image.HaveTag(tag) {
-					flg = false
-				}
+	switch search_type {
+	case "or":
+		s := make(map[*Image]struct{})
+		for _, tag_id := range tag_list {
+			// タグに紐づくimageリストを取得
+			image_list, err := getImageCacheByTagId(this.Workspace, tag_id)
+			if err != nil {
+				return nil, err
 			}
-			if flg {
-				ans = append(ans, image)
-			}
-		} else if search_type == "or" {
-			for _, tag := range tag_list {
-				if image.HaveTag(tag) {
-					ans = append(ans, image)
-					continue
-				}
+
+			// mapで重複を解消する
+			for _, image := range image_list {
+				s[image] = struct{}{}
 			}
 		}
+
+		for key, _ := range s {
+			ans = append(ans, key)
+		}
+	case "and":
+		s := make(map[*Image]int)
+		for _, tag_id := range tag_list {
+			// タグに紐づくimageリストを取得
+			image_list, err := getImageCacheByTagId(this.Workspace, tag_id)
+			if err != nil {
+				return nil, err
+			}
+
+			// 画像がヒットした回数をカウントする
+			for _, image := range image_list {
+				s[image]++
+			}
+		}
+
+		tag_count := len(tag_list)
+
+		for key, value := range s {
+			// すべてのタグにヒットした画像のみを返す
+			if tag_count == value {
+				ans = append(ans, key)
+			}
+		}
+
+	default:
+		return nil, errors.New("Unknown search type.")
 	}
 
-	return ans
+	return ans, nil
 }
 
 func (this *Image) HaveTag(tag_id string) bool {
