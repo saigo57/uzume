@@ -10,6 +10,7 @@ import (
 
 func GetTags() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
+		search_type := c.QueryParam("type")
 		workspace_id := helper.LoggedinWrokspaceId(c)
 
 		workspace, err := model.FindWorkspaceById(workspace_id)
@@ -19,10 +20,28 @@ func GetTags() echo.HandlerFunc {
 
 		tags := model.NewTags(workspace)
 
+		var tag_list []*model.Tag
+		switch search_type {
+		case "favorite":
+			tag_list = tags.GetFavoriteTags()
+		default:
+			tag_list = tags.GetAllTags()
+		}
+
+		type retTag struct {
+			Id   string `json:"tag_id"`
+			Name string `json:"name"`
+		}
+
+		var ret_tags []retTag
+		for _, t := range tag_list {
+			ret_tags = append(ret_tags, retTag{Id: t.Id, Name: t.Name})
+		}
+
 		return c.JSON(http.StatusOK, struct {
-			Tags []*model.Tag `json:"tags"`
+			Tags []retTag `json:"tags"`
 		}{
-			Tags: tags.GetAllTags(),
+			Tags: ret_tags,
 		})
 	}
 }
@@ -111,5 +130,55 @@ func DeleteTag() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusNoContent, "")
+	}
+}
+
+func AddFavoriteTag() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		tag_id := c.Param("id")
+		workspace_id := helper.LoggedinWrokspaceId(c)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		tags := model.NewTags(workspace)
+		tag, err := tags.FindTagById(tag_id)
+		if err != nil {
+			return err
+		}
+
+		tag.Favorite = true
+		if err := tags.Save(); err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusCreated, "")
+	}
+}
+
+func RemoveFavoriteTag() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		tag_id := c.Param("id")
+		workspace_id := helper.LoggedinWrokspaceId(c)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		tags := model.NewTags(workspace)
+		tag, err := tags.FindTagById(tag_id)
+		if err != nil {
+			return err
+		}
+
+		tag.Favorite = false
+		if err := tags.Save(); err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, "")
 	}
 }

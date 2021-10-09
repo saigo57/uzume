@@ -7,12 +7,16 @@ FORMAT: 1A
 
 # Group Tags
 
-## タグ [/api/v1/tags]
+## タグ [/api/v1/tags{?type}]
 
 ### リスト取得 [GET]
 
 #### 処理概要
-* すべての通常タグを取得する
+* type省略時、すべての通常タグを取得する
+* type=favorite時、すべてのfavoriteタグを取得する
+
++ Parameters
+    + type: `favorite` (string)
 
 + Request (application/json)
     + Headers
@@ -32,6 +36,8 @@ FORMAT: 1A
 + Response 401 (application/json)
     + Attributes
         + message: `Unauthorized` (string)
+
+## タグ [/api/v1/tags]
 
 ### 新規登録 [POST]
 
@@ -111,3 +117,53 @@ FORMAT: 1A
     + Attributes
         + message: `Unauthorized` (string)
 
+
+## favoriteタグ [/api/v1/tags/{tag_id}/favorite]
+
+### お気に入り登録 [POST]
+
+#### 処理概要
+* タグをお気に入りに登録する
+
++ Parameters
+    + tag_id: `550e8400-e29b-41d4-a716-446655440000` (string)
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
+
++ Response 201 (application/json)
+
++ Response 400 (application/json)
+    + Attributes
+        + error_message: `エラーの内容` (string)
+
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)
+
+### お気に入り登録解除 [DELETE]
+
+#### 処理概要
+* タグをお気に入りから外す
+
++ Parameters
+    + tag_id: `550e8400-e29b-41d4-a716-446655440000` (string)
+
++ Request (application/json)
+    + Headers
+        ```
+        Authorization: Basic access_token_string
+        ```
+
++ Response 200 (application/json)
+
++ Response 400 (application/json)
+    + Attributes
+        + error_message: `エラーの内容` (string)
+
++ Response 401 (application/json)
+    + Attributes
+        + message: `Unauthorized` (string)

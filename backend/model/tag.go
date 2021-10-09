@@ -13,8 +13,9 @@ const (
 )
 
 type Tag struct {
-	Id   string `json:"tag_id"`
-	Name string `json:"name"`
+	Id       string `json:"tag_id"`
+	Name     string `json:"name"`
+	Favorite bool   `json:"favorite"`
 }
 
 type Tags struct {
@@ -27,6 +28,16 @@ func NewTags(workspace *Workspace) *Tags {
 	tag.Workspace = workspace
 	tag.Load()
 	return tag
+}
+
+func (this *Tags) FindTagById(tag_id string) (*Tag, error) {
+	for _, t := range this.List {
+		if t.Id == tag_id {
+			return t, nil
+		}
+	}
+
+	return nil, errors.New("tagが見つかりませんでした")
 }
 
 func (this *Tags) Load() error {
@@ -54,6 +65,17 @@ func (this *Tags) Save() error {
 
 func (this *Tags) GetAllTags() []*Tag {
 	return this.List
+}
+
+func (this *Tags) GetFavoriteTags() []*Tag {
+	var favorite_tag_list []*Tag
+	for _, t := range this.List {
+		if t.Favorite {
+			favorite_tag_list = append(favorite_tag_list, t)
+		}
+	}
+
+	return favorite_tag_list
 }
 
 func (this *Tags) CreateNewTag(name string) (*Tag, error) {

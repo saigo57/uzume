@@ -16,7 +16,7 @@ import (
 )
 
 // タグ一覧の取得に成功すること
-func TestGetTags_success(t *testing.T) {
+func TestGetAllTags_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
@@ -72,6 +72,66 @@ func TestGetTags_success(t *testing.T) {
 		{
 			TagId: tag4.Id,
 			Name:  tag4.Name,
+		},
+	})
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.JSONEq(t, fmt.Sprintf(`{"tags": %s}`, string(expect_body)), string(rec.Body.Bytes()))
+}
+
+// お気に入りタグ一覧の取得に成功すること
+func TestGetFavoriteTags_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	workspace := new(model.Workspace)
+	workspace.Name = "ワークスペース"
+	workspace.Path = test_helper.BuildFilePath("workspace1.uzume")
+	workspace.CreateWorkspaceDirAndSave()
+
+	config, err := model.NewConfig()
+	assert.NoError(t, err)
+	config.AddWorkspace(*workspace)
+	assert.Equal(t, 1, len(config.WorkspaceList))
+	config.Save()
+
+	tags := model.NewTags(workspace)
+	tag1, _ := tags.CreateNewTag("タグ1")
+	tag2, _ := tags.CreateNewTag("タグ2")
+	tag3, _ := tags.CreateNewTag("タグ3")
+	tag4, _ := tags.CreateNewTag("タグ4")
+	tag1.Favorite = false
+	tag2.Favorite = true
+	tag3.Favorite = true
+	tag4.Favorite = false
+	err = tags.Save()
+	assert.NoError(t, err)
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	body, _ := json.Marshal(struct {
+		WorkspaceId string `json:"workspace_id"`
+	}{
+		WorkspaceId: workspace.Id,
+	})
+	req := httptest.NewRequest("GET", "/api/v1/tags?type=favorite", bytes.NewReader(body))
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	expect_body, _ := json.Marshal([]struct {
+		TagId string `json:"tag_id"`
+		Name  string `json:"name"`
+	}{
+		{
+			TagId: tag2.Id,
+			Name:  tag2.Name,
+		},
+		{
+			TagId: tag3.Id,
+			Name:  tag3.Name,
 		},
 	})
 
@@ -331,4 +391,118 @@ func TestDeleteTags_fail(t *testing.T) {
 
 	tags.Load()
 	assert.Equal(t, 1, len(tags.List))
+}
+
+// 認証に失敗したとき、タグのお気に入り登録に失敗すること
+func TestPostFavoriteTag_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+
+	tags := model.NewTags(workspace)
+	tag, _ := tags.CreateNewTag("タグ")
+	err := tags.Save()
+	assert.NoError(t, err)
+
+	model.GenerateAccessToken(workspace.Id)
+
+	req := httptest.NewRequest("POST", fmt.Sprintf("/api/v1/tags/%s/favorite", tag.Id), nil)
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid_access_token"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+// タグのお気に入り登録に成功すること
+func TestPostFavoriteTag_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+
+	tags := model.NewTags(workspace)
+	tag, _ := tags.CreateNewTag("タグ")
+	err := tags.Save()
+	assert.NoError(t, err)
+
+	tags.Load()
+	assert.Equal(t, 1, len(tags.List))
+	assert.Equal(t, false, tags.List[0].Favorite)
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	req := httptest.NewRequest("POST", fmt.Sprintf("/api/v1/tags/%s/favorite", tag.Id), nil)
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusCreated, rec.Code)
+
+	tags.Load()
+	assert.Equal(t, 1, len(tags.List))
+	assert.Equal(t, true, tags.List[0].Favorite)
+}
+
+// タグのお気に入り登録の解除に成功すること
+func TestDeleteFavoriteTag_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+
+	tags := model.NewTags(workspace)
+	tag, _ := tags.CreateNewTag("タグ")
+	tag.Favorite = true
+	err := tags.Save()
+	assert.NoError(t, err)
+
+	tags.Load()
+	assert.Equal(t, 1, len(tags.List))
+	assert.Equal(t, true, tags.List[0].Favorite)
+
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	req := httptest.NewRequest("DELETE", fmt.Sprintf("/api/v1/tags/%s/favorite", tag.Id), nil)
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	tags.Load()
+	assert.Equal(t, 1, len(tags.List))
+	assert.Equal(t, false, tags.List[0].Favorite)
+}
+
+// 認証に失敗したとき、タグのお気に入り登録の解除に失敗すること
+func TestDeleteFavoriteTag_fail(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+
+	tags := model.NewTags(workspace)
+	tag, _ := tags.CreateNewTag("タグ")
+	tag.Favorite = true
+	err := tags.Save()
+	assert.NoError(t, err)
+
+	model.GenerateAccessToken(workspace.Id)
+
+	req := httptest.NewRequest("DELETE", fmt.Sprintf("/api/v1/tags/%s/favorite", tag.Id), nil)
+	req.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, "invalid_access_token"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }

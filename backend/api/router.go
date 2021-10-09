@@ -61,6 +61,8 @@ func RouteInit() *echo.Echo {
 			auth.POST("/tags", PostTag())
 			auth.PATCH("/tags/:id", PatchTag())
 			auth.DELETE("/tags/:id", DeleteTag())
+			auth.POST("/tags/:id/favorite", AddFavoriteTag())
+			auth.DELETE("/tags/:id/favorite", RemoveFavoriteTag())
 		}
 	}
 
