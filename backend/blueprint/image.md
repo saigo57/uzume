@@ -13,7 +13,7 @@ FORMAT: 1A
 
 # Group Images
 
-## 画像 [/api/v1/images]
+## 画像 [/api/v1/images{?tags,tag_search_type,page}]
 
 ### リスト取得 [GET]
 
@@ -21,23 +21,27 @@ FORMAT: 1A
 * 画像情報を取得する
 * 画像自体はリンクから改めて取得する
 * tag_search_typeにはandかorを指定する
+* pageを省略した場合は1ページ目を返す
+* 1ページに付きpageは100件
+* 最後のページの次のページ以降は0件を返す
+
++ Parameters
+    + tags: `550e8400-e29b-41d4-a716-446655440000,550e8400-e29b-41d4-a716-446655440001` (string)
+    + tag_search_type: `and` (string)
+    + page: `2` (number)
 
 + Request (application/json)
     + Headers
         ```
         Authorization: Basic access_token_string
         ```
-    + Attributes
-        + query (object)
-            + tags (array)
-                + `550e8400-e29b-41d4-a716-446655440000` (string)
-            + tag_search_type: `and` (string)
 
 + Response 200 (application/json)
     + Attributes
         + query (object)
             + images (array)
                 + (Image)
+            + page: `2` (number)
 
 + Response 400 (application/json)
     + Attributes
@@ -47,6 +51,7 @@ FORMAT: 1A
     + Attributes
         + message: `Unauthorized` (string)
 
+## 画像1 [/api/v1/images]
 ### 新規登録 [POST]
 
 #### 処理概要

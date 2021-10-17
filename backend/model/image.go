@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 	"uzume_backend/helper"
 
@@ -22,6 +23,7 @@ import (
 const (
 	IMAGE_DIR_EXT     = ".image"
 	THUMB_HEIGHT_SIZE = 300
+	PAGENATION_PER    = 100
 )
 
 type Image struct {
@@ -160,7 +162,22 @@ func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buff
 	return this.Save()
 }
 
-func (this *Image) SearchImages(tag_list []string, search_type string) ([]*Image, error) {
+func (this *Image) SearchImages(tag_list []string, search_type string, page int) ([]*Image, error) {
+	pagination := func(image_list []*Image) []*Image {
+		sort.Slice(image_list, func(i, j int) bool { return image_list[i].CreatedAt.After(image_list[j].CreatedAt) })
+
+		begin := (page - 1) * PAGENATION_PER
+		if len(image_list) < begin {
+			begin = len(image_list)
+		}
+		end := begin + PAGENATION_PER
+		if len(image_list) < end {
+			end = len(image_list)
+		}
+
+		return image_list[begin:end]
+	}
+
 	// tag指定なしの場合全画像を返す
 	if len(tag_list) == 0 {
 		images, err := getAllImageCache(this.Workspace)
@@ -168,7 +185,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string) ([]*Image
 			return nil, err
 		}
 
-		return images, nil
+		return pagination(images), nil
 	}
 
 	var ans []*Image
@@ -219,7 +236,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string) ([]*Image
 		return nil, errors.New("Unknown search type.")
 	}
 
-	return ans, nil
+	return pagination(ans), nil
 }
 
 func (this *Image) HaveTag(tag_id string) bool {
