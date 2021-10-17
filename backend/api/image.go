@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 	"uzume_backend/helper"
@@ -32,6 +33,7 @@ func GetImages() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		tag_search_type := c.QueryParam("tag_search_type")
 		var tag_list = GetQueryParamTags(c.QueryParam("tags"))
+		var page_str = c.QueryParam("page")
 		workspace_id := helper.LoggedinWrokspaceId(c)
 
 		workspace, err := model.FindWorkspaceById(workspace_id)
@@ -39,8 +41,13 @@ func GetImages() echo.HandlerFunc {
 			return err
 		}
 
+		page, err := strconv.Atoi(page_str)
+		if err != nil || page < 1 {
+			page = 1
+		}
+
 		image := model.NewImage(workspace)
-		images, err := image.SearchImages(tag_list, tag_search_type)
+		images, err := image.SearchImages(tag_list, tag_search_type, page)
 		if err != nil {
 			if err.Error() == "Unknown search type." {
 				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
@@ -49,8 +56,10 @@ func GetImages() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, struct {
+			Page   int            `json:"page"`
 			Images []*model.Image `json:"images"`
 		}{
+			Page:   page,
 			Images: images,
 		})
 	}

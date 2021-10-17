@@ -63,6 +63,80 @@ func TestGetImages_success(t *testing.T) {
 	assert.Equal(t, "テスト作者", images.Images[0].Author)
 }
 
+// 画像一覧の取得時にページネーション・ソートされること
+func TestGetImagesPagenationAndSort_success(t *testing.T) {
+	test_helper.InitializeTest()
+	router := RouteInit()
+
+	_, workspace := fixture.SetupOneWorkspace()
+	token, _ := model.GenerateAccessToken(workspace.Id)
+
+	create_image := func(author string, created_at time.Time) {
+		image, err := fixture.CreateImage(workspace, "testimage1.png")
+		assert.NoError(t, err)
+		image.Memo = "テストメモ"
+		image.Author = author
+		image.CreatedAt = created_at
+		image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED)
+		image.Save()
+	}
+
+	time_now := time.Now()
+	bulk_base_time := time_now.Add(-24 * time.Hour)
+	for i := 0; i < 100; i++ {
+		create_image(fmt.Sprintf("テスト作者 %d", i), bulk_base_time.Add(-time.Second))
+	}
+	create_image("テスト作者 last", time_now.Add(-365*24*time.Hour))
+	create_image("テスト作者 first", time_now)
+
+	workspace.RefleshCache()
+
+	body1, _ := json.Marshal(struct {
+		TagSearchType string `json:"tag_search_type"`
+		Tags          string `json:"tags"`
+	}{
+		TagSearchType: "or",
+		Tags:          model.SYSTEM_TAG_UNCATEGORIZED,
+	})
+	req1 := httptest.NewRequest("GET", "/api/v1/images", bytes.NewReader(body1))
+	req1.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req1.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec1 := httptest.NewRecorder()
+	router.ServeHTTP(rec1, req1)
+	assert.Equal(t, http.StatusOK, rec1.Code)
+	images1 := new(struct {
+		Page   int           `json:"page"`
+		Images []model.Image `json:"images"`
+	})
+	json.Unmarshal([]byte(rec1.Body.String()), images1)
+	assert.Equal(t, 1, images1.Page)
+	assert.Equal(t, 100, len(images1.Images))
+	assert.Equal(t, "テスト作者 first", images1.Images[0].Author)
+
+	// TODO: bodyではなくparameterにする
+	body2, _ := json.Marshal(struct {
+		TagSearchType string `json:"tag_search_type"`
+		Tags          string `json:"tags"`
+	}{
+		TagSearchType: "or",
+		Tags:          model.SYSTEM_TAG_UNCATEGORIZED,
+	})
+	req2 := httptest.NewRequest("GET", "/api/v1/images?page=2", bytes.NewReader(body2))
+	req2.Header.Set(echo.HeaderAuthorization, test_helper.BuildBasicAuthorization(workspace.Id, token))
+	req2.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec2 := httptest.NewRecorder()
+	router.ServeHTTP(rec2, req2)
+	assert.Equal(t, http.StatusOK, rec2.Code)
+	images2 := new(struct {
+		Page   int           `json:"page"`
+		Images []model.Image `json:"images"`
+	})
+	json.Unmarshal([]byte(rec2.Body.String()), images2)
+	assert.Equal(t, 2, images2.Page)
+	assert.Equal(t, 2, len(images2.Images))
+	assert.Equal(t, "テスト作者 last", images2.Images[1].Author)
+}
+
 // access_tokenが間違っているとき、画像一覧の取得に失敗すること
 func TestGetImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
@@ -276,7 +350,7 @@ func TestPostImages_success(t *testing.T) {
 	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images, err := image.SearchImages([]string{}, "or")
+	images, err := image.SearchImages([]string{}, "or", 1)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
@@ -321,7 +395,7 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images, err := image.SearchImages([]string{}, "or")
+	images, err := image.SearchImages([]string{}, "or", 1)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
