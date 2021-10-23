@@ -96,12 +96,19 @@ func MakeRouteDir(path string) error {
 
 func SplitFileNameAndExt(file_name string) (string, string) {
 	ext := filepath.Ext(file_name)
+	basename := filepath.Base(file_name)
+	ext_trim := 0
+
 	if len(ext) > 1 && ext[0] == '.' {
+		if ext == file_name {
+			return file_name, ""
+		}
+
 		ext = ext[1:]
+		ext_trim = 1
 	} else {
 		ext = ""
 	}
-	basename := filepath.Base(file_name)
 
-	return basename[0 : len(basename)-len(ext)-1], ext
+	return basename[0 : len(basename)-len(ext)-ext_trim], ext
 }
