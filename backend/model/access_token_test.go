@@ -10,7 +10,7 @@ import (
 )
 
 // 初回Load
-func TestLoad_first(t *testing.T) {
+func TestJsonAccessorLoad_first(t *testing.T) {
 	test_helper.InitializeTest()
 	access_token, _ := NewAccessToken()
 
@@ -21,7 +21,7 @@ func TestLoad_first(t *testing.T) {
 }
 
 // Load 2回目以降
-func TestLoad(t *testing.T) {
+func TestJsonAccessorLoad(t *testing.T) {
 	test_helper.InitializeTest()
 	access_token, _ := NewAccessToken()
 	json_accessor := NewJsonAccessor()
@@ -42,7 +42,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, "test_access_token", access_token.AccessTokenList[0].AccessToken)
 }
 
-func TestSave(t *testing.T) {
+func TestJsonAccessorSave(t *testing.T) {
 	test_helper.InitializeTest()
 	access_token, _ := NewAccessToken()
 	file_path := test_helper.BuildFilePath("/.uzume/access_token.json")
@@ -62,7 +62,7 @@ func TestSave(t *testing.T) {
 	assert.Equal(t, "test_access_token", access_token2.AccessTokenList[0].AccessToken)
 }
 
-func TestGetWorkspaceId(t *testing.T) {
+func TestJsonAccessorGetWorkspaceId(t *testing.T) {
 	test_helper.InitializeTest()
 	access_token, _ := NewAccessToken()
 	access_token.AccessTokenList = append(access_token.AccessTokenList, AccessTokenInfo{
@@ -81,7 +81,7 @@ func TestGetWorkspaceId(t *testing.T) {
 	assert.Equal(t, "", ws_id2)
 }
 
-func TestDeleteExpireToken(t *testing.T) {
+func TestJsonAccessorDeleteExpireToken(t *testing.T) {
 	test_helper.InitializeTest()
 	access_token, _ := NewAccessToken()
 	access_token.AccessTokenList = append(access_token.AccessTokenList, AccessTokenInfo{
@@ -103,7 +103,7 @@ func TestDeleteExpireToken(t *testing.T) {
 	assert.Equal(t, 0, len(access_token.AccessTokenList))
 }
 
-func TestGenerateAccessToken(t *testing.T) {
+func TestJsonAccessorGenerateAccessToken(t *testing.T) {
 	test_helper.InitializeTest()
 
 	token, _ := GenerateAccessToken("some_workspace_id")

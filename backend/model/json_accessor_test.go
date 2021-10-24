@@ -16,7 +16,7 @@ type test_json_data struct {
 	Bar string `json:"bar"`
 }
 
-func TestReadJson(t *testing.T) {
+func TestJsonAccessorReadJson(t *testing.T) {
 	test_helper.InitializeTest()
 	json_accessor := NewJsonAccessor()
 	json_path := "./../fixture/test.json"
@@ -27,7 +27,7 @@ func TestReadJson(t *testing.T) {
 	assert.Equal(t, json_data.Bar, "2")
 }
 
-func TestSaveJson(t *testing.T) {
+func TestJsonAccessorSaveJson(t *testing.T) {
 	test_helper.InitializeTest()
 	json_accessor := NewJsonAccessor()
 	json_path := test_helper.BuildFilePath("test.json")
@@ -44,7 +44,7 @@ func TestSaveJson(t *testing.T) {
 }
 
 // テスト時にテストフォルダ外にsaveしようとした場合エラーが出ること
-func TestSaveJson_error(t *testing.T) {
+func TestJsonAccessorSaveJson_error(t *testing.T) {
 	test_helper.InitializeTest()
 	json_accessor := NewJsonAccessor()
 	illegal_test_file_path := test_helper.BuildFilePath("../_illegal_test_file_name.json")
