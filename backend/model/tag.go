@@ -86,6 +86,7 @@ func (this *Tags) CreateNewTag(name string) (*Tag, error) {
 	}
 	tag.Id = new_uuid.String()
 	tag.Name = name
+	tag.Favorite = false
 	this.List = append(this.List, tag)
 
 	return tag, nil
