@@ -1,0 +1,11 @@
+@import '../../scss/base.scss';
+
+.thumbnail-area {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px - 50px);
+    padding: 5px;
+    overflow-y: scroll;
+  }

@@ -1,0 +1,49 @@
+@import '../../scss/base.scss';
+
+.menu-title {
+    display: flex;
+    padding-top: 10px;
+    padding-left: 10px;
+    height: 30px;
+    letter-spacing: 1px;
+    user-select: none;
+    color: $main-font-color;
+    background-color: $main-background-color;
+    white-space: nowrap;
+    transition: 0.15s;
+  
+    &-text {
+      padding-top: 4px;
+    }
+    & .svg-inline--fa {
+      height: 22px;
+      width: 22px;
+      padding-right: 8px;
+    }
+    &.clickable:hover {
+      cursor: pointer;
+      background-color: $light-background-color;
+    }
+}
+
+.tag-item {
+    padding-top: 10px;
+    padding-left: 35px;
+    height: 20px;
+    letter-spacing: 1px;
+    color: $main-font-color;
+    list-style: none;
+    user-select: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.15s;
+    &:hover {
+      background-color: $light-background-color;
+    }
+    & .svg-inline--fa {
+      height: 10px;
+      width: 10px;
+      padding-right: 4px;
+    }
+}
+  

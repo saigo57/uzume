@@ -1,0 +1,13 @@
+@import '../../scss/base.scss';
+
+#side-bar {
+    display: block;
+    height: calc(100% - $footer-height);
+    width: 300px;
+    right: 0;
+    margin-bottom: $footer-height;
+    min-width: 150px;
+    color: black;
+    background-color: $main-background-color;
+    overflow-y: scroll;
+  }

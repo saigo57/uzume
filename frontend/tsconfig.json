@@ -1,18 +1,42 @@
+// {
+//   "compilerOptions": {
+//     "target": "es5",
+//     "lib": [
+//       "dom",
+//       "dom.iterable",
+//       "esnext"
+//     ],
+//     "allowJs": true,
+//     "skipLibCheck": true,
+//     "esModuleInterop": true,
+//     "allowSyntheticDefaultImports": true,
+//     "strict": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "noFallthroughCasesInSwitch": true,
+//     "module": "esnext",
+//     "moduleResolution": "node",
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "noEmit": true,
+//     "jsx": "react-jsx"
+//   },
+//   "include": [
+//     "src"
+//   ]
+// }
+
 {
-    "compilerOptions": {
-      "target": "ES2020",
-      "module": "ES2020",
-      "moduleResolution": "Node",
-      "esModuleInterop": true,
-      "lib": ["DOM", "ES2020"],
-      "jsx": "react",
-      "strict": true,
-      "sourceMap": true
-    },
-    "ts-node": {
-      "compilerOptions": {
-        "target": "ES2015",
-        "module": "CommonJS"
-      }
-    }
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["esnext","dom"],
+    "outDir": "build",
+    "rootDir": "src",
+    "jsx": "react",
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   }
+}

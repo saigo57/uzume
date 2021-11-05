@@ -1,0 +1,11 @@
+@import '../../scss/base.scss';
+
+.info-title {
+    float: left;
+    color: $main-font-color;
+    font-size: 13px;
+    width: 65px;
+    padding: 5px 0;
+    user-select: none;
+    list-style: none;
+}
