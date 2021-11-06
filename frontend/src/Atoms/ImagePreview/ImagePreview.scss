@@ -1,0 +1,30 @@
+@import '../../scss/base.scss';
+
+.thumbnail {
+    position: relative;
+    margin: 6px;
+    width: 120px;
+    height: 120px;
+    & > img {
+      width: 120px;
+      height: 120px;
+      border-radius: 4px;
+      user-select: none;
+    }
+    & > .original-size-icon {
+      position: absolute;
+      background-color: grey;
+      right: 0;
+      bottom: 0;
+      padding-right: 5px;
+      padding-bottom: 5px;
+      width: 16px;
+      height: 16px;
+      opacity: 0.8;
+      & > svg {
+        color: $main-font-color;
+        margin-left: 4px;
+        margin-top: 4px;
+      }
+    }
+  }
