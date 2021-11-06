@@ -1,0 +1,9 @@
+@import '../../scss/base.scss';
+
+.main-header-area {
+    position: relative;
+    width: 100%;
+    height: 38px;
+    border-bottom: solid 2px $light-background-color;
+    background-color: $main-background-color;
+}

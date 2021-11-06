@@ -1,0 +1,12 @@
+@import '../../scss/base.scss';
+
+#main-menu {
+    display: block;
+    height: calc(100% - $footer-height);
+    width: 200px;
+    flex-basis: auto;
+    left: 0;
+    margin: 0;
+    background-color: $main-background-color;
+}
+

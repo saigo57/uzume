@@ -1,0 +1,23 @@
+@import '../../scss/base.scss';
+
+.info-area {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.info-item {
+    display: block;
+    padding: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+    list-style: none;
+  
+    &-block-separator {
+      width: 100%;
+      height: 1px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      background-color: $light-background-color;
+    }
+}
