@@ -1,0 +1,8 @@
+@import '../../scss/base.scss';
+
+.split-bar {
+  height: calc(100% - $footer-height);
+  width: 5px;
+  cursor: col-resize;
+  background-color: $edge-gray;
+}
