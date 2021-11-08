@@ -118,10 +118,10 @@ const renderer: Configuration = {
      * HTMLファイルを出力するプラグイン
      */
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      template: './src/view/app.html',
       minify: !isDev,
       inject: 'body',
-      filename: 'index.html',
+      filename: 'app.html',
       scriptLoading: 'blocking',
     }),
     new MiniCssExtractPlugin(),

@@ -1,0 +1,34 @@
+@import 'const';
+
+.server-list {
+  .server-icon {
+    display: block;
+    width: 36px;
+    height: 36px;
+    padding: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    user-select: none;
+    border: 3px solid $edge-gray;
+    transition: 0.15s;
+    cursor: pointer;
+    &:hover, &.selected {
+      border: 3px solid #ccc;
+    }
+
+    &:nth-of-type(1) {
+      margin-top: 1px;
+    }
+    & > .fa-plus {
+      display: inline-block;
+      color: white;
+      margin: auto;
+      text-align: center;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+    }
+  }
+}
