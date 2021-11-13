@@ -1,0 +1,45 @@
+@import '../../../scss/const.scss';
+
+// TODO: imageSidebar固有のプロパティを切り出す
+
+.tag {
+  display: inline-flex;
+  height: 20px;
+  max-width: calc(100% - 20px);
+  margin: 2px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 10px;
+  padding-right: 6px;
+  border-radius: 10px;
+  background-color: #666;
+  color: $main-font-color;
+  user-select: none;
+  line-height: 20px;
+  cursor: pointer;
+
+  & > svg {
+    display: inline;
+    margin-top: 3px;
+    margin-left: 2px;
+    padding: 1px;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.15s;
+    &:hover {
+      background-color: #444;
+    }
+  }
+
+  .tag-text {
+    margin-top: 2px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    width: calc(100% - 12px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

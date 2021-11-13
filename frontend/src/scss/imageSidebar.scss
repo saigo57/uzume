@@ -1,0 +1,98 @@
+@import 'const';
+
+.image-side-bar {
+  .side-bar-title {
+    position: relative;
+    background-color: $edge-gray;
+    height: 25px;
+    border-top: solid 2px $edge-gray;
+    border-radius: 1px 1px 0 0;
+
+    &:nth-of-type(1) {
+      border-top: none;
+    }
+
+    &-text {
+      position: absolute;
+      height: 25px;
+      width: 60px;
+      padding-top: 8px;
+      padding-left: 14px;
+      padding-right: 14px;
+      background-color: $main-background-color;
+      color: $main-font-color;
+      user-select: none;
+    }
+  }
+
+  .tag-search {
+    width: calc(100% - 20px);
+    margin-top: 20px;
+    margin-bottom: 5px;
+    margin-right: 10px;
+    margin-left: 10px;
+    height: 20px;
+    background-color: $light-background-color;
+    border-radius: 10px;
+    border: solid 1px $main-font-color;
+  }
+  .tagged-area {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    height: 150px;
+    align-content: flex-start;
+  }
+
+  .info-area {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  .info-item {
+    display: block;
+    padding: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+    list-style: none;
+
+    &-block-separator {
+      width: 100%;
+      height: 1px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      background-color: $light-background-color;
+    }
+  }
+  .info-title {
+    float: left;
+    color: $main-font-color;
+    font-size: 13px;
+    width: 65px;
+    padding: 5px 0;
+    user-select: none;
+    list-style: none;
+  }
+  .info-body {
+    display: block;
+    float: right;
+    color: $main-font-color;
+    font-size: 13px;
+    line-height: 16px;
+    width: calc(100% - 65px - 14px);
+    padding: 5px 5px;
+    background-color: #666;
+    border-radius: 4px;
+
+    &.editable {
+      user-select: text;
+    }
+    &.freezed {
+      user-select: none;
+    }
+    &.memo {
+      resize: none;
+      height: 50px;
+    }
+  }
+}
