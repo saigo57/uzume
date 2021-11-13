@@ -7,12 +7,16 @@ import (
 )
 
 type imageCache struct {
-	Images      []*Image
-	IdToImages  map[string]*Image   // map[image_id]
-	TagToImages map[string][]*Image // map[tag_id]
+	SortedImages []*Image
+	IdToImages   map[string]*Image   // map[image_id]
+	TagToImages  map[string][]*Image // map[tag_id]
 }
 
 var g_image_cache = make(map[string]*imageCache) // map[workspace_id]
+
+func ResetImageCache() {
+	g_image_cache = make(map[string]*imageCache)
+}
 
 func getImageCache(workspace_id string) *imageCache {
 	if g_image_cache[workspace_id] == nil {
@@ -42,7 +46,7 @@ func getAllImageCache(workspace *Workspace) ([]*Image, error) {
 		}
 	}
 
-	return g_image_cache[workspace.Id].Images, nil
+	return g_image_cache[workspace.Id].SortedImages, nil
 }
 
 func getImageCacheByTagId(workspace *Workspace, tag_id string) ([]*Image, error) {
@@ -65,12 +69,12 @@ func createImageCache(image *Image) {
 	}
 
 	image_cache := getImageCache(image.Workspace.Id)
-
-	image_cache.Images = append(image_cache.Images, image)
 	image_cache.IdToImages[image.Id] = image
 	for _, tag_id := range image.Tags {
 		image_cache.TagToImages[tag_id] = append(image_cache.TagToImages[tag_id], image)
 	}
+
+	resetSortedImages(image.Workspace)
 }
 
 func updateImageCache(image *Image, prev_image *Image) {
@@ -124,6 +128,17 @@ func updateImageCache(image *Image, prev_image *Image) {
 	}
 }
 
+func resetSortedImages(workspace *Workspace) error {
+	g_image_cache[workspace.Id].SortedImages = []*Image{}
+	for _, v := range g_image_cache[workspace.Id].IdToImages {
+		g_image_cache[workspace.Id].SortedImages = append(g_image_cache[workspace.Id].SortedImages, v)
+	}
+
+	sortImageList(g_image_cache[workspace.Id].SortedImages)
+
+	return nil
+}
+
 func refleshImageCache(workspace *Workspace) error {
 	image := NewImage(workspace)
 	all_image_files, err := ioutil.ReadDir(image.ImagesDirPath())
@@ -132,6 +147,7 @@ func refleshImageCache(workspace *Workspace) error {
 	}
 
 	cache := new(imageCache)
+	cache.IdToImages = make(map[string]*Image)
 	cache.TagToImages = make(map[string][]*Image)
 
 	for _, f := range all_image_files {
@@ -146,13 +162,14 @@ func refleshImageCache(workspace *Workspace) error {
 			return err
 		}
 
-		cache.Images = append(cache.Images, image)
+		cache.IdToImages[image.Id] = image
 		for _, t := range image.Tags {
 			cache.TagToImages[t] = append(cache.TagToImages[t], image)
 		}
 	}
 
 	g_image_cache[workspace.Id] = cache
+	resetSortedImages(workspace)
 
 	return nil
 }

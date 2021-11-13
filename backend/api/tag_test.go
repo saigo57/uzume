@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"uzume_backend/fixture"
 	"uzume_backend/model"
 	"uzume_backend/test_helper"
 
@@ -344,7 +343,7 @@ func TestDeleteTags_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -371,7 +370,7 @@ func TestDeleteTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -398,7 +397,7 @@ func TestPostFavoriteTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -422,7 +421,7 @@ func TestPostFavoriteTag_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -454,7 +453,7 @@ func TestDeleteFavoriteTag_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")
@@ -487,7 +486,7 @@ func TestDeleteFavoriteTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 
 	tags := model.NewTags(workspace)
 	tag, _ := tags.CreateNewTag("タグ")

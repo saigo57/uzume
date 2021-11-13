@@ -82,6 +82,11 @@ func (this *Image) Save() error {
 		}
 
 		// TODO: 意図しないデータを変更しようとした場合は、差分キャッシュ更新ではなくキャッシュを破棄する
+	} else {
+		default_time_border, _ := time.Parse("2006/01/02 15:04:05.000", "0002/01/01 00:00:00.000")
+		if this.CreatedAt.Before(default_time_border) {
+			this.CreatedAt = time.Now()
+		}
 	}
 
 	json_accessor := NewJsonAccessor()
@@ -162,10 +167,12 @@ func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buff
 	return this.Save()
 }
 
-func (this *Image) SearchImages(tag_list []string, search_type string, page int) ([]*Image, error) {
-	pagination := func(image_list []*Image) []*Image {
-		sort.Slice(image_list, func(i, j int) bool { return image_list[i].CreatedAt.After(image_list[j].CreatedAt) })
+func sortImageList(image_list []*Image) {
+	sort.Slice(image_list, func(i, j int) bool { return image_list[i].CreatedAt.After(image_list[j].CreatedAt) })
+}
 
+func SearchImages(workspace *Workspace, tag_list []string, search_type string, page int) ([]*Image, error) {
+	pagination := func(image_list []*Image) []*Image {
 		begin := (page - 1) * PAGENATION_PER
 		if len(image_list) < begin {
 			begin = len(image_list)
@@ -180,7 +187,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string, page int)
 
 	// tag指定なしの場合全画像を返す
 	if len(tag_list) == 0 {
-		images, err := getAllImageCache(this.Workspace)
+		images, err := getAllImageCache(workspace)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +201,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string, page int)
 		s := make(map[*Image]struct{})
 		for _, tag_id := range tag_list {
 			// タグに紐づくimageリストを取得
-			image_list, err := getImageCacheByTagId(this.Workspace, tag_id)
+			image_list, err := getImageCacheByTagId(workspace, tag_id)
 			if err != nil {
 				return nil, err
 			}
@@ -212,7 +219,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string, page int)
 		s := make(map[*Image]int)
 		for _, tag_id := range tag_list {
 			// タグに紐づくimageリストを取得
-			image_list, err := getImageCacheByTagId(this.Workspace, tag_id)
+			image_list, err := getImageCacheByTagId(workspace, tag_id)
 			if err != nil {
 				return nil, err
 			}
@@ -236,6 +243,7 @@ func (this *Image) SearchImages(tag_list []string, search_type string, page int)
 		return nil, errors.New("Unknown search type.")
 	}
 
+	sortImageList(ans)
 	return pagination(ans), nil
 }
 

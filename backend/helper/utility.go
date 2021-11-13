@@ -85,6 +85,11 @@ func LoggedinWrokspaceId(c echo.Context) string {
 
 func MakeRouteDir(path string) error {
 	dir_path := filepath.Dir(path)
+
+	return MakeDir(dir_path)
+}
+
+func MakeDir(dir_path string) error {
 	if !DirExists(dir_path) {
 		if err := os.Mkdir(dir_path, 0777); err != nil {
 			return err
