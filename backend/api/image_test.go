@@ -11,7 +11,6 @@ import (
 	"os"
 	"testing"
 	"time"
-	"uzume_backend/fixture"
 	"uzume_backend/helper"
 	"uzume_backend/model"
 	"uzume_backend/test_helper"
@@ -25,10 +24,10 @@ func TestGetImages_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -66,17 +65,19 @@ func TestGetImages_success(t *testing.T) {
 // 画像一覧の取得時にページネーション・ソートされること
 func TestGetImagesPagenationAndSort_success(t *testing.T) {
 	test_helper.InitializeTest()
+	model.ResetImageCache()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	create_image := func(author string, created_at time.Time) {
-		image, err := fixture.CreateImage(workspace, "testimage1.png")
+		image, err := model.FixtureCreateImage(workspace, "testimage1.png")
+		image.CreatedAt = created_at
+		image.Save()
 		assert.NoError(t, err)
 		image.Memo = "テストメモ"
 		image.Author = author
-		image.CreatedAt = created_at
 		image.AddTag(model.SYSTEM_TAG_UNCATEGORIZED)
 		image.Save()
 	}
@@ -142,10 +143,10 @@ func TestGetImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -175,10 +176,10 @@ func TestPatchImages_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -213,10 +214,10 @@ func TestPatchImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -246,10 +247,10 @@ func TestGetImageFile_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -288,10 +289,10 @@ func TestGetImageFile_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -320,7 +321,7 @@ func TestPostImages_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
@@ -350,7 +351,7 @@ func TestPostImages_success(t *testing.T) {
 	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images, err := image.SearchImages([]string{}, "or", 1)
+	images, err := model.SearchImages(workspace, []string{}, "or", 1)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
@@ -374,7 +375,7 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	multipart_body := new(bytes.Buffer)
@@ -395,7 +396,7 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 	workspace.RefleshCache()
 	image := model.NewImage(workspace)
 	image.Load()
-	images, err := image.SearchImages([]string{}, "or", 1)
+	images, err := model.SearchImages(workspace, []string{}, "or", 1)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(images))
 	assert.Equal(t, "testimage1", images[0].FileName)
@@ -420,7 +421,7 @@ func TestPostImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
@@ -453,7 +454,7 @@ func TestPatchImageTag_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, err := model.GenerateAccessToken(workspace.Id)
 	assert.NoError(t, err)
 
@@ -463,7 +464,7 @@ func TestPatchImageTag_success(t *testing.T) {
 	err = tags.Save()
 	assert.NoError(t, err)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -534,7 +535,7 @@ func TestPatchImageTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
@@ -542,7 +543,7 @@ func TestPatchImageTag_fail(t *testing.T) {
 	err := tags.Save()
 	assert.NoError(t, err)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -574,7 +575,7 @@ func TestDeleteImageTag_success(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	token, err := model.GenerateAccessToken(workspace.Id)
 	assert.NoError(t, err)
 
@@ -584,7 +585,7 @@ func TestDeleteImageTag_success(t *testing.T) {
 	err = tags.Save()
 	assert.NoError(t, err)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"
@@ -620,7 +621,7 @@ func TestDeleteImageTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
 	router := RouteInit()
 
-	_, workspace := fixture.SetupOneWorkspace()
+	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
 
 	tags := model.NewTags(workspace)
@@ -629,7 +630,7 @@ func TestDeleteImageTag_fail(t *testing.T) {
 	err := tags.Save()
 	assert.NoError(t, err)
 
-	image, err := fixture.CreateImage(workspace, "testimage1.png")
+	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
 	image.Memo = "テストメモ"
 	image.Author = "テスト作者"

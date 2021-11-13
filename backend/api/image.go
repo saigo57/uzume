@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 	"uzume_backend/helper"
 	"uzume_backend/model"
 
@@ -46,8 +45,7 @@ func GetImages() echo.HandlerFunc {
 			page = 1
 		}
 
-		image := model.NewImage(workspace)
-		images, err := image.SearchImages(tag_list, tag_search_type, page)
+		images, err := model.SearchImages(workspace, tag_list, tag_search_type, page)
 		if err != nil {
 			if err.Error() == "Unknown search type." {
 				return c.JSON(http.StatusBadRequest, helper.ErrorMessage{ErrorMessage: err.Error()})
@@ -169,7 +167,6 @@ func PostImages() echo.HandlerFunc {
 
 		image.Memo = memo
 		image.Author = author
-		image.CreatedAt = time.Now()
 		if err := image.Save(); err != nil {
 			return err
 		}
