@@ -1,0 +1,72 @@
+@import 'const';
+
+.modal-form {
+  .title {
+    font-size: 1.2em;
+    margin-bottom: 16px;
+  }
+  .content {
+    font-size: 1em;
+    margin-bottom: 15px;
+  }
+  .text-box {
+    background-color: #444;
+    border: none;
+    height: 22px;
+    width: 300px;
+    color: $main-font-color;
+    border-radius: 2px;
+  }
+  .input-block {
+    margin-bottom: 10px;
+  }
+  .show-block {
+    margin-bottom: 10px;
+  }
+  .show-value {
+    padding: 4px;
+    font-size: 1em;
+    background-color: $verylight-background-color;
+    border-radius: 4px;
+  }
+  .label-name {
+    font-size: 0.9em;
+  }
+  .close-button {
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin-top: -8px;
+    margin-left: auto;
+    margin-right: -8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    &:hover {
+      color: $hover-font-color;
+    }
+  }
+  .form-buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .button-area {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .button {
+    display: block;
+    height: 25px;
+    width: 100px;
+    border-radius: 2px;
+    border: none;
+    color: $main-font-color;
+    background-color: $light-background-color;
+    cursor: pointer;
+    &:hover {
+      background-color: $verylight-background-color;
+    }
+  }
+  .button:nth-child(n + 2) {
+    margin-left: 10px;
+  }
+}
