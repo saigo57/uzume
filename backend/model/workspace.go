@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -26,7 +27,7 @@ func FindWorkspaceById(workspace_id string) (*Workspace, error) {
 	}
 	ok, workspace_path := config.FindWorkspacePath(workspace_id)
 	if !ok {
-		return nil, errors.New("workspaceが見つかりませんでした")
+		return nil, errors.New(fmt.Sprintf("workspaceが見つかりませんでした[%s]", workspace_id))
 	}
 
 	workspace := new(Workspace)
