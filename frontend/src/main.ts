@@ -1,6 +1,7 @@
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
 import './mainProc/serverList';
+import './mainProc/images';
 
 function createWindow () {
   const options: Electron.BrowserWindowConstructorOptions = {
