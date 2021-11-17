@@ -74,9 +74,9 @@ export default class Image {
     }
   }
 
-  public async getList(): Promise<ResImages> {
+  public async getList(page: number): Promise<ResImages> {
     try {
-      let res = await this.authorizeAxios().get('/')
+      let res = await this.authorizeAxios().get('/', { params: { page: page} })
       return JSON.parse(JSON.stringify(res.data)) as ResImages
     } catch (error) {
       console.log(`image get error [${error}]`)
@@ -94,7 +94,7 @@ export default class Image {
         responseType: 'arraybuffer',
         headers: {
           'Authorization': authorizeString,
-          'Content-Type': 'image/jpg'
+          'Content-Type': 'image'
         },
       }).get()
       return res.data.toString('base64')
