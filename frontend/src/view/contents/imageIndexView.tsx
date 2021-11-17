@@ -15,29 +15,73 @@ type ImageIndexViewProps = {
   workspaceId: string
 };
 
+type ImageList = {
+  page: number
+  images: ImageInfo[]
+}
+
 export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isDragOverState, setIsDragOver] = useState(false);
-  const [imageInfoState, setImageInfo] = useState([] as ImageInfo[]);
+  const [imageList, setImageList] = useState({page: 0, images: []} as ImageList);
+  const [nextPageRequestableState, setNextPageRequestable] = useState(false);
 
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
-      const showImages: ShowImages = { workspaceId: props.workspaceId }
-      window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+      setImageList({images: [], page: 0 })
+      setNextPageRequestable(false)
+      requestShowImages(1)
     }
   }, [props.workspaceId]);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.SHOW_IMAGES_REPLY, (_e, arg) => {
-      let imageInfos = JSON.parse(arg) as ImageInfos
-      setImageInfo(imageInfos.images)
+    if ( imageList.page > 0 ) setNextPageRequestable(true)
+  }, [imageList.page]);
 
-      imageInfos.images.forEach((image) => {
-        let reqImage: RequestImage = {
-          workspaceId: imageInfos.workspaceId,
-          imageId: image.image_id,
-          isThumbnail: true,
+  useEffect(() => {
+    window.api.on(ImagesIpcId.SHOW_IMAGES_REPLY, (_e, arg) => {
+      let rcvImageInfos = JSON.parse(arg) as ImageInfos
+
+      if ( rcvImageInfos.images.length == 0 ) {
+        setNextPageRequestable(false);
+        return;
+      }
+
+      setImageList(prevState => {
+        const requestImage = (newImages: ImageInfo[]) =>{
+          newImages.forEach((image) => {
+            let reqImage: RequestImage = {
+              workspaceId: rcvImageInfos.workspaceId,
+              imageId: image.image_id,
+              isThumbnail: true,
+            }
+            window.api.send(ImagesIpcId.REQUEST_IMAGE, JSON.stringify(reqImage));
+          });
         }
-        window.api.send(ImagesIpcId.REQUEST_IMAGE, JSON.stringify(reqImage));
+
+        if ( rcvImageInfos.page == 1 ) {
+          // TODO:スクロール量もリセットする必要あり？
+          requestImage(rcvImageInfos.images)
+          return {
+            images: rcvImageInfos.images,
+            page: 1,
+          }
+        }
+
+        let addImages: ImageInfo[] = []
+        var currImages: { [image_id: string]: boolean; } = {};
+        for (let i = 0; i < prevState.images.length; i++) {
+          currImages[prevState.images[i].image_id] = true
+        }
+        for (let i = 0; i < rcvImageInfos.images.length; i++) {
+          if ( rcvImageInfos.images[i].image_id in currImages ) continue;
+          addImages.push(rcvImageInfos.images[i]);
+        }
+
+        requestImage(addImages)
+        return {
+          images: [...prevState.images, ...addImages],
+          page: rcvImageInfos.page,
+        }
       });
     });
   }, []);
@@ -52,6 +96,11 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       }
     });
   }, []);
+
+  const requestShowImages = (page: number) => {
+    const showImages: ShowImages = { workspaceId: props.workspaceId, page: page }
+    window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+  };
 
   const handleDragOver = (e: any) => {
     e.stopPropagation();
@@ -80,10 +129,31 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if ( nextPageRequestableState ) {
+            setNextPageRequestable(false)
+            requestShowImages(imageList.page + 1)
+          }
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    if (ref.current === null) return;
+
+    observer.unobserve(ref.current)
+    if ( nextPageRequestableState ) observer.observe(ref.current);
+  });
+
   return (
     <div className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} >
       {
-        imageInfoState.map((image) => {
+        imageList.images.map((image) => {
           return (
             <div className="thumbnail">
               <img id={`image-${image.image_id}`}></img>
@@ -92,6 +162,13 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
           )
         })
       }
+      {(()=>{
+        if ( nextPageRequestableState ) {
+          return (<div id="infinite-scroll-end-marker" ref={ref} ></div>);
+        } else {
+          return;
+        }
+      })()}
     </div>
   );
 }

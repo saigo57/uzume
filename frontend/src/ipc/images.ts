@@ -14,6 +14,7 @@ export type ImageFiles = {
 
 export type ShowImages = {
   workspaceId: string
+  page: number
 }
 
 export type RequestImage = {
