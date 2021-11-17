@@ -8,7 +8,7 @@ import { IpcId as CurrWsIpcId, CurrentWorkspace } from "../ipc/currentWorkspace"
 export function App() {
   const [currentWorkspaceState, setCurrentWorkspace] = useState<CurrentWorkspace>({
     workspace_name: '',
-    workspace_id: ''
+    workspace_id: '',
   });
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export function App() {
       <ServerList />
       <MainMenu workspaceName={currentWorkspaceState.workspace_name} />
       <div id="before-main" className="split-bar"></div>
-      <ContentsArea />
+      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} />
       <Footer />
     </div>
   );

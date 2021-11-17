@@ -8,6 +8,7 @@ import {
 } from '../ipc/serverList';
 import BackendConnector from '../backendConnector/backendConnector';
 import { changeCurrentWorkspace } from './currWorkspace'
+import { showImagesReply } from './images'
 const path = require('path');
 
 let g_workspaceList: ServerInfo[] = []
@@ -36,10 +37,6 @@ ipcMain.on(IpcId.SELECT_NEW_WORKSPACE_DIR, (e, _arg) => {
 // ワークスペースを新規作成
 ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
   let wsInfo: CreateWorkspaceInfo = JSON.parse(arg)
-  console.log(wsInfo.name)
-  console.log(wsInfo.dirName)
-  console.log(wsInfo.dirPath)
-
   BackendConnector.Workspace.create(
     wsInfo.name,
     path.join(wsInfo.dirPath, wsInfo.dirName + ".uzume")
@@ -74,14 +71,15 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
 ipcMain.on(IpcId.DELETE_WORKSPACE, (e, arg) => {
   let msg: ShowContextMenu = JSON.parse(arg)
 
-  BackendConnector.Workspace.delete(msg.workspaceId).then(() => {
-    fetchWorkspaceList(e, null as any)
-  });
+  BackendConnector.workspace(msg.workspaceId, (ws) => {
+    ws.delete().then(() => {
+      fetchWorkspaceList(e, null as any)
+    });
+  })
 });
 
 // selectWorkspaceIdをnullにすると一番上を選択
 function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string) {
-  console.log('fetchWorkspaceList')
   BackendConnector.Workspace.getList().then((workspaceList) => {
     g_workspaceList = workspaceList.map((w) => {
       return {
@@ -121,6 +119,7 @@ function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
 
   replyWorkspaceList(e)
   callChangeCurrentWorkspace(e)
+  showImagesReply(e, workspace_id)
 }
 
 function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {

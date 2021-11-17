@@ -46,6 +46,10 @@ func getAllImageCache(workspace *Workspace) ([]*Image, error) {
 		}
 	}
 
+	if _, ok := g_image_cache[workspace.Id]; !ok {
+		return []*Image{}, nil
+	}
+
 	return g_image_cache[workspace.Id].SortedImages, nil
 }
 
@@ -54,6 +58,10 @@ func getImageCacheByTagId(workspace *Workspace, tag_id string) ([]*Image, error)
 		if err := refleshImageCache(workspace); err != nil {
 			return nil, err
 		}
+	}
+
+	if _, ok := g_image_cache[workspace.Id]; !ok {
+		return []*Image{}, nil
 	}
 
 	return g_image_cache[workspace.Id].TagToImages[tag_id], nil
@@ -143,6 +151,10 @@ func refleshImageCache(workspace *Workspace) error {
 	image := NewImage(workspace)
 	all_image_files, err := ioutil.ReadDir(image.ImagesDirPath())
 	if err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			destroyImageCache(workspace)
+			return nil
+		}
 		return err
 	}
 

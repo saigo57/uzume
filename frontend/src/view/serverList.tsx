@@ -49,7 +49,6 @@ export const ServerList = () => {
   useEffect(() => {
     window.api.on(serverListIpcId.FETCH_WORKSPACE_LIST_REPLY, (_e, arg) => {
       const serverList = JSON.parse(arg) as ServerInfo[]
-      console.log(serverList)
       setServerList(serverList);
     });
   }, []);

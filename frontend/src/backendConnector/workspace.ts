@@ -1,4 +1,5 @@
 const axiosBase = require('axios');
+import Image from './image'
 import { Buffer } from 'buffer'
 
 export type ResLogin = {
@@ -16,6 +17,21 @@ export type ResWorkspace = {
 }
 
 export default class Workspace {
+  workspaceId: string
+  accessToken: string
+  public image: Image
+
+  constructor(workspaceId: string, accessToken: string) {
+    this.workspaceId = workspaceId
+    this.accessToken = accessToken
+    this.image = new Image(workspaceId, accessToken)
+  }
+
+  static async createInstance(workspaceId: string): Promise<Workspace> {
+    let accessToken = await this.login(workspaceId)
+    return new Workspace(workspaceId, accessToken)
+  }
+
   static noauthorizeAxios() {
     let axios = axiosBase.create({
       baseURL: 'http://localhost:1323/api/v1/workspaces',
@@ -24,37 +40,6 @@ export default class Workspace {
       },
       responseType: 'json'
     });
-    axios.interceptors.request.use((request:any) => {
-      console.log('request: ', request)
-      return request
-    });
-    axios.interceptors.response.use((response:any) => {
-      console.log('response: ', response.data)
-      return response
-    });
-    return axios;
-  }
-
-  static async login(workspaceId: string): Promise<string> {
-    const res = await this.noauthorizeAxios().post('/login', {workspace_id: workspaceId});
-    let login = JSON.parse(JSON.stringify(res.data)) as ResLogin
-    return login.access_token
-  }
-
-  static async authorizeAxios(workspaceId: string) {
-    // TODO: accessTokenをどこかにキャッシュする
-    let accessToken = await this.login(workspaceId)
-    let encodedString = Buffer.from(`${workspaceId}:${accessToken}`).toString('base64')
-    let authorizeString = `Basic ${encodedString}`
-
-    let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/workspaces',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': authorizeString
-      },
-      responseType: 'json'
-    })
     axios.interceptors.request.use((request:any) => {
       console.log('request: ', request)
       return request
@@ -90,11 +75,38 @@ export default class Workspace {
     return null as any
   }
 
-  static async delete(workspaceId: string) {
+  static async login(workspaceId: string): Promise<string> {
+    const res = await this.noauthorizeAxios().post('/login', {workspace_id: workspaceId});
+    let login = JSON.parse(JSON.stringify(res.data)) as ResLogin
+    return login.access_token
+  }
+
+  private authorizeAxios() {
+    let encodedString = Buffer.from(`${this.workspaceId}:${this.accessToken}`).toString('base64')
+    let authorizeString = `Basic ${encodedString}`
+
+    let axios = axiosBase.create({
+      baseURL: 'http://localhost:1323/api/v1/workspaces',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authorizeString
+      },
+      responseType: 'json'
+    })
+    axios.interceptors.request.use((request:any) => {
+      console.log('request: ', request)
+      return request
+    });
+    axios.interceptors.response.use((response:any) => {
+      console.log('response: ', response.data)
+      return response
+    });
+    return axios;
+  }
+
+  public async delete() {
     try {
-      let axios = await this.authorizeAxios(workspaceId)
-      const res = axios.delete('/')
-      return res
+      return await this.authorizeAxios().delete('/')
     } catch (error) {
       console.log(`workspace delete error [${error}]`)
     }
