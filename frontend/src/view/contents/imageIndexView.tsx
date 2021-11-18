@@ -13,6 +13,8 @@ import {
 
 type ImageIndexViewProps = {
   workspaceId: string
+  onImageDoubleClick: (imageId: string) => void
+  hide: boolean
 };
 
 type ImageList = {
@@ -54,7 +56,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
               imageId: image.image_id,
               isThumbnail: true,
             }
-            window.api.send(ImagesIpcId.REQUEST_IMAGE, JSON.stringify(reqImage));
+            window.api.send(ImagesIpcId.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage));
           });
         }
 
@@ -87,12 +89,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.REQUEST_IMAGE_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.REQUEST_THUMB_IMAGE_REPLY, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
 
       let img: any = document.getElementById(`image-${imageData.imageId}`);
       if ( img ) {
-        img.src = "data:image/jpg;base64," + imageData.imageBase64;
+        img.src = "data:image;base64," + imageData.imageBase64;
       }
     });
   }, []);
@@ -151,11 +153,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   });
 
   return (
-    <div className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} >
+    <div className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''} ${props.hide ? 'hide' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} >
       {
         imageList.images.map((image) => {
           return (
-            <div className="thumbnail">
+            <div className="thumbnail"
+              onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}>
               <img id={`image-${image.image_id}`}></img>
               <div className="original-size-icon"><FontAwesomeIcon icon={faBars} /></div>
             </div>

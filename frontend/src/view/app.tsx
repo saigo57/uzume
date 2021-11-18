@@ -11,6 +11,16 @@ export function App() {
     workspace_id: '',
   });
 
+  // イベント
+  const [showIndexImageEvent, setShowIndexImageEvent] = useState(0)
+  const raiseShowIndexImageEvent = () => {
+    setShowIndexImageEvent(prev => prev + 1)
+  };
+
+  useEffect(() => {
+    raiseShowIndexImageEvent();
+  }, [currentWorkspaceState]);
+
   useEffect(() => {
     window.api.on(CurrWsIpcId.GET_CURRENT_WORKSPACE_REPLY, (_e, arg) => {
       const serverList = JSON.parse(arg) as CurrentWorkspace
@@ -18,12 +28,18 @@ export function App() {
     });
   }, []);
 
+  const onMenuAction = (action: string) => {
+    switch ( action ) {
+      case 'home_click': raiseShowIndexImageEvent(); break;
+    }
+  }
+
   return (
     <div className="container">
       <ServerList />
-      <MainMenu workspaceName={currentWorkspaceState.workspace_name} />
+      <MainMenu workspaceName={currentWorkspaceState.workspace_name} onAction={onMenuAction} />
       <div id="before-main" className="split-bar"></div>
-      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} />
+      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} showIndexImageEvent={showIndexImageEvent} />
       <Footer />
     </div>
   );

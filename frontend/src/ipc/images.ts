@@ -3,8 +3,10 @@ export class IpcId {
   static readonly UPLOAD_IMAGES: string = IpcId.NAME_SPACE + "upload-images";
   static readonly SHOW_IMAGES: string = IpcId.NAME_SPACE + "show-images";
   static readonly SHOW_IMAGES_REPLY: string = IpcId.NAME_SPACE + "show-images-reply";
-  static readonly REQUEST_IMAGE: string = IpcId.NAME_SPACE + "request-image";
-  static readonly REQUEST_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-reply";
+  static readonly REQUEST_THUMB_IMAGE: string = IpcId.NAME_SPACE + "request-thumb-image";
+  static readonly REQUEST_THUMB_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-thumb-reply";
+  static readonly REQUEST_ORIG_IMAGE: string = IpcId.NAME_SPACE + "request-orig-image";
+  static readonly REQUEST_ORIG_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-orig-reply";
 }
 
 export type ImageFiles = {
