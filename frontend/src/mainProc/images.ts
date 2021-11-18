@@ -26,18 +26,27 @@ ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
   showImagesReply(e, showImages.workspaceId, showImages.page)
 });
 
-ipcMain.on(IpcId.REQUEST_IMAGE, (e, arg) => {
+ipcMain.on(IpcId.REQUEST_THUMB_IMAGE, (e, arg) => {
   let reqImage: RequestImage = JSON.parse(arg)
+  getImage(e, reqImage, IpcId.REQUEST_THUMB_IMAGE_REPLY)
+});
+
+ipcMain.on(IpcId.REQUEST_ORIG_IMAGE, (e, arg) => {
+  let reqImage: RequestImage = JSON.parse(arg)
+  getImage(e, reqImage, IpcId.REQUEST_ORIG_IMAGE_REPLY)
+});
+
+function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: string) {
   BackendConnector.workspace(reqImage.workspaceId, (ws) => {
     ws.image.getImage(
       reqImage.imageId,
       reqImage.isThumbnail ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
     ).then((imageBase64) => {
       let imageData: ImageData = { imageId: reqImage.imageId, imageBase64: imageBase64  }
-      e.reply(IpcId.REQUEST_IMAGE_REPLY, JSON.stringify(imageData));
+      e.reply(replyId, JSON.stringify(imageData));
     })
   });
-});
+}
 
 export function showImagesReply(e: Electron.IpcMainEvent, workspaceId: string, page: number) {
   BackendConnector.workspace(workspaceId, (ws) => {

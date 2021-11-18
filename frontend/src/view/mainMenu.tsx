@@ -6,18 +6,23 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 
 type MainMenuProps = {
-  workspaceName: string;
+  workspaceName: string
+  onAction: (action: string) => void
 };
 
 export const MainMenu:React.VFC<MainMenuProps> = (props) => {
   const [FavoriteTagListState, setFavoriteTagList] = useState(['タグ1', 'タグ2', 'タグ3', 'タグ4']);
+
+  const onHomeClick = () => {
+    if ( props.onAction ) props.onAction('home_click');
+  };
 
   return (
     <section id="main-menu" className="main-menu">
       <h1 className="menu-title">
         {props.workspaceName}
       </h1>
-      <h1 className="menu-title clickable">
+      <h1 className="menu-title clickable" onClick={onHomeClick}>
         <FontAwesomeIcon icon={faHome} /><div className="menu-title-text">Home</div>
       </h1>
       <h1 className="menu-title">
