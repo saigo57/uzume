@@ -107,8 +107,9 @@ export default class Workspace {
   public async delete() {
     try {
       return await this.authorizeAxios().delete('/')
-    } catch (error) {
-      console.log(`workspace delete error [${error}]`)
+    } catch (e) {
+      console.log(`workspace delete error [${e}]`)
+      throw e
     }
   }
 };
