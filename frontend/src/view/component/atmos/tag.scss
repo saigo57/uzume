@@ -11,12 +11,17 @@
   padding-bottom: 0;
   padding-left: 10px;
   padding-right: 6px;
+  border: 1px solid #777;
   border-radius: 10px;
   background-color: #666;
   color: $main-font-color;
   user-select: none;
   line-height: 20px;
   cursor: pointer;
+
+  &.added {
+    background-color: rgb(78, 108, 160);
+  }
 
   & > svg {
     display: inline;
@@ -37,9 +42,12 @@
     margin-top: 2px;
     font-size: 12px;
     letter-spacing: 1px;
-    width: calc(100% - 12px);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    width: 100%;
+    &.disp-delete {
+      width: calc(100% - 12px);
+    }
   }
 }
