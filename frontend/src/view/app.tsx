@@ -39,7 +39,9 @@ export function App() {
       <ServerList />
       <MainMenu workspaceName={currentWorkspaceState.workspace_name} onAction={onMenuAction} />
       <div id="before-main" className="split-bar"></div>
-      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} showIndexImageEvent={showIndexImageEvent} />
+      <ContentsArea
+        workspaceId={currentWorkspaceState.workspace_id}
+        showIndexImageEvent={showIndexImageEvent} />
       <Footer />
     </div>
   );

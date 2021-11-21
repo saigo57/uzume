@@ -1,3 +1,4 @@
+// BC = BackendConnector
 import BCWorkspace from './workspace';
 
 export default class BackendConnector {
@@ -6,7 +7,6 @@ export default class BackendConnector {
   static workspaceList: { [key: string]: BCWorkspace; } = {}
 
   static workspace(workspaceId: string, callback: (workspace: BCWorkspace) => void) {
-
     // accessTokenがキャッシュされていたらそれを使う
     if ( workspaceId in this.workspaceList ) {
       let unauthorize = false;

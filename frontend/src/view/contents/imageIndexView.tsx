@@ -13,6 +13,7 @@ import {
 
 type ImageIndexViewProps = {
   workspaceId: string
+  onChangeSelectedImages: (imageIds: string[]) => void
   onImageDoubleClick: (imageId: string) => void
   hide: boolean
 };
@@ -26,6 +27,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isDragOverState, setIsDragOver] = useState(false);
   const [imageList, setImageList] = useState({page: 0, images: []} as ImageList);
   const [nextPageRequestableState, setNextPageRequestable] = useState(false);
+  const [selectedImageId, setSelectedImageId] = useState([] as string[]);
 
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
@@ -99,6 +101,19 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     });
   }, []);
 
+  useEffect(() => {
+    window.api.on(ImagesIpcId.UPDATE_IMAGE_INFO_REPLY, (_e, arg) => {
+      const imageInfoList = JSON.parse(arg) as ImageInfo[]
+      imageInfoList.forEach((img) => {
+        for (let i = 0; i < imageList.images.length; i++) {
+          if ( imageList.images[i].image_id == img.image_id ) {
+            imageList.images[i] = img
+          }
+        }
+      });
+    });
+  }, []);
+
   const requestShowImages = (page: number) => {
     const showImages: ShowImages = { workspaceId: props.workspaceId, page: page }
     window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
@@ -131,8 +146,23 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
-  const ref = React.useRef<HTMLDivElement>(null);
+  const onThumbnailAreaClick = () => {
+    updateSelectImages([])
+  };
 
+  const onImageClick = (e:any, imageId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    updateSelectImages([imageId])
+  };
+
+  const updateSelectImages = (imageIds: string[]) => {
+    setSelectedImageId(imageIds)
+    if ( props.onChangeSelectedImages ) props.onChangeSelectedImages(imageIds)
+  }
+
+  // 無限スクロール発火の監視
+  const ref = React.useRef<HTMLDivElement>(null);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -145,20 +175,26 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       },
       { threshold: 0.5 },
     );
-
     if (ref.current === null) return;
-
     observer.unobserve(ref.current)
     if ( nextPageRequestableState ) observer.observe(ref.current);
   });
 
   return (
-    <div className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''} ${props.hide ? 'hide' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} >
+    <div
+      className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''} ${props.hide ? 'hide' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onClick={onThumbnailAreaClick}
+    >
       {
         imageList.images.map((image) => {
           return (
-            <div className="thumbnail"
-              onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}>
+            <div className={`thumbnail ${selectedImageId.includes(image.image_id) ? 'selected' : ''}`}
+              onClick={(e)=>{ onImageClick(e, image.image_id) }}
+              onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}
+            >
               <img id={`image-${image.image_id}`}></img>
               <div className="original-size-icon"><FontAwesomeIcon icon={faBars} /></div>
             </div>

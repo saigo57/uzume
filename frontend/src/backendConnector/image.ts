@@ -9,7 +9,7 @@ export type ResImage = {
   memo: string
   author: string
   created_at: string
-  // TODO: tagsを実装
+  tags: string[]
 }
 
 export type ResImages = {
@@ -100,6 +100,27 @@ export default class Image {
       return res.data.toString('base64')
     } catch (e) {
       console.log(`image get error [${e}]`)
+      throw e
+    }
+  }
+
+  public async addTag(imageId: string, tagId: string) {
+    try {
+      let res = await this.authorizeAxios().patch(`/${imageId}/tags`, { tag_id: tagId })
+      return;
+    } catch (e) {
+      console.log(`image add tag error [${e}]`)
+      throw e
+    }
+  }
+
+  public async removeTag(imageId: string, tagId: string) {
+    try {
+      // TODO: APIドキュメントを更新
+      let res = await this.authorizeAxios().delete(`/${imageId}/tags/${tagId}`)
+      return;
+    } catch (e) {
+      console.log(`image remove tag error [${e}]`)
       throw e
     }
   }

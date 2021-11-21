@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/user"
 	"path/filepath"
 	"time"
@@ -42,6 +43,7 @@ func (a *AccessToken) Load() error {
 	}
 
 	if !helper.FileExists(a.FilePath) {
+		fmt.Printf("[AccessToken Model] file not exists. [%s]", a.FilePath)
 		return nil
 	}
 
@@ -49,9 +51,11 @@ func (a *AccessToken) Load() error {
 
 	bytes, err := json_accessor.ReadJson(a.FilePath)
 	if err != nil {
+		fmt.Printf("[AccessToken Model] faild to read json file. [%s]", a.FilePath)
 		return err
 	}
 	if err := json.Unmarshal(bytes, a); err != nil {
+		fmt.Printf("[AccessToken Model] faild to unmarshal json file. [%s]", a.FilePath)
 		return err
 	}
 
