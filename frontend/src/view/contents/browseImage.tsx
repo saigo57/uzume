@@ -6,7 +6,11 @@ import { faStepBackward } from "@fortawesome/free-solid-svg-icons";
 import { ImageIndexView } from "./imageIndexView";
 import { ImageSideBar } from "./imageSideBar";
 
-export function BrowseImage() {
+type BrowseImageProps = {
+  workspaceId: string
+};
+
+export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   return (
     <>
       <section id="browse-image-area" className="browse-image-area">
@@ -21,7 +25,7 @@ export function BrowseImage() {
         </div>
 
         {/* ここでサムネ表示と原寸大表示を切り替える */}
-        <ImageIndexView />
+        <ImageIndexView workspaceId={props.workspaceId} />
       </section>
 
       <div id="after-browse-image-area" className="split-bar"></div>
