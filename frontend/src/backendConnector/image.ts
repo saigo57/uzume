@@ -68,9 +68,10 @@ export default class Image {
         params.append('image', fs.createReadStream(filePath), filePath)
         await this.authorizeAxiosMultipart().post('/', params, { headers: params.getHeaders() } as any)
       }
-      return 0
-    } catch (error) {
-      console.log(`image post error [${error}]`)
+      return 0 // なんか返さないとasync/awaitが怪しい動きをする(はず)
+    } catch (e) {
+      console.log(`image post error [${e}]`)
+      throw e
     }
   }
 
@@ -78,11 +79,10 @@ export default class Image {
     try {
       let res = await this.authorizeAxios().get('/', { params: { page: page} })
       return JSON.parse(JSON.stringify(res.data)) as ResImages
-    } catch (error) {
-      console.log(`image get error [${error}]`)
+    } catch (e) {
+      console.log(`image get error [${e}]`)
+      throw e
     }
-
-    return null as any
   }
 
   public async getImage(imageId: string, imageSize: string): Promise<string> {
@@ -98,10 +98,9 @@ export default class Image {
         },
       }).get()
       return res.data.toString('base64')
-    } catch (error) {
-      console.log(`image get error [${error}]`)
+    } catch (e) {
+      console.log(`image get error [${e}]`)
+      throw e
     }
-
-    return null as any
   }
 }
