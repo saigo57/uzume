@@ -15,14 +15,15 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
 
   BackendConnector.workspace(imageFiles.workspaceId, (ws) => {
     ws.image.create(imageFiles.imageFileList).then(() => {
-      showImagesReply(e, imageFiles.workspaceId)
+      // TODO: uploadしたときの画面の動きは整理する必要がある
+      showImagesReply(e, imageFiles.workspaceId, 1)
     });
   })
 });
 
 ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
   let showImages: ShowImages = JSON.parse(arg)
-  showImagesReply(e, showImages.workspaceId)
+  showImagesReply(e, showImages.workspaceId, showImages.page)
 });
 
 ipcMain.on(IpcId.REQUEST_IMAGE, (e, arg) => {
@@ -38,9 +39,9 @@ ipcMain.on(IpcId.REQUEST_IMAGE, (e, arg) => {
   });
 });
 
-export function showImagesReply(e: Electron.IpcMainEvent, workspaceId: string) {
+export function showImagesReply(e: Electron.IpcMainEvent, workspaceId: string, page: number) {
   BackendConnector.workspace(workspaceId, (ws) => {
-    ws.image.getList().then((imgList) => {
+    ws.image.getList(page).then((imgList) => {
       let imageInfos: ImageInfos = { workspaceId: workspaceId, page: imgList.page, images: [] }
 
       for (let i = 0; i < imgList.images.length; i++) {
