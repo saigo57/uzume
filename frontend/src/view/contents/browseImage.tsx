@@ -16,8 +16,18 @@ type BrowseImageProps = {
 };
 
 export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
+  const [selectedImageIds, setSelectedImageIds] = useState([] as string[]);
+
+  useEffect(() => {
+    setSelectedImageIds([])
+  }, [props.workspaceId]);
+
   const onImageDoubleClick = (imageId: string) => {
     props.onModeChange(imageId)
+  };
+
+  const onChangeSelectedImages = (imageIds: string[]) => {
+    setSelectedImageIds(imageIds)
   };
 
   return (
@@ -36,7 +46,11 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           </div>
         </div>
 
-        <ImageIndexView workspaceId={props.workspaceId} onImageDoubleClick={onImageDoubleClick} hide={!!props.imageId} />
+        <ImageIndexView
+          workspaceId={props.workspaceId}
+          onChangeSelectedImages={onChangeSelectedImages}
+          onImageDoubleClick={onImageDoubleClick}
+          hide={!!props.imageId} />
 
         {(() => {
           if ( props.imageId ) {
@@ -47,7 +61,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
 
       <div id="after-browse-image-area" className="split-bar"></div>
 
-      <ImageSideBar />
+      <ImageSideBar workspaceId={props.workspaceId} imageIds={selectedImageIds} />
     </>
   );
 }

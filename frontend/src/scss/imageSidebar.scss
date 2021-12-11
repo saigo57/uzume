@@ -25,23 +25,17 @@
     }
   }
 
-  .tag-search {
-    width: calc(100% - 20px);
-    margin-top: 20px;
-    margin-bottom: 5px;
-    margin-right: 10px;
-    margin-left: 10px;
-    height: 20px;
-    background-color: $light-background-color;
-    border-radius: 10px;
-    border: solid 1px $main-font-color;
-  }
   .tagged-area {
     display: flex;
     flex-wrap: wrap;
-    padding: 10px;
+    padding: 6px;
     height: 150px;
+    margin: 8px;
+    border: 1px solid #666;
+    border-radius: 5px;
+    background-color: #454545;
     align-content: flex-start;
+    cursor: pointer;
   }
 
   .info-area {
