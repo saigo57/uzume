@@ -24,13 +24,21 @@
     }
   }
   .search-bar {
-    float: left;
+    position: absolute;
+    top: 5px;
+    left: 35px;
+    display: flex;
+    flex-wrap: nowrap;
     height: 25px;
     width: calc(100% - 180px);
     background-color: $light-background-color;
-    margin-top: 8px;
     border-radius: 8px;
     border: solid 1px $main-font-color;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
   .control-panel {
     position: absolute;

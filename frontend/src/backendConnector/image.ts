@@ -14,12 +14,15 @@ export type ResImage = {
 
 export type ResImages = {
   page: number
-  images: ResImage[]
+  images: ResImage[] | null
 }
 
 export default class Image {
   static readonly IMAGE_SIZE_THUMBNAIL: string = "thumbnail";
   static readonly IMAGE_SIZE_ORIGINAL: string = "original";
+
+  static readonly TAG_SEARCH_TYPE_AND :string = "and";
+  static readonly TAG_SEARCH_TYPE_OR :string = "or";
 
   workspaceId: string
   accessToken: string
@@ -75,9 +78,25 @@ export default class Image {
     }
   }
 
-  public async getList(page: number): Promise<ResImages> {
+  public async getList(page: number, tagIds: string[], searchType: string): Promise<ResImages> {
     try {
-      let res = await this.authorizeAxios().get('/', { params: { page: page} })
+      let params;
+      if ( tagIds.length > 0 ) {
+        let id_str = '';
+        let comma = '';
+        tagIds.forEach((id) => {
+          id_str += `${comma}${id}`;
+          comma = ',';
+        });
+
+        let type: string = searchType;
+        if ( ![Image.TAG_SEARCH_TYPE_AND, Image.TAG_SEARCH_TYPE_OR].includes(type) ) type = Image.TAG_SEARCH_TYPE_AND;
+        params = { page: page, tags: id_str, tag_search_type: type };
+      } else {
+        params = { page: page };
+      }
+
+      let res = await this.authorizeAxios().get('/', { params: params });
       return JSON.parse(JSON.stringify(res.data)) as ResImages
     } catch (e) {
       console.log(`image get error [${e}]`)

@@ -18,11 +18,15 @@ export class IpcId {
 export type ImageFiles = {
   workspaceId: string
   imageFileList: string[]
+  tagIds: string[]
+  searchType: string
 }
 
 export type ShowImages = {
   workspaceId: string
   page: number
+  tagIds: string[]
+  searchType: string
 }
 
 export type RequestImage = {
