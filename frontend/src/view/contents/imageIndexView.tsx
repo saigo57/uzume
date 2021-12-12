@@ -16,6 +16,8 @@ type ImageIndexViewProps = {
   onChangeSelectedImages: (imageIds: string[]) => void
   onImageDoubleClick: (imageId: string) => void
   hide: boolean
+  tagIds: string[]
+  searchType: string
 };
 
 type ImageList = {
@@ -42,10 +44,16 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, [imageList.page]);
 
   useEffect(() => {
+    if ( props.onChangeSelectedImages ) props.onChangeSelectedImages(selectedImageId)
+  }, [selectedImageId]);
+
+  useEffect(() => {
     window.api.on(ImagesIpcId.SHOW_IMAGES_REPLY, (_e, arg) => {
       let rcvImageInfos = JSON.parse(arg) as ImageInfos
+      setSelectedImageId([])
 
       if ( rcvImageInfos.images.length == 0 ) {
+        if ( rcvImageInfos.page == 1 ) setImageList({page: 1, images: []})
         setNextPageRequestable(false);
         return;
       }
@@ -115,7 +123,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   const requestShowImages = (page: number) => {
-    const showImages: ShowImages = { workspaceId: props.workspaceId, page: page }
+    const showImages: ShowImages = {
+      workspaceId: props.workspaceId,
+      page: page,
+      tagIds: props.tagIds,
+      searchType: props.searchType,
+    }
     window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
   };
 
@@ -138,7 +151,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     e.preventDefault();
     setIsDragOver(false);
 
-    let imageFiles: ImageFiles = { workspaceId: props.workspaceId, imageFileList: [] }
+    let imageFiles: ImageFiles = {
+      workspaceId: props.workspaceId,
+      imageFileList: [],
+      tagIds: props.tagIds,
+      searchType: props.searchType,
+    }
     for (let i = 0; i < e.dataTransfer.files.length; i++) {
       imageFiles.imageFileList.push(e.dataTransfer.files[i].path);
     }
@@ -146,19 +164,17 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
-  const onThumbnailAreaClick = () => {
-    updateSelectImages([])
+  const onThumbnailAreaClick = (e:any) => {
+    if ( e.target == e.currentTarget ) updateSelectImages([])
   };
 
   const onImageClick = (e:any, imageId: string) => {
-    e.stopPropagation();
     e.preventDefault();
     updateSelectImages([imageId])
   };
 
   const updateSelectImages = (imageIds: string[]) => {
     setSelectedImageId(imageIds)
-    if ( props.onChangeSelectedImages ) props.onChangeSelectedImages(imageIds)
   }
 
   // 無限スクロール発火の監視

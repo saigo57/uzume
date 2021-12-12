@@ -15,6 +15,10 @@ import {
 } from '../../ipc/tags'
 import { Tag } from "../component/atmos/tag";
 import { TagCtrlPanel } from "../component/organisms/tagCtrlPanel";
+import {
+  sendIpcGetAllTags,
+} from '../commonIpc';
+
 
 type ImageSideBarProps = {
   workspaceId: string
@@ -46,11 +50,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    let req = {
-      workspaceId: props.workspaceId,
-    } as GetAllTags
-
-    window.api.send(TagsIpcId.GET_ALL_TAGS, JSON.stringify(req));
+    sendIpcGetAllTags(props.workspaceId)
   }, [props.workspaceId]);
 
   useEffect(() => {

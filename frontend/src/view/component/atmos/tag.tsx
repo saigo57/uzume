@@ -15,7 +15,7 @@ type TagProps = {
 };
 
 export const Tag:React.VFC<TagProps> = (props) => {
-  const onDeleteClick = (e:any) => {
+  const onTagClick = (e:any) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -26,10 +26,16 @@ export const Tag:React.VFC<TagProps> = (props) => {
     }
   }
 
+  const onDeleteIconClick = (e:any) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if ( props.onDeleteClick && props.tagId ) props.onDeleteClick(props.tagId);
+  }
+
   return (
     <div
       className={`tag ${props.delete ? 'disp-delete' : ''} ${props.alreadyAdded ? 'added' : ''}`}
-      onClick={onDeleteClick}
+      onClick={onTagClick}
     >
       <div className="tag-text">{props.tagName}</div>
       {(() => {
@@ -37,9 +43,7 @@ export const Tag:React.VFC<TagProps> = (props) => {
           return (
             <FontAwesomeIcon
               icon={faTimes}
-              onClick={()=>{
-                if ( props.onDeleteClick && props.tagId ) props.onDeleteClick(props.tagId);
-              }}
+              onClick={onDeleteIconClick}
             />
           );
         }
