@@ -20,7 +20,9 @@ import (
 // ワークスペース一覧の取得に成功すること
 func TestGetWorkspaces(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	json_accessor := model.NewJsonAccessor()
 	configFilePath := test_helper.BuildFilePath("/.uzume/config.json")
@@ -80,7 +82,9 @@ func TestGetWorkspaces(t *testing.T) {
 // ワークスペースの新規作成に成功すること
 func TestPostWorkspaces_Success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	c := new(model.Config)
 	c.Save()
@@ -118,7 +122,9 @@ func TestPostWorkspaces_Success(t *testing.T) {
 // ワークスペースがディスクに既に存在するとき、新規作成に失敗すること
 func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	c := new(model.Config)
 	c.Save()
@@ -143,7 +149,9 @@ func TestPostWorkspaces_FailOnWorkspaceAlreadyExists_disk(t *testing.T) {
 // 既存のワークスペースの登録に成功すること。また、既に存在するワークスペースだった場合はエラーになること
 func TestPostWorkspacesAdd(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	c := new(model.Config)
 	c.Save()
@@ -193,7 +201,9 @@ func TestPostWorkspacesAdd(t *testing.T) {
 // 存在しないワークスペースを登録したときエラーになること
 func TestPostWorkspacesAdd_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	c := new(model.Config)
 	c.Save()
@@ -223,7 +233,9 @@ func TestPostWorkspacesAdd_fail(t *testing.T) {
 // ワークスペースへのログインに成功すること
 func TestPostWorkspacesLogin_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -247,7 +259,9 @@ func TestPostWorkspacesLogin_success(t *testing.T) {
 // ワークスペースIDが間違っているときログインに失敗すること
 func TestPostWorkspacesLogin_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -271,7 +285,9 @@ func TestPostWorkspacesLogin_fail(t *testing.T) {
 // ワークスペースのUPDATEに成功すること
 func TestPatchWorkspaces_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -310,7 +326,9 @@ func TestPatchWorkspaces_success(t *testing.T) {
 // access_tokenが間違っているとき、認証エラーになりデータはUPDATEされないこと
 func TestPatchWorkspaces_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -350,7 +368,9 @@ func TestPatchWorkspaces_fail(t *testing.T) {
 // ワークスペースの削除に成功すること
 func TestDeleteWorkspaces_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -386,7 +406,9 @@ func TestDeleteWorkspaces_success(t *testing.T) {
 // access_tokenが間違っているとき、認証エラーになりデータはDELETEされないこと
 func TestDeleteWorkspaces_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -422,7 +444,9 @@ func TestDeleteWorkspaces_fail(t *testing.T) {
 // ワークスペースiconのアップロードと取得に成功すること
 func TestPostAndGetWorkspaceIcon(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -466,7 +490,9 @@ func TestPostAndGetWorkspaceIcon(t *testing.T) {
 // access_tokenが間違っているとき、ワークスペースiconのアップロードと取得に失敗すること
 func TestPostAndGetWorkspaceIcon_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"

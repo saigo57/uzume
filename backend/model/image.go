@@ -185,7 +185,7 @@ func SearchImages(workspace *Workspace, tag_list []string, search_type string, p
 		return image_list[begin:end]
 	}
 
-	// tag指定なしの場合全画像を返す
+	// tag指定なしの場合全画像を返す
 	if len(tag_list) == 0 {
 		images, err := getAllImageCache(workspace)
 		if err != nil {

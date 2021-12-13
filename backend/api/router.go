@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net"
 	"uzume_backend/model"
 
 	"github.com/labstack/echo"
@@ -21,7 +22,7 @@ func workspaceAuth(workspace_id, token string) (bool, error) {
 	return false, nil
 }
 
-func RouteInit() *echo.Echo {
+func RouteInit(listener net.Listener) *echo.Echo {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Debug = true
@@ -32,6 +33,7 @@ func RouteInit() *echo.Echo {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAcceptEncoding},
 	}))
 	e.Logger.SetLevel(log.DEBUG)
+	e.Listener = listener
 
 	v1 := e.Group("/api/v1")
 	{
