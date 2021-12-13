@@ -1,10 +1,20 @@
 package main
 
 import (
+	"log"
+	"net"
 	"uzume_backend/api"
+
+	"golang.org/x/net/netutil"
 )
 
 func main() {
-	router := api.RouteInit()
-	router.Logger.Fatal(router.Start(":1323"))
+	ln, err := net.Listen("tcp", ":1323")
+	if err != nil {
+		log.Fatal(err)
+	}
+	listener := netutil.LimitListener(ln, 1)
+	defer listener.Close()
+	router := api.RouteInit(listener)
+	router.Logger.Fatal(router.Start(""))
 }

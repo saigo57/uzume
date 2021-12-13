@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/netutil"
 )
 
 func InitializeTest() {
@@ -65,4 +67,12 @@ func WriteMultipartImageField(t *testing.T, multipart_writer *multipart.Writer, 
 	_, err = io.Copy(part, image_file)
 	assert.NoError(t, err)
 	return image_file_buffer
+}
+
+func Listener() net.Listener {
+	ln, err := net.Listen("tcp", "")
+	if err != nil {
+		fmt.Println("listener error")
+	}
+	return netutil.LimitListener(ln, 1)
 }

@@ -71,13 +71,20 @@ ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
 
 function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: string) {
   BackendConnector.workspace(reqImage.workspaceId, (ws) => {
-    ws.image.getImage(
-      reqImage.imageId,
-      reqImage.isThumbnail ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
-    ).then((imageBase64) => {
-      let imageData: ImageData = { imageId: reqImage.imageId, imageBase64: imageBase64  }
-      e.reply(replyId, JSON.stringify(imageData));
-    })
+    let retry = 0;
+    while ( true ) {
+      ws.image.getImage(
+        reqImage.imageId,
+        reqImage.isThumbnail ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
+      ).then((imageBase64) => {
+        let imageData: ImageData = { imageId: reqImage.imageId, imageBase64: imageBase64  }
+        e.reply(replyId, JSON.stringify(imageData));
+      }).catch((err) => {
+        retry++;
+      })
+
+      if ( retry == 0 || retry > 5 ) break;
+    }
   });
 }
 
