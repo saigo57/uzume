@@ -177,6 +177,11 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     setSelectedImageId(imageIds)
   }
 
+  const thumbImgStyle = (width: number, height: number): React.CSSProperties => {
+    const heightMax = 120;
+    return { width: `${width * heightMax / height}px`, height: `${heightMax}px` }
+  }
+
   // 無限スクロール発火の監視
   const ref = React.useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -211,7 +216,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
               onClick={(e)=>{ onImageClick(e, image.image_id) }}
               onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}
             >
-              <img id={`image-${image.image_id}`}></img>
+              <img id={`image-${image.image_id}`} style={thumbImgStyle(image.width, image.height)}></img>
               <div className="original-size-icon"><FontAwesomeIcon icon={faBars} /></div>
             </div>
           )

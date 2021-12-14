@@ -6,6 +6,8 @@ export type ResImage = {
   image_id: string
   file_name: string
   ext: string
+  width: number
+  height: number
   memo: string
   author: string
   created_at: string
