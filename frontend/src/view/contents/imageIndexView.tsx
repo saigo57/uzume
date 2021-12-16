@@ -254,6 +254,11 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     if (ref.current === null) return;
     observer.unobserve(ref.current)
     if ( nextPageRequestableState ) observer.observe(ref.current);
+
+    return () => {
+      if (ref.current === null) return;
+      observer.unobserve(ref.current)
+    }
   });
 
   const iconEnter = (e: any) => {
