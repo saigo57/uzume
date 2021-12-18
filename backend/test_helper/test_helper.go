@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net"
 	"os"
@@ -15,15 +16,56 @@ import (
 	"golang.org/x/net/netutil"
 )
 
+func exists(name string) bool {
+	_, err := os.Stat(name)
+	return !os.IsNotExist(err)
+}
+
+func myRemoveAll(dir string) error {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			if err := myRemoveAll(filepath.Join(dir, file.Name())); err != nil {
+				return err
+			}
+		} else {
+			// file
+			if err := os.Remove(filepath.Join(dir, file.Name())); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := os.Remove(dir); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func InitializeTest() {
 	test_work_dir := BuildFilePath("")
 
-	if err := os.RemoveAll(test_work_dir); err != nil {
+	files, err := ioutil.ReadDir(test_work_dir)
+	if err != nil {
 		fmt.Println(err)
 	}
 
-	if err := os.Mkdir(test_work_dir, 0777); err != nil {
-		fmt.Println(err)
+	for _, file := range files {
+		if file.IsDir() {
+			if err := myRemoveAll(filepath.Join(test_work_dir, file.Name())); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	if !exists(test_work_dir) {
+		if err := os.Mkdir(test_work_dir, 0777); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

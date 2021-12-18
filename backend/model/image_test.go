@@ -20,35 +20,8 @@ import (
 // 	test_helper.InitializeTest()
 // }
 
-func TestImage_Save(t *testing.T) {
-	test_helper.InitializeTest()
-	_, workspace := FixtureSetupOneWorkspace()
-	tagA := FixtureCreateTag(workspace, "tagA")
-	tagB := FixtureCreateTag(workspace, "tagB")
-
-	assert.Equal(t, 0, len(g_image_cache))
-	image, _ := FixtureCreateImage(workspace, "testimage1.png")
-	image.Save()
-
-	assert.Equal(t, 1, len(g_image_cache))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].SortedImages))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].IdToImages))
-	assert.Equal(t, 0, len(g_image_cache[workspace.Id].TagToImages))
-
-	image.AddTag(tagA.Id)
-	image.Save()
-	assert.Equal(t, 1, len(g_image_cache))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].SortedImages))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].IdToImages))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].TagToImages))
-
-	image.AddTag(tagB.Id)
-	image.Save()
-	assert.Equal(t, 1, len(g_image_cache))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].SortedImages))
-	assert.Equal(t, 1, len(g_image_cache[workspace.Id].IdToImages))
-	assert.Equal(t, 2, len(g_image_cache[workspace.Id].TagToImages))
-}
+// func TestImage_Save(t *testing.T) {
+// }
 
 // func TestImage_CreateImageAndSave(t *testing.T) {
 // 	test_helper.InitializeTest()

@@ -126,14 +126,23 @@ func updateImageCache(image *Image, prev_image *Image) {
 
 		if is_deleted {
 			var new_images []*Image
-			for _, i := range image_cache.TagToImages[prev_tag_id] {
-				if image.Id != i.Id {
-					new_images = append(new_images, image)
+			for _, img := range image_cache.TagToImages[prev_tag_id] {
+				if image.Id != img.Id {
+					new_images = append(new_images, img)
 				}
 			}
 			image_cache.TagToImages[prev_tag_id] = new_images
 		}
 	}
+
+	// 紐づく画像が0になったkey(タグ)を削除する
+	new_tag_to_images := make(map[string][]*Image)
+	for tag_id, images := range image_cache.TagToImages {
+		if len(images) > 0 {
+			new_tag_to_images[tag_id] = images
+		}
+	}
+	image_cache.TagToImages = new_tag_to_images
 }
 
 func resetSortedImages(workspace *Workspace) error {
