@@ -27,6 +27,7 @@ export type ShowImages = {
   page: number
   tagIds: string[]
   searchType: string
+  uncategorized: boolean
 }
 
 export type RequestImage = {

@@ -18,6 +18,7 @@ type ImageIndexViewProps = {
   hide: boolean
   tagIds: string[]
   searchType: string
+  uncategorized: boolean
 };
 
 type ImageList = {
@@ -49,7 +50,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       setNextPageRequestable(false)
       requestShowImages(1)
     }
-  }, [props.workspaceId]);
+  }, [props.workspaceId, props.uncategorized]);
 
   useEffect(() => {
     if ( imageList.page > 0 ) setNextPageRequestable(true)
@@ -183,6 +184,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       page: page,
       tagIds: props.tagIds,
       searchType: props.searchType,
+      uncategorized: props.uncategorized,
     }
     window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
   };

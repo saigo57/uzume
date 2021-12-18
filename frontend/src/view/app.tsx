@@ -10,14 +10,22 @@ export function App() {
     workspace_name: '',
     workspace_id: '',
   });
+  const [currMode, setCurrMode] = useState('home');
 
   // イベント
   const [showIndexImageEvent, setShowIndexImageEvent] = useState(0)
   const raiseShowIndexImageEvent = () => {
+    setCurrMode('home')
     setShowIndexImageEvent(prev => prev + 1)
+  };
+  const [uncategorizedEvent, setUncategorizedEvent] = useState(0)
+  const raiseUncategorizedEvent = () => {
+    setCurrMode('uncategorized')
+    setUncategorizedEvent(prev => prev + 1)
   };
 
   useEffect(() => {
+    setCurrMode('home')
     raiseShowIndexImageEvent();
   }, [currentWorkspaceState]);
 
@@ -31,17 +39,20 @@ export function App() {
   const onMenuAction = (action: string) => {
     switch ( action ) {
       case 'home_click': raiseShowIndexImageEvent(); break;
+      case 'uncategorized_click': raiseUncategorizedEvent(); break;
     }
   }
 
   return (
     <div className="container">
       <ServerList />
-      <MainMenu workspaceName={currentWorkspaceState.workspace_name} onAction={onMenuAction} />
+      <MainMenu workspaceName={currentWorkspaceState.workspace_name} currMode={currMode} onAction={onMenuAction} />
       <div id="before-main" className="split-bar"></div>
       <ContentsArea
         workspaceId={currentWorkspaceState.workspace_id}
-        showIndexImageEvent={showIndexImageEvent} />
+        uncategorized={currMode == 'uncategorized'}
+        showIndexImageEvent={showIndexImageEvent}
+        uncategorizedEvent={uncategorizedEvent} />
       <Footer />
     </div>
   );
