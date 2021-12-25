@@ -1,48 +1,91 @@
 import React, { useState, useEffect} from 'react';
 import { Tag } from "../atmos/tag";
+import { MenuItem, useTags } from '../../lib/tagCustomHooks';
 import CssConst from "./../../cssConst";
-import {
-  TagInfo,
-} from '../../../ipc/tags'
+import { TagInfo } from '../../../ipc/tags';
+
+import './searchPanel.scss';
 
 type SearchPanelProps = {
   id: string
   display: boolean
-  tagInfoList: TagInfo[]
+  workspaceId: string
   selectedTag: TagInfo[]
   onTagAddClick: (tagId: string | null, tagName: string) => void
   onTagDeleteClick: (tagId: string) => void
 }
 
 export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
+  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
+
+  useEffect(() => {
+    resetTagList()
+  }, [props.workspaceId]);
+
+  let selectedTagIds = props.selectedTag.map(t => t.tagId);
+
   const style: React.CSSProperties = {
     position: 'absolute',
     display: props.display ? 'block' : 'none',
     top: '37px',
     height: '300px',
-    width: '400px',
-    padding: '8px',
+    width: '500px',
     backgroundColor: CssConst.MAIN_BACKGROUND_COLOR,
     border: `1px solid ${CssConst.EDGE_GRAY}`,
     zIndex: 10,
   }
 
-  let selectedTagIds = props.selectedTag.map(t => t.tagId);
+  const tagGroupAreaWidth = '150px';
+
+  const tagGroupArea: React.CSSProperties = {
+    float: 'left',
+    width: `${tagGroupAreaWidth}`,
+    height: '100%',
+  };
+
+  const tagArea: React.CSSProperties = {
+    float: 'right',
+    width: `calc(100% - ${tagGroupAreaWidth})`,
+    height: '100%',
+  };
+
+  const menuSelected = (menu: string): string => {
+    return selectingMenu == menu ? "selected" : "";
+  }
+
+  const onMenuClick = (menu: string) => {
+    selectMenu(menu)
+  }
 
   return (
-    <div id={props.id} style={style}>
-      { props.tagInfoList.map((t) => {
+    <div id={props.id} className="search-panel" style={style}>
+      <div style={tagGroupArea}>
+        <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>すべてのタグ</div>
+        <div className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`} onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}>未分類のタグ</div>
+        { tagGroupListState.map((tg) => {
           return (
-            <Tag
-              tagId={t.tagId}
-              tagName={t.name}
-              delete={false}
-              alreadyAdded={selectedTagIds.includes(t.tagId)}
-              onClick={props.onTagAddClick}
-              onDeleteClick={props.onTagDeleteClick}
-            />
+            <div
+              className={`menu-item ${menuSelected(tg.tagGroupId)}`}
+              onClick={() => onMenuClick(tg.tagGroupId)} >
+                {tg.name}
+              </div>
           );
-      }) }
+        }) }
+      </div>
+      <div style={tagArea}>
+        { showingTagAllListState.map((t) => {
+            return (
+              <Tag
+                tagId={t.tagId}
+                tagName={t.name}
+                delete={false}
+                alreadyAdded={selectedTagIds.includes(t.tagId)}
+                onClick={props.onTagAddClick}
+                onDeleteClick={props.onTagDeleteClick}
+              />
+            );
+        }) }
+      </div>
     </div>
   );
 }

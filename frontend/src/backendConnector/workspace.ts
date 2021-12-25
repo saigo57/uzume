@@ -1,6 +1,7 @@
 const axiosBase = require('axios');
 import Image from './image'
 import Tags from './tags'
+import TagGroups from './tagGroups'
 import { Buffer } from 'buffer'
 
 export type ResLogin = {
@@ -22,12 +23,14 @@ export default class Workspace {
   accessToken: string
   public image: Image
   public tags: Tags
+  public tag_groups: TagGroups
 
   constructor(workspaceId: string, accessToken: string) {
     this.workspaceId = workspaceId
     this.accessToken = accessToken
     this.image = new Image(workspaceId, accessToken)
     this.tags = new Tags(workspaceId, accessToken)
+    this.tag_groups = new TagGroups(workspaceId, accessToken)
   }
 
   static async createInstance(workspaceId: string): Promise<Workspace> {

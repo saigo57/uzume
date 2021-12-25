@@ -67,6 +67,34 @@ html {
   overflow-y: scroll;
 }
 
+#tag-manage-menu-area {
+  display: block;
+  height: calc(100% - $footer-height);
+  width: 300px;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  margin-bottom: $footer-height;
+  min-width: 200px;
+  color: black;
+  background-color: $main-background-color;
+  overflow-y: scroll;
+}
+
+#tag-manage-list-area {
+  display: block;
+  height: calc(100% - $footer-height);
+  flex: 1;
+  right: 0;
+  left: 0;
+  padding: 10px;
+  margin-bottom: $footer-height;
+  min-width: 400px;
+  color: black;
+  background-color: $main-background-color;
+  overflow-y: scroll;
+}
+
 #footer {
   position: absolute;
   bottom: 0;

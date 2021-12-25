@@ -23,6 +23,7 @@ import {
 type ImageSideBarProps = {
   workspaceId: string
   imageIds: string[]
+  dsb_ref: React.RefObject<HTMLDivElement>
 };
 
 export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
@@ -112,7 +113,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   let linkedTagList = linkedTag()
 
   return (
-    <section id="image-side-bar" className="image-side-bar">
+    <section id="image-side-bar" className="image-side-bar" ref={props.dsb_ref}>
       <div className="side-bar-title"><div className="side-bar-title-text">Tag</div></div>
       <div className="tag-area" onClick={onTagAreaClick}>
         <div className="tagged-area">

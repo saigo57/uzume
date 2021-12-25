@@ -29,13 +29,14 @@ func GetTags() echo.HandlerFunc {
 		}
 
 		type retTag struct {
-			Id   string `json:"tag_id"`
-			Name string `json:"name"`
+			Id         string `json:"tag_id"`
+			Name       string `json:"name"`
+			TagGroupId string `json:"tag_group_id"`
 		}
 
 		var ret_tags []retTag
 		for _, t := range tag_list {
-			ret_tags = append(ret_tags, retTag{Id: t.Id, Name: t.Name})
+			ret_tags = append(ret_tags, retTag{Id: t.Id, Name: t.Name, TagGroupId: t.TagGroupId})
 		}
 
 		return c.JSON(http.StatusOK, struct {
