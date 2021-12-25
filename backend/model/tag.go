@@ -13,9 +13,10 @@ const (
 )
 
 type Tag struct {
-	Id       string `json:"tag_id"`
-	Name     string `json:"name"`
-	Favorite bool   `json:"favorite"`
+	Id         string `json:"tag_id"`
+	Name       string `json:"name"`
+	Favorite   bool   `json:"favorite"`
+	TagGroupId string `json:"tag_group_id"`
 }
 
 type Tags struct {
@@ -114,6 +115,25 @@ func (this *Tags) DeleteTag(tag_id string) error {
 	this.List = new_tag_list
 
 	return nil
+}
+
+func (this *Tags) AddGroupTag(tag_id string, group_tag_id string) error {
+	for _, t := range this.List {
+		if t.Id == tag_id {
+			t.TagGroupId = group_tag_id
+			return nil
+		}
+	}
+
+	return errors.New("The tag_id doesn't exist.")
+}
+
+func (this *Tags) RemoveGroupTag(group_tag_id string) {
+	for _, t := range this.List {
+		if t.TagGroupId == group_tag_id {
+			t.TagGroupId = ""
+		}
+	}
 }
 
 func (this *Tags) TagsJsonPath() string {

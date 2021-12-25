@@ -1,4 +1,6 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks';
+import { useTags } from '../lib/tagCustomHooks';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { faStepForward } from "@fortawesome/free-solid-svg-icons";
@@ -27,19 +29,20 @@ type BrowseImageProps = {
   uncategorized: boolean
   onModeChange: (imageId: string | null) => void
   onPrevClick: () => void
+  dsb_ref: React.RefObject<HTMLDivElement>
 };
 
 export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const [selectedImageIds, setSelectedImageIds] = useState([] as string[]);
-  const [tagListState, setTagList] = useState([] as TagInfo[]);
   const [searchTags, setSearchTags] = useState([] as TagInfo[]);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [searchType, setSearchType] = useState('and');
+  const [tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
 
   useEffect(() => {
     setSelectedImageIds([])
-    setTagList([])
     setSearchTags([])
+    resetTagList()
     sendIpcGetAllTags(props.workspaceId)
 
     showImages()
@@ -52,13 +55,6 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   useEffect(() => {
     showImages()
   }, [searchTags, searchType]);
-
-  useEffect(() => {
-    window.api.on(TagsIpcId.GET_ALL_TAGS_REPLY, (_e, arg) => {
-      const tagList = JSON.parse(arg) as TagList
-      setTagList(tagList.tags)
-    });
-  }, []);
 
   useEffect(() => {
     if ( showSearchPanel ) {
@@ -97,7 +93,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const onSearchPanelTagAddClick = (tagId: string | null, _tagName: string) => {
     if ( !tagId  ) return;
 
-    var clickTags = tagListState.filter((tag) => tag.tagId == tagId);
+    var clickTags = tagAllListState.filter((tag) => tag.tagId == tagId);
     if ( clickTags.length == 0 ) return;
     var clickTag = clickTags[0];
     setSearchTags((state) => [...state, clickTag])
@@ -111,9 +107,13 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
     setSearchType(type => type == 'and' ? 'or' : 'and')
   };
 
+  const dsb_split_bar = useRef<HTMLDivElement>(null);
+  const dsb_right = useRef<HTMLDivElement>(null);
+  useDraggableSplitBar(props.dsb_ref, dsb_split_bar, dsb_right)
+
   return (
     <>
-      <section id="browse-image-area" className="browse-image-area">
+      <section id="browse-image-area" className="browse-image-area" ref={props.dsb_ref}>
         <div className="main-header-area">
           <div className="prev" onClick={props.onPrevClick}>
             <FontAwesomeIcon icon={faArrowLeft} />
@@ -150,7 +150,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           <SearchPanel
             id="search-panel-id"
             display={showSearchPanel}
-            tagInfoList={tagListState}
+            workspaceId={props.workspaceId}
             selectedTag={searchTags}
             onTagAddClick={onSearchPanelTagAddClick}
             onTagDeleteClick={onSearchPanelTagDeleteClick}
@@ -174,9 +174,9 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
         })()}
       </section>
 
-      <div id="after-browse-image-area" className="split-bar"></div>
+      <div id="after-browse-image-area" className="split-bar" ref={dsb_split_bar}></div>
 
-      <ImageSideBar workspaceId={props.workspaceId} imageIds={selectedImageIds} />
+      <ImageSideBar workspaceId={props.workspaceId} imageIds={selectedImageIds} dsb_ref={dsb_right} />
     </>
   );
 }

@@ -3,6 +3,8 @@ import { app, BrowserWindow } from 'electron';
 import './mainProc/serverList';
 import './mainProc/images';
 import './mainProc/tags';
+import './mainProc/tagGroups';
+import './mainProc/tagManage';
 
 function createWindow () {
   const options: Electron.BrowserWindowConstructorOptions = {

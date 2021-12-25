@@ -5,6 +5,10 @@ import {
 
 var prevWorkspaceId: string = "";
 
+export const resetWorkspaceId = () => {
+  prevWorkspaceId = "";
+};
+
 export const sendIpcGetAllTags = (workspaceId: string) => {
   if ( prevWorkspaceId == workspaceId ) return;
   prevWorkspaceId = workspaceId;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDrag } from 'react-dnd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
@@ -15,6 +16,14 @@ type TagProps = {
 };
 
 export const Tag:React.VFC<TagProps> = (props) => {
+  const [{ isDragging }, dragRef] = useDrag({
+    type: 'Item',
+    item: { tagId: props.tagId },
+    collect: (monitor) => ({
+        isDragging: monitor.isDragging()
+    })
+  });
+
   const onTagClick = (e:any) => {
     e.stopPropagation();
     e.preventDefault();
@@ -36,6 +45,7 @@ export const Tag:React.VFC<TagProps> = (props) => {
     <div
       className={`tag ${props.delete ? 'disp-delete' : ''} ${props.alreadyAdded ? 'added' : ''}`}
       onClick={onTagClick}
+      ref={dragRef}
     >
       <div className="tag-text">{props.tagName}</div>
       {(() => {

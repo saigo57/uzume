@@ -12,6 +12,7 @@ export type GetAllTags = {
 export type TagInfo = {
   tagId: string
   name: string
+  tagGroupId: string
 }
 
 export type TagList = {

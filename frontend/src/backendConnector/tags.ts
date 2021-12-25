@@ -3,6 +3,7 @@ const axiosBase = require('axios');
 export type ResTag = {
   tag_id: string
   name: string
+  tag_group_id: string
 }
 
 export type ResTagList = {
