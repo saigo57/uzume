@@ -75,4 +75,13 @@ export default class Tags {
       throw e
     }
   }
+
+  public async renameTag(tagId: string, tagName: string) {
+    try {
+      await this.authorizeAxios().patch(`/${tagId}`, { name: tagName  })
+    } catch (e) {
+      console.log(`rename tag error [${e}]`)
+      throw e
+    }
+  }
 }

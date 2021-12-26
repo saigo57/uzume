@@ -72,6 +72,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
           return (
             <div>
               <Tag
+                workspaceId={props.workspaceId}
                 tagId={null}
                 tagName={`追加:${searchTagText}`}
                 delete={false}
@@ -89,6 +90,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
             if ( searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1 ) {
               return (
                 <Tag
+                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   delete={false}

@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDrag } from 'react-dnd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  IpcId as TagsIpcId,
+  ShowContextMenu,
+} from '../../../ipc/tags'
 
 // TODO: CSS in JSに置き換えたい
 import './tag.scss';
 
 type TagProps = {
+  workspaceId: string
   tagId: string|null
   tagName: string
   delete: boolean
@@ -41,10 +46,22 @@ export const Tag:React.VFC<TagProps> = (props) => {
     if ( props.onDeleteClick && props.tagId ) props.onDeleteClick(props.tagId);
   }
 
+  const onContextMenu = () => {
+    if ( !props.tagId ) return;
+
+    const req: ShowContextMenu = {
+      workspaceId: props.workspaceId,
+      tagId: props.tagId,
+      tagName: props.tagName,
+    }
+    window.api.send(TagsIpcId.SHOW_CONTEXT_MENU, JSON.stringify(req))
+  }
+
   return (
     <div
       className={`tag ${props.delete ? 'disp-delete' : ''} ${props.alreadyAdded ? 'added' : ''}`}
       onClick={onTagClick}
+      onContextMenu={onContextMenu}
       ref={dragRef}
     >
       <div className="tag-text">{props.tagName}</div>

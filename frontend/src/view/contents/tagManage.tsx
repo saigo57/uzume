@@ -158,6 +158,7 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
         { showingTagAllListState.map((t) => {
           return (
             <Tag
+              workspaceId={props.workspaceId}
               tagId={t.tagId}
               tagName={t.name}
               delete={false}
