@@ -68,8 +68,9 @@ func RouteInit(listener net.Listener) *echo.Echo {
 
 			auth.GET("/tag_groups", GetTagGroups())
 			auth.POST("/tag_groups", PostTagGroup())
-			auth.POST("/tag_groups/:tag_group_id", PostTagToTagGroup())
-			auth.DELETE("/tag_groups/:tag_group_id", DeleteTagToTagGroup())
+			auth.PATCH("/tag_groups/:id", PatchTagGroup())
+			auth.POST("/tag_groups/:id", PostTagToTagGroup())
+			auth.DELETE("/tag_groups/:id", DeleteTagToTagGroup())
 		}
 	}
 

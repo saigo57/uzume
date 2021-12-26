@@ -1,9 +1,12 @@
-import { ipcMain } from 'electron';
+import { ipcMain, BrowserWindow, Menu } from 'electron';
 import {
   IpcId,
   GetAllTags,
   TagInfo,
   CreateTagToImage,
+  ShowContextMenu,
+  TagRenameReply,
+  TagRename,
 } from '../ipc/tags'
 import {
   addTagToImages,
@@ -24,6 +27,37 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
       // 画像にタグ付与
       addTagToImages(e, createTag.workspaceId, createTag.imageIds, tagInfo.tag_id)
     })
+  });
+});
+
+ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
+  let requestShowContextMenu: ShowContextMenu = JSON.parse(arg)
+
+  const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
+    {
+      label: 'タグ名を変更',
+      click: () => {
+        let req: TagRenameReply = {
+          workspaceId: requestShowContextMenu.workspaceId,
+          tagId: requestShowContextMenu.tagId,
+          tagName: requestShowContextMenu.tagName,
+        }
+        e.reply(IpcId.TO_TAG_RENAME_REPLY, JSON.stringify(req))
+      }
+    }
+  ]
+  const menu = Menu.buildFromTemplate(template)
+  let contents: any = BrowserWindow.fromWebContents(e.sender)
+  menu.popup(contents)
+});
+
+ipcMain.on(IpcId.TAG_RENAME, (e, arg) => {
+  let requestTagRename: TagRename = JSON.parse(arg)
+
+  BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {
+    ws.tags.renameTag(requestTagRename.tagId, requestTagRename.tagName).then(() => {
+      getNewTags(e, requestTagRename.workspaceId)
+    });
   });
 });
 

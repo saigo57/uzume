@@ -76,6 +76,15 @@ export default class TagGroups {
     }
   }
 
+  public async RenameTagGroup(tagGroupId: string, tagGroupName: string) {
+    try {
+      await this.authorizeAxios().patch(`/${tagGroupId}`, { name: tagGroupName  })
+    } catch (e) {
+      console.log(`rename tag_group error [${e}]`)
+      throw e
+    }
+  }
+
   public async DeleteTagGroup(tagGroupId: string) {
     try {
       await this.authorizeAxios().delete(`/${tagGroupId}`)

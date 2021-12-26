@@ -120,6 +120,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
           { linkedTagList.map((t) => {
               return (
                 <Tag
+                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   delete={true}
