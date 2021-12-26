@@ -85,19 +85,20 @@ func createImageCache(image *Image) {
 	resetSortedImages(image.Workspace)
 }
 
-func updateImageCache(image *Image, prev_image *Image) {
-	if !isImageCacheExist(image.Workspace) {
-		if err := refleshImageCache(image.Workspace); err != nil {
+func updateImageCache(next_image *Image, prev_image *Image) {
+	if !isImageCacheExist(next_image.Workspace) {
+		if err := refleshImageCache(next_image.Workspace); err != nil {
 			// 失敗した場合は、一旦キャッシュを放棄する
-			destroyImageCache(image.Workspace)
+			destroyImageCache(next_image.Workspace)
 			return
 		}
 	}
 
-	image_cache := getImageCache(image.Workspace.Id)
+	image_cache := getImageCache(next_image.Workspace.Id)
 
 	// image自体の内容を更新
-	*(image_cache.IdToImages[image.Id]) = *image
+	*(image_cache.IdToImages[next_image.Id]) = *next_image
+	image := image_cache.IdToImages[next_image.Id]
 
 	// 増えたタグについての処理
 	for _, next_tag_id := range image.Tags {
