@@ -25,7 +25,7 @@ func NewTagGroups(workspace *Workspace) *TagGroups {
 	return tag_group
 }
 
-func (this *TagGroups) FindTagById(tag_group_id string) (*TagGroup, error) {
+func (this *TagGroups) FindTagGroupById(tag_group_id string) (*TagGroup, error) {
 	for _, t := range this.List {
 		if t.Id == tag_group_id {
 			return t, nil
@@ -73,6 +73,17 @@ func (this *TagGroups) CreateNewTagGroup(name string) (*TagGroup, error) {
 	this.List = append(this.List, tag_group)
 
 	return tag_group, nil
+}
+
+func (this *TagGroups) UpdateTagGroup(tag_group_id, name string) error {
+	for _, tg := range this.List {
+		if tg.Id == tag_group_id {
+			tg.Name = name
+			return nil
+		}
+	}
+
+	return errors.New("The tag_group_id doesn't exist.")
 }
 
 func (this *TagGroups) DeleteTagGroup(tag_group_id string) {

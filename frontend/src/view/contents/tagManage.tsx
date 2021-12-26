@@ -70,6 +70,7 @@ const TagGroupMenu:React.VFC<TagGroupMenuProps> = (props) => {
     let req = {
       workspaceId: props.workspaceId,
       tagGroupId: props.tagGroupId,
+      tagGroupName: props.name,
     } as TagGroupContextMenu
     window.api.send(TagManageIpcId.TAG_GROUP_CONTEXT_MENU, JSON.stringify(req));
   };
@@ -96,11 +97,9 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
 
   useEffect(() => {
     window.api.on(TagManageIpcId.TAG_GROUP_DELETE_REPLY, (_e, _arg) => {
-      console.log('TAG_GROUP_DELETE_REPLY')
       selectMenu(MenuItem.ALL_TAG)
     });
   }, []);
-
 
   const onTagGroupPlusClick = () => {
     setNewTagGroupName("")
