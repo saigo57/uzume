@@ -15,6 +15,12 @@
     min-width: 40px;
     border: 3px solid $main-background-color;
     border-radius: 4px;
+    transition: 0.15s;
+
+    &:hover {
+      border-color: $verylight-background-color;
+      cursor: pointer;
+    }
     &.selected {
       border-color: $selected-border-color;
     }
@@ -34,7 +40,11 @@
       padding-bottom: 5px;
       width: 16px;
       height: 16px;
+      transition: 0.15s;
       opacity: 0.8;
+      &:hover {
+        cursor: zoom-in;
+      }
       & > svg {
         color: $main-font-color;
         margin-left: 4px;
@@ -44,5 +54,11 @@
   }
   &.drag-over {
     opacity: 0.3;
+  }
+}
+
+#image-preview {
+  &:hover {
+    cursor: zoom-in;
   }
 }
