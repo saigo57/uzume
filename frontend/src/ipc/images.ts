@@ -7,12 +7,12 @@ export class IpcId {
   static readonly REQUEST_THUMB_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-thumb-reply";
   static readonly REQUEST_ORIG_IMAGE: string = IpcId.NAME_SPACE + "request-orig-image";
   static readonly REQUEST_ORIG_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-orig-reply";
-  static readonly GET_IMAGE_INFO: string = IpcId.NAME_SPACE + "get-image-info";
-  static readonly GET_IMAGE_INFO_REPLY: string = IpcId.NAME_SPACE + "get-image-info-reply";
+  static readonly GET_IMAGE_INFO_LIST: string = IpcId.NAME_SPACE + "get-image-info-list";
+  static readonly GET_IMAGE_INFO_LIST_REPLY: string = IpcId.NAME_SPACE + "get-image-info-list-reply";
   static readonly ADD_TAG: string = IpcId.NAME_SPACE + "add-tag";
   static readonly REMOVE_TAG: string = IpcId.NAME_SPACE + "remove-tag";
   static readonly UPDATE_IMAGE_INFO_REPLY: string = IpcId.NAME_SPACE + "update-image-info";
-  static readonly IMAGE_INFO_UPDATED_REPLY: string = IpcId.NAME_SPACE + "image-info-updated-reply";
+  static readonly IMAGE_INFO_LIST_UPDATED_REPLY: string = IpcId.NAME_SPACE + "image-info-list-updated-reply";
 }
 
 export type ImageFiles = {
@@ -43,7 +43,7 @@ export type ImageData = {
 
 export type RequestImageInfo = {
   workspaceId: string
-  imageId: string
+  imageIds: string[]
 }
 
 export type ImageInfo = {
@@ -72,6 +72,6 @@ export type AddTagToImage = {
 
 export type RemoveTagFromImage = {
   workspaceId: string
-  imageId: string
+  imageIds: string[]
   tagId: string
 }

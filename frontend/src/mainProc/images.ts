@@ -35,10 +35,12 @@ ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
   showImagesReply(e, showImages.workspaceId, showImages.page, tags, showImages.searchType)
 });
 
-ipcMain.on(IpcId.GET_IMAGE_INFO, (e, arg) => {
+ipcMain.on(IpcId.GET_IMAGE_INFO_LIST, (e, arg) => {
   let reqImage: RequestImageInfo = JSON.parse(arg)
-  let imageInfo = g_imageInfoList[reqImage.workspaceId][reqImage.imageId]
-  e.reply(IpcId.GET_IMAGE_INFO_REPLY, JSON.stringify(imageInfo));
+  let imageInfoList: ImageInfo[] = reqImage.imageIds.map(
+    (image_id) => g_imageInfoList[reqImage.workspaceId][image_id]
+  );
+  e.reply(IpcId.GET_IMAGE_INFO_LIST_REPLY, JSON.stringify(imageInfoList));
 });
 
 ipcMain.on(IpcId.REQUEST_THUMB_IMAGE, (e, arg) => {
@@ -60,14 +62,19 @@ ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
   let removeTagFromImage: RemoveTagFromImage = JSON.parse(arg)
 
   BackendConnector.workspace(removeTagFromImage.workspaceId, (ws) => {
-    ws.image.removeTag(removeTagFromImage.imageId, removeTagFromImage.tagId)
-    let imageInfo = g_imageInfoList[removeTagFromImage.workspaceId][removeTagFromImage.imageId]
-    let newTags: string[] = []
-    for (let i = 0; i < imageInfo.tags.length; i++) {
-      if ( imageInfo.tags[i] != removeTagFromImage.tagId ) newTags.push(imageInfo.tags[i]);
-    }
-    imageInfo.tags = newTags;
-    afterUpdateImageInfo(e, [imageInfo])
+    let imageInfoList: ImageInfo[] = []
+    removeTagFromImage.imageIds.forEach((image_id) => {
+      ws.image.removeTag(image_id, removeTagFromImage.tagId);
+      let imageInfo = g_imageInfoList[removeTagFromImage.workspaceId][image_id];
+      let newTags: string[] = []
+      for (let i = 0; i < imageInfo.tags.length; i++) {
+        if ( imageInfo.tags[i] != removeTagFromImage.tagId ) newTags.push(imageInfo.tags[i]);
+      }
+      imageInfo.tags = newTags;
+      imageInfoList.push(imageInfo);
+    });
+
+    afterUpdateImageInfo(e, imageInfoList)
   });
 });
 
@@ -125,11 +132,14 @@ export function showImagesReply(
 
 export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, imageIds: string[], tagId: string) {
   BackendConnector.workspace(workspaceId, (ws) => {
-    let imageInfoList: ImageInfo[] =[]
+    let imageInfoList: ImageInfo[] = []
     for (let i = 0; i < imageIds.length; i++) {
+      let imageInfo = g_imageInfoList[workspaceId][imageIds[i]];
+      if ( imageInfo.tags.includes(tagId) ) continue; // 既に付与されていたらスキップする
+
       ws.image.addTag(imageIds[i], tagId)
-      g_imageInfoList[workspaceId][imageIds[i]].tags.push(tagId)
-      imageInfoList.push(g_imageInfoList[workspaceId][imageIds[i]])
+      imageInfo.tags.push(tagId)
+      imageInfoList.push(imageInfo)
     }
 
     afterUpdateImageInfo(e, imageInfoList)
@@ -138,5 +148,5 @@ export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, im
 
 function afterUpdateImageInfo(e: Electron.IpcMainEvent, imageInfoList :ImageInfo[]) {
   e.reply(IpcId.UPDATE_IMAGE_INFO_REPLY, JSON.stringify(imageInfoList));
-  e.reply(IpcId.IMAGE_INFO_UPDATED_REPLY, JSON.stringify(imageInfoList));
+  e.reply(IpcId.IMAGE_INFO_LIST_UPDATED_REPLY, JSON.stringify(imageInfoList));
 }

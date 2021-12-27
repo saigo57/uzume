@@ -41,6 +41,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isDragOverState, setIsDragOver] = useState(false);
   const [imageList, setImageList] = useState({page: 0, images: []} as ImageList);
   const [nextPageRequestableState, setNextPageRequestable] = useState(false);
+  const [lastClickImageId, setLastClickImageId] = useState("");
   const [selectedImageId, setSelectedImageId] = useState([] as string[]);
   const [preview, setPreview] = useState({isDisplay: false, isFlagBreak: false, startingPos: {x: 0, y: 0}} as Preview);
 
@@ -234,7 +235,26 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   const onImageClick = (e:any, imageId: string) => {
     e.preventDefault();
-    updateSelectImages([imageId])
+
+    if ( e.metaKey || e.ctrlKey ) { // command or ctrl
+      setSelectedImageId(state => [...state, imageId])
+    } else if ( e.shiftKey ) {
+      // 前回クリックした画像と今回の間の画像を選択状態にする
+      var shiftRange = false;
+      var selectImageIds: string[] = [];
+      imageList.images.forEach((img) => {
+        let isEdge = img.image_id == imageId || img.image_id == lastClickImageId;
+        let prevShiftRange = shiftRange;
+        if ( isEdge && !shiftRange ) shiftRange = true;
+        if ( shiftRange ) selectImageIds.push(img.image_id);
+        if ( isEdge && prevShiftRange && shiftRange ) shiftRange = false;
+      });
+      updateSelectImages(selectImageIds);
+    } else {
+      updateSelectImages([imageId]);
+    }
+
+    setLastClickImageId(imageId);
   };
 
   const updateSelectImages = (imageIds: string[]) => {
