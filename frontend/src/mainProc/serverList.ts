@@ -4,7 +4,8 @@ import {
   ServerInfo,
   SelectWorkspace,
   CreateWorkspaceInfo,
-  ShowContextMenu
+  ShowContextMenu,
+  AddWorkspaceInfo,
 } from '../ipc/serverList';
 import BackendConnector from '../backendConnector/backendConnector';
 import { changeCurrentWorkspace } from './currWorkspace'
@@ -34,6 +35,16 @@ ipcMain.on(IpcId.SELECT_NEW_WORKSPACE_DIR, (e, _arg) => {
   e.reply(IpcId.SELECT_NEW_WORKSPACE_DIR_REPLY, dirName);
 });
 
+// 既存のワークスペースを選択
+ipcMain.on(IpcId.SELECT_ADD_WORKSPACE_DIR, (e, _arg) => {
+  let dirName = dialog.showOpenDialogSync(null as any, {
+    properties: ['openDirectory'],
+    title: 'Select a text file',
+    defaultPath: '.',
+  });
+  e.reply(IpcId.SELECT_ADD_WORKSPACE_DIR_REPLY, dirName);
+});
+
 // ワークスペースを新規作成
 ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
   let wsInfo: CreateWorkspaceInfo = JSON.parse(arg)
@@ -42,6 +53,16 @@ ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
     path.join(wsInfo.dirPath, wsInfo.dirName + ".uzume")
   ).then((workspaceId) => {
     fetchWorkspaceList(e, workspaceId.workspace_id)
+  });
+});
+
+// 既存ワークスペースを追加
+ipcMain.on(IpcId.CREATE_ADD_SERVER, (e, arg) => {
+  let wsInfo: AddWorkspaceInfo = JSON.parse(arg)
+  BackendConnector.Workspace.add(
+    wsInfo.dirPath
+  ).then(() => {
+    fetchWorkspaceList(e, null as any)
   });
 });
 

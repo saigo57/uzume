@@ -69,4 +69,12 @@
   .button:nth-child(n + 2) {
     margin-left: 10px;
   }
+  .existing-workspace-link {
+    margin-top: 10px;
+    font-size: 12px;
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
 }

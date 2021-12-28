@@ -7,6 +7,7 @@ import {
   SelectWorkspace,
   ShowContextMenu,
   DeleteWorkspace,
+  AddWorkspaceInfo,
 } from "../ipc/serverList";
 import CssConst from "./cssConst";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -37,10 +38,12 @@ const reactModalStyle: ReactModal.Styles = {
 export const ServerList = () => {
   const [serverListState, setServerList] = useState([] as ServerInfo[]);
   const [isShowNewWorkspaceModalState, setIsShowNewWorkspaceModal] = useState(false);
+  const [isShowAddWorkspaceModalState, setIsShowAddWorkspaceModal] = useState(false);
   const [isShowDeleteWorkspaceModalState, setIsShowDeleteWorkspaceModal] = useState(false);
   const [workspaceInfoState, setWorkspaceInfo] = useState<CreateWorkspaceInfo>({name:'', dirName:'', dirPath:''});
   const [deleteWorkspaceState, setDeleteWorkspaceState] = useState<ServerInfo>(
     {workspaceId:'', name:'', iconImagePath:'', isAvailable: false, isSelected: false});
+  const [addWorkspacePathState, setAddWorkspacePathState] = useState('');
 
   useEffect(() => {
     window.api.send(serverListIpcId.FETCH_WORKSPACE_LIST);
@@ -90,6 +93,14 @@ export const ServerList = () => {
     setWorkspaceInfo({name:'', dirName:'', dirPath:''})
   }
 
+  const AddExistingServer = () => {
+    let req: AddWorkspaceInfo = {
+      dirPath: addWorkspacePathState
+    }
+    window.api.send(serverListIpcId.CREATE_ADD_SERVER, JSON.stringify(req));
+    setAddWorkspacePathState('')
+  }
+
   const deleteWorkspace = (workspaceId: string) => {
     let msg = JSON.stringify({
       workspaceId: workspaceId
@@ -110,11 +121,23 @@ export const ServerList = () => {
     window.api.send(serverListIpcId.SELECT_WORKSPACE, JSON.stringify(sw));
   }
 
-  const selectDirDialog = () => {
+  const selectNewWorkspaceDir = () => {
     window.api.send(serverListIpcId.SELECT_NEW_WORKSPACE_DIR);
     window.api.on(serverListIpcId.SELECT_NEW_WORKSPACE_DIR_REPLY, (_e, arg) => {
       setWorkspaceInfo({...workspaceInfoState, dirPath: arg[0]})
     });
+  }
+
+  const selectAddWorkspaceDir = () => {
+    window.api.send(serverListIpcId.SELECT_ADD_WORKSPACE_DIR);
+    window.api.on(serverListIpcId.SELECT_ADD_WORKSPACE_DIR_REPLY, (_e, arg) => {
+      setAddWorkspacePathState(arg[0])
+    });
+  }
+
+  const showAddWorkspaceModal = () => {
+    setIsShowNewWorkspaceModal(false)
+    setIsShowAddWorkspaceModal(true)
   }
 
   return (
@@ -162,10 +185,32 @@ export const ServerList = () => {
           <div className="show-block">
             <label className="label-name">ワークスペースを作成するフォルダ</label>
             <div>{workspaceInfoState.dirPath}</div>
-            <button type="button" className="button" onClick={selectDirDialog}>フォルダ選択</button>
+            <button type="button" className="button" onClick={selectNewWorkspaceDir}>フォルダ選択</button>
           </div>
           <div className="form-buttons">
+            <button type="submit" className="button" onClick={ () => { setIsShowNewWorkspaceModal(false) } }>キャンセル</button>
             <button type="submit" className="button" onClick={createNewServer}>作成</button>
+          </div>
+          <div className="existing-workspace-link" onClick={showAddWorkspaceModal}>既存のワークスペースを追加する場合はこちら</div>
+        </form>
+      </ReactModal>
+
+      <ReactModal
+        isOpen={isShowAddWorkspaceModalState}
+        onRequestClose={ () => { setIsShowAddWorkspaceModal(false) } }
+        style={reactModalStyle}
+      >
+        <form className="modal-form" onSubmit={ () => { setIsShowAddWorkspaceModal(false) } }>
+          <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ () => { setIsShowAddWorkspaceModal(false) } } />
+          <div className="title">ワークスペース追加</div>
+          <div className="show-block">
+            <label className="label-name">追加するワークスペースのフォルダ</label>
+            <div>{addWorkspacePathState}</div>
+            <button type="button" className="button" onClick={selectAddWorkspaceDir}>フォルダ選択</button>
+          </div>
+          <div className="form-buttons">
+            <button type="submit" className="button" onClick={() => { setIsShowAddWorkspaceModal(false) }}>キャンセル</button>
+            <button type="submit" className="button" onClick={AddExistingServer}>追加</button>
           </div>
         </form>
       </ReactModal>
