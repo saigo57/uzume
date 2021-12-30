@@ -39,10 +39,10 @@
     }
   }
 
-  .tag-item {
-    padding-top: 10px;
-    padding-left: 35px;
-    height: 20px;
+  @mixin item {
+    padding-top: 5px;
+    padding-bottom: 2px;
+    height: 18px;
     letter-spacing: 1px;
     color: $main-font-color;
     list-style: none;
@@ -50,6 +50,7 @@
     cursor: pointer;
     font-size: 14px;
     transition: 0.15s;
+    white-space: nowrap;
     &:hover {
       background-color: $light-background-color;
     }
@@ -58,5 +59,14 @@
       width: 10px;
       padding-right: 4px;
     }
+  }
+
+  .tag-group-item {
+    @include item;
+    padding-left: 15px;
+  }
+  .tag-item {
+    @include item;
+    padding-left: 35px;
   }
 }
