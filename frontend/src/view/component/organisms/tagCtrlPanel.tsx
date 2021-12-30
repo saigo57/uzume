@@ -75,6 +75,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
                 workspaceId={props.workspaceId}
                 tagId={null}
                 tagName={`追加:${searchTagText}`}
+                favorite={false}
                 delete={false}
                 alreadyAdded={false}
                 onClick={()=>{createNewTag(searchTagText)}}
@@ -93,6 +94,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
                   workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
+                  favorite={t.favorite}
                   delete={false}
                   alreadyAdded={alreadyLinkedTagId.includes(t.tagId)}
                   onClick={()=>{addTagToImage(t.tagId)}}

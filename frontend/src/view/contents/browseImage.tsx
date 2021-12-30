@@ -140,6 +140,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
               workspaceId={props.workspaceId}
               tagId={null}
               tagName={`type:${searchType}`}
+              favorite={false}
               delete={false}
               alreadyAdded={false}
               onClick={toggleSearchType}
@@ -151,6 +152,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
                   workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
+                  favorite={t.favorite}
                   delete={true}
                   alreadyAdded={false}
                   onClick={searchBarClick}

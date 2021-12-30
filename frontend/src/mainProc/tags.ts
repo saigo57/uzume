@@ -35,6 +35,24 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
     {
+      label: `お気に入り登録${requestShowContextMenu.currFavorite ? '解除' : ''}`,
+      click: () => {
+        if ( requestShowContextMenu.currFavorite ) {
+          BackendConnector.workspace(requestShowContextMenu.workspaceId, (ws) => {
+            ws.tags.removeFavorite(requestShowContextMenu.tagId).then(() => {
+              getNewTags(e, requestShowContextMenu.workspaceId)
+            })
+          })
+        } else {
+          BackendConnector.workspace(requestShowContextMenu.workspaceId, (ws) => {
+            ws.tags.addFavorite(requestShowContextMenu.tagId).then(() => {
+              getNewTags(e, requestShowContextMenu.workspaceId)
+            })
+          })
+        }
+      }
+    },
+    {
       label: 'タグ名を変更',
       click: () => {
         let req: TagRenameReply = {
@@ -71,6 +89,7 @@ export function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
             tagId: resTagList.tags[i].tag_id,
             name: resTagList.tags[i].name,
             tagGroupId: resTagList.tags[i].tag_group_id,
+            favorite: resTagList.tags[i].favorite,
           })
         }
       }
