@@ -4,6 +4,7 @@ export type ResTag = {
   tag_id: string
   name: string
   tag_group_id: string
+  favorite: boolean
 }
 
 export type ResTagList = {
@@ -81,6 +82,24 @@ export default class Tags {
       await this.authorizeAxios().patch(`/${tagId}`, { name: tagName  })
     } catch (e) {
       console.log(`rename tag error [${e}]`)
+      throw e
+    }
+  }
+
+  public async addFavorite(tagId: string) {
+    try {
+      await this.authorizeAxios().post(`/${tagId}/favorite`)
+    } catch (e) {
+      console.log(`add favorite tag error [${e}]`)
+      throw e
+    }
+  }
+
+  public async removeFavorite(tagId: string) {
+    try {
+      await this.authorizeAxios().delete(`/${tagId}/favorite`)
+    } catch (e) {
+      console.log(`remove favorite tag error [${e}]`)
       throw e
     }
   }

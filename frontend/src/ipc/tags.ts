@@ -16,6 +16,7 @@ export type TagInfo = {
   tagId: string
   name: string
   tagGroupId: string
+  favorite: boolean
 }
 
 export type TagList = {
@@ -32,6 +33,7 @@ export type ShowContextMenu = {
   workspaceId: string
   tagId: string
   tagName: string
+  currFavorite: boolean
 }
 
 export type TagRenameReply = {

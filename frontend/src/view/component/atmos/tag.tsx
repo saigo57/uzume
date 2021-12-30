@@ -14,6 +14,7 @@ type TagProps = {
   workspaceId: string
   tagId: string|null
   tagName: string
+  favorite: boolean
   delete: boolean
   alreadyAdded: boolean
   onClick: ((tagId: string|null, tagName: string) => void) | null
@@ -53,6 +54,7 @@ export const Tag:React.VFC<TagProps> = (props) => {
       workspaceId: props.workspaceId,
       tagId: props.tagId,
       tagName: props.tagName,
+      currFavorite: props.favorite
     }
     window.api.send(TagsIpcId.SHOW_CONTEXT_MENU, JSON.stringify(req))
   }
