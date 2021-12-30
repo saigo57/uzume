@@ -13,11 +13,13 @@ import { ImageSideBar } from "./imageSideBar";
 import { TagInfo } from '../../ipc/tags';
 import { sendIpcGetAllTags } from '../commonIpc';
 import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images';
+import { Event } from './../lib/eventCustomHooks';
 
 type BrowseImageProps = {
   workspaceId: string
   imageId: string | null
   uncategorized: boolean
+  singleTagClickEvent: Event
   onModeChange: (imageId: string | null) => void
   onPrevClick: () => void
   dsb_ref: React.RefObject<HTMLDivElement>
@@ -29,6 +31,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [searchType, setSearchType] = useState('and');
   const [tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
+  const [singleClickTagId, setSingleClickTagId] = useState(null as string | null);
 
   useEffect(() => {
     setSelectedImageIds([])
@@ -44,8 +47,24 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   }, [props.uncategorized]);
 
   useEffect(() => {
+    let tagId = props.singleTagClickEvent.data;
+    setSingleClickTagId(tagId)
+  }, [props.singleTagClickEvent]);
+
+  useEffect(() => {
+    setSearchTags((state) => {
+      let tagId = singleClickTagId;
+      if ( !tagId ) return state;
+      return tagAllListState.filter((tag:any) => tagId == tag.tagId);
+    });
+
+    setSingleClickTagId(null)
     showImages()
-  }, [searchTags.length, searchType]); // renameのときは発火させない
+  }, [singleClickTagId]);
+
+  useEffect(() => {
+    showImages()
+  }, [searchTags.length, searchType, singleClickTagId]); // renameのときは発火させない
 
   useEffect(() => {
     if ( showSearchPanel ) {

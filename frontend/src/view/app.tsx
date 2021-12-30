@@ -32,10 +32,11 @@ export function App() {
   const [tagManageEvent, raiseTagManageEvent] = useEvent(() => {
     setCurrMode('tag_manage');
   });
+  const [singleTagClickEvent, raiseSingleTagClickEvent] = useEvent(null);
 
   useEffect(() => {
     setCurrMode('home')
-    raiseShowIndexImageEvent();
+    raiseShowIndexImageEvent(null);
   }, [currentWorkspaceState]);
 
   useEffect(() => {
@@ -52,9 +53,9 @@ export function App() {
 
   const onMenuAction = (action: string) => {
     switch ( action ) {
-      case 'home_click': raiseShowIndexImageEvent(); break;
-      case 'uncategorized_click': raiseUncategorizedEvent(); break;
-      case 'tag_manage_click': raiseTagManageEvent(); break;
+      case 'home_click': raiseShowIndexImageEvent(null); break;
+      case 'uncategorized_click': raiseUncategorizedEvent(null); break;
+      case 'tag_manage_click': raiseTagManageEvent(null); break;
     }
   }
 
@@ -62,7 +63,14 @@ export function App() {
     <DndProvider backend={HTML5Backend}>
       <div className="container">
         <ServerList />
-        <MainMenu workspaceName={currentWorkspaceState.workspace_name} currMode={currMode} onAction={onMenuAction} dsb_ref={dsb_left} />
+        <MainMenu
+          workspaceId={currentWorkspaceState.workspace_id}
+          workspaceName={currentWorkspaceState.workspace_name}
+          currMode={currMode}
+          onAction={onMenuAction}
+          onSingleTagClick={raiseSingleTagClickEvent}
+          dsb_ref={dsb_left}
+        />
         <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>
         <ContentsArea
           workspaceId={currentWorkspaceState.workspace_id}
@@ -70,6 +78,7 @@ export function App() {
           showIndexImageEvent={showIndexImageEvent}
           uncategorizedEvent={uncategorizedEvent}
           tagManageEvent={tagManageEvent}
+          singleTagClickEvent={singleTagClickEvent}
           dsb_ref={dsb_right}
         />
         <Footer />
