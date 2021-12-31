@@ -8,6 +8,9 @@ import {
   ShowContextMenu,
   DeleteWorkspace,
   AddWorkspaceInfo,
+  FetchWorkspaceIcon,
+  IconImageData,
+  SetWorkspaceIcon,
 } from "../ipc/serverList";
 import CssConst from "./cssConst";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -36,14 +39,19 @@ const reactModalStyle: ReactModal.Styles = {
 }
 
 export const ServerList = () => {
+  const DEFAULT_ICON_PATH = '../src/contents/img/design-server-icon.jpg';
   const [serverListState, setServerList] = useState([] as ServerInfo[]);
   const [isShowNewWorkspaceModalState, setIsShowNewWorkspaceModal] = useState(false);
   const [isShowAddWorkspaceModalState, setIsShowAddWorkspaceModal] = useState(false);
   const [isShowDeleteWorkspaceModalState, setIsShowDeleteWorkspaceModal] = useState(false);
+  const [isShowSetIconModalState, setIsShowSetIconModalState] = useState(false);
   const [workspaceInfoState, setWorkspaceInfo] = useState<CreateWorkspaceInfo>({name:'', dirName:'', dirPath:''});
   const [deleteWorkspaceState, setDeleteWorkspaceState] = useState<ServerInfo>(
-    {workspaceId:'', name:'', iconImagePath:'', isAvailable: false, isSelected: false});
+    {workspaceId:'', name:'', isAvailable: false, isSelected: false});
+  const [workspaceIconState, setWorkspaceIconState] = useState<ServerInfo>(
+    {workspaceId:'', name:'', isAvailable: false, isSelected: false});
   const [addWorkspacePathState, setAddWorkspacePathState] = useState('');
+  const [workspaceIconPathState, setWorkspaceIconPathState] = useState('');
 
   useEffect(() => {
     window.api.send(serverListIpcId.FETCH_WORKSPACE_LIST);
@@ -61,6 +69,42 @@ export const ServerList = () => {
       const deleteWorkspace = JSON.parse(arg) as ServerInfo
       setDeleteWorkspaceState(deleteWorkspace)
       setIsShowDeleteWorkspaceModal(true)
+    });
+  }, []);
+
+  useEffect(() => {
+    window.api.on(serverListIpcId.SHOW_SET_ICON_MODAL_REPLY, (_e, arg) => {
+      const targetWorkspace = JSON.parse(arg) as ServerInfo
+      setWorkspaceIconState(targetWorkspace)
+      setIsShowSetIconModalState(true)
+    });
+  }, []);
+
+  useEffect(() => {
+    window.api.on(serverListIpcId.SELECT_SET_WORKSPACE_ICON_REPLY, (_e, arg) => {
+      setWorkspaceIconPathState(arg[0])
+    });
+  }, []);
+
+  useEffect(() => {
+    serverListState.forEach((server) => {
+      let req = { workspaceId: server.workspaceId } as FetchWorkspaceIcon
+      window.api.send(serverListIpcId.FETCH_WORKSPACE_ICON, JSON.stringify(req));
+    })
+  }, [serverListState]);
+
+  useEffect(() => {
+    window.api.on(serverListIpcId.FETCH_WORKSPACE_ICON_REPLY, (_e, arg) => {
+      const iconImageData = JSON.parse(arg) as IconImageData;
+      let img: any = document.getElementById(`icon-image-${iconImageData.workspaceId}`);
+
+      if ( img ) {
+        if ( iconImageData.iconExists ) {
+          img.src = "data:image;base64," + iconImageData.imageBase64;
+        } else {
+          img.src = DEFAULT_ICON_PATH;
+        }
+      }
     });
   }, []);
 
@@ -108,6 +152,14 @@ export const ServerList = () => {
     window.api.send(serverListIpcId.DELETE_WORKSPACE, msg)
   }
 
+  const setWorkspaceIcon = (workspaceId: string) => {
+    let msg = JSON.stringify({
+      workspaceId: workspaceId,
+      iconPath: workspaceIconPathState,
+    } as SetWorkspaceIcon)
+    window.api.send(serverListIpcId.SET_WORKSPACE_ICON, msg)
+  }
+
   const inputNameOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWorkspaceInfo({...workspaceInfoState, name: event.target.value})
   }
@@ -135,6 +187,10 @@ export const ServerList = () => {
     });
   }
 
+  const selectWorkspaceIcon = () => {
+    window.api.send(serverListIpcId.SELECT_SET_WORKSPACE_ICON);
+  }
+
   const showAddWorkspaceModal = () => {
     setIsShowNewWorkspaceModal(false)
     setIsShowAddWorkspaceModal(true)
@@ -146,8 +202,9 @@ export const ServerList = () => {
         serverListState.map((s) => {
           return (
             <img
+              id={`icon-image-${s.workspaceId}`}
               className={`server-icon actually-workspace-icon ${selectedClassName(s.isSelected)}`} 
-              src={s.iconImagePath}
+              src={DEFAULT_ICON_PATH}
               data-workspace_id={s.workspaceId}
               onClick={workspaceIconClick}>
             </img>
@@ -237,6 +294,25 @@ export const ServerList = () => {
           <div className="form-buttons">
             <button type="submit" className="button" onClick={ () => { setIsShowDeleteWorkspaceModal(false) } }>キャンセル</button>
             <button type="submit" className="button" onClick={ () => { deleteWorkspace(deleteWorkspaceState.workspaceId) } }>削除</button>
+          </div>
+        </form>
+      </ReactModal>
+
+      <ReactModal
+        isOpen={isShowSetIconModalState}
+        onRequestClose={ () => { setIsShowSetIconModalState(false) } }
+        style={reactModalStyle}
+      >
+        <form className="modal-form" onSubmit={ () => { setIsShowSetIconModalState(false) } }>
+          <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ () => { setIsShowSetIconModalState(false) } } />
+          <div className="title">{workspaceIconState.name} アイコン設定</div>
+          <div className="show-block">
+            <div>{workspaceIconPathState}</div>
+            <button type="button" className="button" onClick={selectWorkspaceIcon}>画像選択</button>
+          </div>
+          <div className="form-buttons">
+            <button type="submit" className="button" onClick={() => { setIsShowSetIconModalState(false) }}>キャンセル</button>
+            <button type="submit" className="button" onClick={() => { setWorkspaceIcon(workspaceIconState.workspaceId) }}>設定</button>
           </div>
         </form>
       </ReactModal>

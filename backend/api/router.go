@@ -50,6 +50,7 @@ func RouteInit(listener net.Listener) *echo.Echo {
 			auth.DELETE("/workspaces", DeleteWorkspaces())
 			auth.GET("/workspaces/icon", GetWorkspaceIcon())
 			auth.POST("/workspaces/icon", PostWorkspaceIcon())
+			auth.DELETE("/workspaces/icon", DeleteWorkspaceIcon())
 			auth.POST("/workspaces/reflesh_cache", PostWorkspaceRefleshCache())
 
 			auth.POST("/images", PostImages())
