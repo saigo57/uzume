@@ -1,4 +1,6 @@
 const axiosBase = require('axios');
+const fs = require('fs');
+const FormData = require('form-data')
 import Image from './image'
 import Tags from './tags'
 import TagGroups from './tagGroups'
@@ -125,6 +127,46 @@ export default class Workspace {
       return await this.authorizeAxios().delete('/')
     } catch (e) {
       console.log(`workspace delete error [${e}]`)
+      throw e
+    }
+  }
+
+  public async postIcon(filePath: string) {
+    try {
+      const params = new FormData();
+      params.append('icon', fs.createReadStream(filePath), filePath)
+      return await this.authorizeAxios().post('/icon', params, { headers: params.getHeaders() } as any)
+    } catch (e) {
+      console.log(`workspace icon post error [${e}]`)
+      throw e
+    }
+  }
+
+  public async fetchIcon() {
+    try {
+      let encodedString = Buffer.from(`${this.workspaceId}:${this.accessToken}`).toString('base64')
+      let authorizeString = `Basic ${encodedString}`
+
+      let res = await axiosBase.create({
+        baseURL: `http://localhost:1323/api/v1/workspaces/icon`,
+        responseType: 'arraybuffer',
+        headers: {
+          'Authorization': authorizeString,
+          'Content-Type': 'image'
+        },
+      }).get()
+      return res.data.toString('base64')
+    } catch (e:any) {
+      console.log(`fetch workspace icon error [${e}]`)
+      throw e
+    }
+  }
+
+  public async deleteIcon() {
+    try {
+      return await this.authorizeAxios().delete('/icon')
+    } catch (e) {
+      console.log(`workspace icon delete error [${e}]`)
       throw e
     }
   }

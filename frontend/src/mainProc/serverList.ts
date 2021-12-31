@@ -6,6 +6,9 @@ import {
   CreateWorkspaceInfo,
   ShowContextMenu,
   AddWorkspaceInfo,
+  FetchWorkspaceIcon,
+  IconImageData,
+  SetWorkspaceIcon,
 } from '../ipc/serverList';
 import BackendConnector from '../backendConnector/backendConnector';
 import { changeCurrentWorkspace } from './currWorkspace'
@@ -45,6 +48,16 @@ ipcMain.on(IpcId.SELECT_ADD_WORKSPACE_DIR, (e, _arg) => {
   e.reply(IpcId.SELECT_ADD_WORKSPACE_DIR_REPLY, dirName);
 });
 
+// 既存のワークスペースを選択
+ipcMain.on(IpcId.SELECT_SET_WORKSPACE_ICON, (e, _arg) => {
+  let dirName = dialog.showOpenDialogSync(null as any, {
+    properties: ['openFile'],
+    title: 'ワークスペースアイコン画像',
+    defaultPath: '.',
+  });
+  e.reply(IpcId.SELECT_SET_WORKSPACE_ICON_REPLY, dirName);
+});
+
 // ワークスペースを新規作成
 ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
   let wsInfo: CreateWorkspaceInfo = JSON.parse(arg)
@@ -66,6 +79,16 @@ ipcMain.on(IpcId.CREATE_ADD_SERVER, (e, arg) => {
   });
 });
 
+// ワークスペースアイコンを設定
+ipcMain.on(IpcId.SET_WORKSPACE_ICON, (e, arg) => {
+  let setWorkspaceIcon: SetWorkspaceIcon = JSON.parse(arg)
+  BackendConnector.workspace(setWorkspaceIcon.workspaceId, (ws) => {
+    ws.postIcon(setWorkspaceIcon.iconPath).then(() => {
+      fetchWorkspaceList(e, null as any)
+    });
+  })
+});
+
 ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
   let msg: ShowContextMenu = JSON.parse(arg)
 
@@ -76,13 +99,29 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
         // TODO: 後で実装
       }
     },
+    {
+      label: 'アイコンを設定',
+      click: () => {
+        showSelectWorkspaceIconModal(e, msg.workspaceId)
+      }
+    },
     { type: 'separator' },
     {
-      label: '削除',
+      label: 'アイコンを削除',
+      click: () => {
+        BackendConnector.workspace(msg.workspaceId, (ws) => {
+          ws.deleteIcon().then(() => {
+            fetchWorkspaceList(e, null as any)
+          });
+        })
+      }
+    },
+    {
+      label: 'ワークスペースを削除',
       click: () => {
         showDeleteWorkspaceModal(e, msg.workspaceId)
       }
-    }
+    },
   ]
   const menu = Menu.buildFromTemplate(template)
   let contents: any = BrowserWindow.fromWebContents(e.sender)
@@ -99,6 +138,42 @@ ipcMain.on(IpcId.DELETE_WORKSPACE, (e, arg) => {
   })
 });
 
+ipcMain.on(IpcId.DELETE_WORKSPACE, (e, arg) => {
+  let msg: ShowContextMenu = JSON.parse(arg)
+
+  BackendConnector.workspace(msg.workspaceId, (ws) => {
+    ws.delete().then(() => {
+      fetchWorkspaceList(e, null as any)
+    });
+  })
+});
+
+ipcMain.on(IpcId.FETCH_WORKSPACE_ICON, (e, arg) => {
+  let msg: FetchWorkspaceIcon = JSON.parse(arg)
+
+  BackendConnector.workspace(msg.workspaceId, (ws) => {
+    ws.fetchIcon().then((imageBase64) => {
+      let imageData: IconImageData = {
+        workspaceId: msg.workspaceId,
+        iconExists: true,
+        imageBase64: imageBase64,
+      }
+      e.reply(IpcId.FETCH_WORKSPACE_ICON_REPLY, JSON.stringify(imageData));
+    }).catch((err) => {
+      if ( err.response.status == 404 ) {
+        let imageData: IconImageData = {
+          workspaceId: msg.workspaceId,
+          iconExists: false,
+          imageBase64: '',
+        }
+        e.reply(IpcId.FETCH_WORKSPACE_ICON_REPLY, JSON.stringify(imageData));
+      } else {
+        console.log(`icon error[${err.status}]`)
+      }
+    });
+  })
+});
+
 // selectWorkspaceIdをnullにすると一番上を選択
 function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string) {
   BackendConnector.Workspace.getList().then((workspaceList) => {
@@ -106,7 +181,6 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
       return {
         workspaceId: w.workspace_id,
         name: w.name,
-        iconImagePath: "../src/contents/img/design-server-icon.jpg", // TODO: バックエンドから取得する
         isAvailable: true,
         isSelected: false
       } as ServerInfo
@@ -156,5 +230,13 @@ function showDeleteWorkspaceModal(e: Electron.IpcMainEvent, workspaceId: string)
     if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
 
     e.reply(IpcId.SHOW_DELETE_WORKSPACE_MODAL_REPLY, JSON.stringify(g_workspaceList[i]))
+  }
+}
+
+function showSelectWorkspaceIconModal(e: Electron.IpcMainEvent, workspaceId: string) {
+  for (let i = 0; i < g_workspaceList.length; i++) {
+    if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
+
+    e.reply(IpcId.SHOW_SET_ICON_MODAL_REPLY, JSON.stringify(g_workspaceList[i]))
   }
 }

@@ -252,6 +252,20 @@ func PostWorkspaceIcon() echo.HandlerFunc {
 	}
 }
 
+func DeleteWorkspaceIcon() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		workspace_id := helper.LoggedinWrokspaceId(c)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		workspace.DeleteWorkspaceIcon()
+		return c.JSON(http.StatusCreated, "")
+	}
+}
+
 func PostWorkspaceRefleshCache() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		workspace_id := helper.LoggedinWrokspaceId(c)
