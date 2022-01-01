@@ -323,8 +323,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     maxWidth: thumbnailArea?.offsetWidth,
     maxHeight: thumbnailArea?.offsetHeight,
     visibility: preview.isDisplay ? 'visible': 'hidden',
+    opacity: preview.isDisplay ? '1': '0',
     backgroundColor: 'rbga(0,0,0,0)',
     objectFit: 'contain',
+    transitionProperty: 'opacity',
+    transitionDuration: '0.15s',
+    transitionDelay: '0.2s',
   };
 
   return (

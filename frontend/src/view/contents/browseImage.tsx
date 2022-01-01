@@ -161,12 +161,12 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
               );
             }) }
           </div>
-          <div className="control-panel">
+          {/* <div className="control-panel">
             <div className="back-foward">
               <FontAwesomeIcon icon={faStepBackward} />
               <FontAwesomeIcon icon={faStepForward} />
             </div>
-          </div>
+          </div> */}
 
           <SearchPanel
             id="search-panel-id"

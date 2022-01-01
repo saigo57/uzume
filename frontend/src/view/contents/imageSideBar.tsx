@@ -108,6 +108,13 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
     file_name: '', ext: '', memo: '', author: '', created_at: '',
   } as ImageInfo;
   if ( imageInfoList.length == 1 ) showImageInfo = imageInfoList[0];
+  
+  const formatDate = (dateStr: string)=>{
+    if ( !dateStr ) return '';
+    let d = new Date(Date.parse(dateStr));
+    let formatted_date = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + "." + d.getSeconds();
+    return formatted_date;
+  }
 
   return (
     <>
@@ -134,7 +141,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
         </div>
         <div className="side-bar-title"><div className="side-bar-title-text">Info</div></div>
         <ul className="info-area">
-          <li className="info-item">
+          {/* <li className="info-item">
             <div className="info-title">メモ</div>
             <textarea name="memo" className="info-body editable memo" value="画像についてのメモを記述する。編集はreactのstateを介して行う必要があるよう。" />
           </li>
@@ -142,7 +149,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
             <div className="info-title">作者</div>
             <input type="text" name="author" className="info-body editable" value="ジャムおじさん" />
           </li>
-          <div className="info-item-block-separator"></div>
+          <div className="info-item-block-separator"></div> */}
           <li className="info-item">
             <div className="info-title">ファイル名</div>
             <div className="info-body freezed">{showImageInfo.file_name}</div>
@@ -157,16 +164,16 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
           </li>
           <li className="info-item">
             <div className="info-title">登録日</div>
-            <div className="info-body freezed">{showImageInfo.created_at}</div>
+            <div className="info-body freezed">{formatDate(showImageInfo.created_at)}</div>
           </li>
           <li className="info-item">
             <div className="info-title">解像度</div>
-            <div className="info-body freezed">{showImageInfo.width} × {showImageInfo.height}</div>
+            <div className="info-body freezed">{showImageInfo.width} {showImageInfo.width ? 'x' : ''} {showImageInfo.height}</div>
           </li>
-          <li className="info-item">
+          {/* <li className="info-item">
             <div className="info-title">容量</div>
             <div className="info-body freezed">2.43MB</div>
-          </li>
+          </li> */}
         </ul>
       </section>
 
