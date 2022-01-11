@@ -44,6 +44,8 @@ export default class Image {
         'Content-Type': 'application/json',
         'Authorization': authorizeString
       },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
       responseType: 'json'
     })
     axios.interceptors.request.use((request:any) => {
