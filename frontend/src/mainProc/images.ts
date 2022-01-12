@@ -10,6 +10,7 @@ import {
   ImageInfo,
   AddTagToImage,
   RemoveTagFromImage,
+  ImageUploadProgress,
 } from '../ipc/images'
 import BackendConnector from '../backendConnector/backendConnector';
 import BackendConnectorImage from '../backendConnector/image';
@@ -20,8 +21,17 @@ let g_imageInfoList: { [key: string]: ImageInfoMap } = {}
 ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
   let imageFiles: ImageFiles = JSON.parse(arg)
 
+  const imageUploaded = (finishNum: number, allNum: number) => {
+    let progress = {
+      completeCnt: finishNum,
+      allImagesCnt: allNum,
+    } as ImageUploadProgress
+
+    e.reply(IpcId.IMAGE_UPLOAD_PROGRESS_REPLY, JSON.stringify(progress))
+  };
+
   BackendConnector.workspace(imageFiles.workspaceId, (ws) => {
-    ws.image.create(imageFiles.imageFileList).then(() => {
+    ws.image.create(imageFiles.imageFileList, imageUploaded).then(() => {
       // TODO: uploadしたときの画面の動きは整理する必要がある
       showImagesReply(e, imageFiles.workspaceId, 1, imageFiles.tagIds, imageFiles.searchType)
     });

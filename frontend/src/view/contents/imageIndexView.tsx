@@ -1,4 +1,5 @@
 import React, { useState, useEffect} from 'react';
+import ReactModal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -9,7 +10,9 @@ import {
   ShowImages,
   RequestImage,
   ImageData,
-} from '../../ipc/images'
+  ImageUploadProgress,
+} from '../../ipc/images';
+import CssConst from "./../cssConst";
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -37,6 +40,11 @@ type Preview = {
   startingPos: Point
 }
 
+type UploadModalInfo = {
+  completeCnt: number
+  allImagesCnt: number
+}
+
 export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isDragOverState, setIsDragOver] = useState(false);
   const [imageList, setImageList] = useState({page: 0, images: []} as ImageList);
@@ -44,6 +52,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [lastClickImageId, setLastClickImageId] = useState("");
   const [selectedImageId, setSelectedImageId] = useState([] as string[]);
   const [preview, setPreview] = useState({isDisplay: false, isFlagBreak: false, startingPos: {x: 0, y: 0}} as Preview);
+  const [isShowImageUploadModal, setIsShowImageUploadModal] = useState(false);
+  const [uploadModalInfo, setUploadModalInfo] = useState({ completeCnt: 0, allImagesCnt: 0 } as UploadModalInfo);
 
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
@@ -147,6 +157,17 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
+    window.api.on(ImagesIpcId.IMAGE_UPLOAD_PROGRESS_REPLY, (_e, arg) => {
+      let progress = JSON.parse(arg) as ImageUploadProgress
+      if ( progress.completeCnt < progress.allImagesCnt ) {
+        setUploadModalInfo({completeCnt: progress.completeCnt, allImagesCnt: progress.allImagesCnt })
+      } else {
+        setIsShowImageUploadModal(false)
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     let thumbnailArea: any = document.getElementById('thumbnail-area');
     thumbnailArea.addEventListener('mousemove', onMousemove);
 
@@ -195,6 +216,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       imageFiles.imageFileList.push(e.dataTransfer.files[i].path);
     }
 
+    setIsShowImageUploadModal(true)
+    setUploadModalInfo({ completeCnt: 0, allImagesCnt: imageFiles.imageFileList.length })
     window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
@@ -331,6 +354,23 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     transitionDelay: '0.2s',
   };
 
+  const reactModalStyle: ReactModal.Styles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: CssConst.MAIN_BACKGROUND_COLOR,
+      borderColor: CssConst.EDGE_GRAY,
+      color: CssConst.MAIN_FONT_COLOR,
+    },
+    overlay: {
+      background: 'rgba(0, 0, 0, 0.5)'
+    }
+  };
+
   return (
     <div
       id="thumbnail-area"
@@ -370,6 +410,19 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       })()}
 
       <img id="image-preview" style={previewStyle}></img>
+
+      <ReactModal
+        isOpen={isShowImageUploadModal}
+        onRequestClose={ () => { setIsShowImageUploadModal(false) } }
+        style={reactModalStyle}
+      >
+        <form className="modal-form" onSubmit={ () => { setIsShowImageUploadModal(false) } }>
+          <div className="title">アップロード中</div>
+          <div className="show-block">
+            <div>{uploadModalInfo.completeCnt}/{uploadModalInfo.allImagesCnt}</div>
+          </div>
+        </form>
+      </ReactModal>
     </div>
   );
 }
