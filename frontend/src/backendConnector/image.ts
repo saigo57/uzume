@@ -67,13 +67,14 @@ export default class Image {
     return this.authorizeAxiosBase('multipart/form-data')
   }
 
-  public async create(filePathList: string[]) {
+  public async create(filePathList: string[], imageUploadedCallBack: (finishNum: number, allNum: number)=>void) {
     try {
       for (let i = 0; i < filePathList.length; i++) {
         let filePath = filePathList[i]
         const params = new FormData();
         params.append('image', fs.createReadStream(filePath), filePath)
         await this.authorizeAxiosMultipart().post('/', params, { headers: params.getHeaders() } as any)
+        imageUploadedCallBack(i + 1, filePathList.length)
       }
       return 0 // なんか返さないとasync/awaitが怪しい動きをする(はず)
     } catch (e) {
