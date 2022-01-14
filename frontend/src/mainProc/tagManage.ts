@@ -8,6 +8,7 @@ import {
 import { getNewTags } from './tags';
 import { fetchAllTagGroups } from './tagGroups';
 import BackendConnector from '../backendConnector/backendConnector';
+import { showFooterMessage } from '../ipc/footer';
 
 ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
   let reqTagGroupContextMenu: TagGroupContextMenu = JSON.parse(arg)
@@ -33,6 +34,8 @@ ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
             getNewTags(e, reqTagGroupContextMenu.workspaceId);
             fetchAllTagGroups(e, reqTagGroupContextMenu.workspaceId);
             e.reply(IpcId.TAG_GROUP_DELETE_REPLY)
+          }).catch((err) => {
+            showFooterMessage(e, `タググループの削除に失敗しました。[${err}}]`);
           })
         });
       }
@@ -49,6 +52,8 @@ ipcMain.on(IpcId.TAG_GROUP_RENAME, (e, arg) => {
   BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {
     ws.tag_groups.RenameTagGroup(requestTagRename.tagGroupId, requestTagRename.tagGroupName).then(() => {
       fetchAllTagGroups(e, requestTagRename.workspaceId);
+    }).catch((err) => {
+      showFooterMessage(e, `タググループのリネームに失敗しました。[${err}}]`);
     });
   });
 });

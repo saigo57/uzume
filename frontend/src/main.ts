@@ -1,5 +1,7 @@
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
+import BackendConnector from './backendConnector/backendConnector';
+import { showFooterMessageByBrowserWindow } from './ipc/footer';
 import './mainProc/serverList';
 import './mainProc/images';
 import './mainProc/tags';
@@ -26,6 +28,10 @@ function createWindow () {
   }
 
   win.loadFile('dist/app.html');
+
+  BackendConnector.onFailAuthorization = (err) => {
+    showFooterMessageByBrowserWindow(win, `アクセストークンの取得に失敗しました。[${err}]`)
+  }
 }
 
 // Electron の初期化が完了したらウィンドウを作成

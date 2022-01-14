@@ -10,6 +10,7 @@ import {
   getNewTags
 } from './tags';
 import BackendConnector from '../backendConnector/backendConnector';
+import { showFooterMessage } from '../ipc/footer';
 
 ipcMain.on(IpcId.GET_ALL_TAG_GROUPS, (e, arg) => {
   let reqAllTagGroups: GetAllTagGroups = JSON.parse(arg)
@@ -21,6 +22,8 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_GROUP, (e, arg) => {
   BackendConnector.workspace(reqCreateTagGroup.workspaceId, (ws) => {
     ws.tag_groups.createNewTagGroup(reqCreateTagGroup.name).then(() => {
       fetchAllTagGroups(e, reqCreateTagGroup.workspaceId);
+    }).catch((err) => {
+      showFooterMessage(e, `タググループの新規作成に失敗しました。[${err}}]`);
     })
   });
 });
@@ -30,6 +33,8 @@ ipcMain.on(IpcId.ADD_TO_TAG_GROUP, (e, arg) => {
   BackendConnector.workspace(reqAddToTagGroup.workspaceId, (ws) => {
     ws.tag_groups.AddTagToTagGroup(reqAddToTagGroup.tagGroupId, reqAddToTagGroup.tagId).then(() => {
       getNewTags(e, reqAddToTagGroup.workspaceId);
+    }).catch((err) => {
+      showFooterMessage(e, `タググループへのタグ追加に失敗しました。[${err}}]`);
     })
   });
 });
@@ -47,6 +52,8 @@ export function fetchAllTagGroups(e: Electron.IpcMainEvent, workspace_id: string
         }
       }
       e.reply(IpcId.GET_ALL_TAG_GROUPS_REPLY, JSON.stringify({tag_groups: tag_groups}));
+    }).catch((err) => {
+      showFooterMessage(e, `タググループリストの取得に失敗しました。[${err}}]`);
     })
   });
 }
