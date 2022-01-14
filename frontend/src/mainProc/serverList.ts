@@ -14,6 +14,7 @@ import BackendConnector from '../backendConnector/backendConnector';
 import { changeCurrentWorkspace } from './currWorkspace'
 import { showImagesReply } from './images'
 const path = require('path');
+import { showFooterMessage } from '../ipc/footer';
 
 let g_workspaceList: ServerInfo[] = []
 
@@ -66,6 +67,8 @@ ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
     path.join(wsInfo.dirPath, wsInfo.dirName + ".uzume")
   ).then((workspaceId) => {
     fetchWorkspaceList(e, workspaceId.workspace_id)
+  }).catch((err) => {
+    showFooterMessage(e, `ワークスペースの新規作成に失敗しました。[${err}}]`);
   });
 });
 
@@ -76,6 +79,8 @@ ipcMain.on(IpcId.CREATE_ADD_SERVER, (e, arg) => {
     wsInfo.dirPath
   ).then(() => {
     fetchWorkspaceList(e, null as any)
+  }).catch((err) => {
+    showFooterMessage(e, `既存ワークスペースの追加に失敗しました。[${err}}]`);
   });
 });
 
@@ -85,6 +90,8 @@ ipcMain.on(IpcId.SET_WORKSPACE_ICON, (e, arg) => {
   BackendConnector.workspace(setWorkspaceIcon.workspaceId, (ws) => {
     ws.postIcon(setWorkspaceIcon.iconPath).then(() => {
       fetchWorkspaceList(e, null as any)
+    }).catch((err) => {
+      showFooterMessage(e, `ワークスペースアイコンの設定に失敗しました。[${err}}]`);
     });
   })
 });
@@ -112,6 +119,8 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
         BackendConnector.workspace(msg.workspaceId, (ws) => {
           ws.deleteIcon().then(() => {
             fetchWorkspaceList(e, null as any)
+          }).catch((err) => {
+            showFooterMessage(e, `アイコンの削除に失敗しました。[${err}}]`);
           });
         })
       }
@@ -134,16 +143,8 @@ ipcMain.on(IpcId.DELETE_WORKSPACE, (e, arg) => {
   BackendConnector.workspace(msg.workspaceId, (ws) => {
     ws.delete().then(() => {
       fetchWorkspaceList(e, null as any)
-    });
-  })
-});
-
-ipcMain.on(IpcId.DELETE_WORKSPACE, (e, arg) => {
-  let msg: ShowContextMenu = JSON.parse(arg)
-
-  BackendConnector.workspace(msg.workspaceId, (ws) => {
-    ws.delete().then(() => {
-      fetchWorkspaceList(e, null as any)
+    }).catch((err) => {
+      showFooterMessage(e, `ワークスペースの削除に失敗しました。[${err}}]`);
     });
   })
 });
@@ -160,15 +161,19 @@ ipcMain.on(IpcId.FETCH_WORKSPACE_ICON, (e, arg) => {
       }
       e.reply(IpcId.FETCH_WORKSPACE_ICON_REPLY, JSON.stringify(imageData));
     }).catch((err) => {
-      if ( err.response.status == 404 ) {
-        let imageData: IconImageData = {
-          workspaceId: msg.workspaceId,
-          iconExists: false,
-          imageBase64: '',
+      if ( 'response' in err ) {
+        if ( err.response.status == 404 ) {
+          let imageData: IconImageData = {
+            workspaceId: msg.workspaceId,
+            iconExists: false,
+            imageBase64: '',
+          }
+          e.reply(IpcId.FETCH_WORKSPACE_ICON_REPLY, JSON.stringify(imageData));
+        } else {
+          showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err.response.status}}]`);
         }
-        e.reply(IpcId.FETCH_WORKSPACE_ICON_REPLY, JSON.stringify(imageData));
       } else {
-        console.log(`icon error[${err.status}]`)
+        showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err}}]`);
       }
     });
   })
@@ -196,6 +201,8 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
     }
 
     callChangeCurrentWorkspace(e)
+  }).catch((err) => {
+    showFooterMessage(e, `ワークスペースリストの取得に失敗しました。[${err}}]`);
   });
 }
 
