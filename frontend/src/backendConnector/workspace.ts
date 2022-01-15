@@ -1,6 +1,7 @@
 const axiosBase = require('axios');
 const fs = require('fs');
-const FormData = require('form-data')
+const FormData = require('form-data');
+import BackendConnector from "./backendConnector";
 import Image from './image'
 import Tags from './tags'
 import TagGroups from './tagGroups'
@@ -42,7 +43,7 @@ export default class Workspace {
 
   static noauthorizeAxios() {
     let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/workspaces',
+      baseURL: BackendConnector.buildUrl('/api/v1/workspaces'),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -104,7 +105,7 @@ export default class Workspace {
     let authorizeString = `Basic ${encodedString}`
 
     let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/workspaces',
+      baseURL: BackendConnector.buildUrl('/api/v1/workspaces'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authorizeString
@@ -148,7 +149,7 @@ export default class Workspace {
       let authorizeString = `Basic ${encodedString}`
 
       let res = await axiosBase.create({
-        baseURL: `http://localhost:1323/api/v1/workspaces/icon`,
+        baseURL: BackendConnector.buildUrl(`/api/v1/workspaces/icon`),
         responseType: 'arraybuffer',
         headers: {
           'Authorization': authorizeString,
