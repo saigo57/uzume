@@ -1,4 +1,5 @@
 const axiosBase = require('axios');
+import BackendConnector from "./backendConnector";
 
 export type ResTagGroup = {
   tag_group_id: string
@@ -27,7 +28,7 @@ export default class TagGroups {
     let authorizeString = `Basic ${encodedString}`
 
     let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/tag_groups',
+      baseURL: BackendConnector.buildUrl('/api/v1/tag_groups'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authorizeString

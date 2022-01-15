@@ -1,4 +1,5 @@
 const axiosBase = require('axios');
+import BackendConnector from "./backendConnector";
 
 export type ResTag = {
   tag_id: string
@@ -29,7 +30,7 @@ export default class Tags {
     let authorizeString = `Basic ${encodedString}`
 
     let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/tags',
+      baseURL: BackendConnector.buildUrl('/api/v1/tags'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authorizeString

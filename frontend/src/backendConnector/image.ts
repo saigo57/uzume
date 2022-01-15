@@ -1,3 +1,5 @@
+import BackendConnector from "./backendConnector";
+
 const axiosBase = require('axios');
 const fs = require('fs');
 const FormData = require('form-data')
@@ -37,9 +39,9 @@ export default class Image {
   private authorizeAxiosBase(contentType: string) {
     let encodedString = Buffer.from(`${this.workspaceId}:${this.accessToken}`).toString('base64')
     let authorizeString = `Basic ${encodedString}`
-
+    
     let axios = axiosBase.create({
-      baseURL: 'http://localhost:1323/api/v1/images',
+      baseURL: BackendConnector.buildUrl('/api/v1/images'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': authorizeString
@@ -114,7 +116,7 @@ export default class Image {
       let encodedString = Buffer.from(`${this.workspaceId}:${this.accessToken}`).toString('base64')
       let authorizeString = `Basic ${encodedString}`
       let res = await axiosBase.create({
-        baseURL: `http://localhost:1323/api/v1/images/${imageId}/file?image_size=${imageSize}`,
+        baseURL: BackendConnector.buildUrl(`/api/v1/images/${imageId}/file?image_size=${imageSize}`),
         responseType: 'arraybuffer',
         headers: {
           'Authorization': authorizeString,

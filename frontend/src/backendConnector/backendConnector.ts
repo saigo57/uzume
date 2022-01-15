@@ -6,6 +6,22 @@ export default class BackendConnector {
   
   static workspaceList: { [key: string]: BCWorkspace; } = {}
   static onFailAuthorization: ((err: any) => void) | null = null
+  private static backendUrl: string | null = null
+
+  static setBackendUrl(url: string) {
+    if ( url.slice(-1) == '/' ) {
+      this.backendUrl = url.substring(0, url.length - 1)
+    } else {
+      this.backendUrl = url
+    }
+  }
+
+  static buildUrl(path: string): string {
+    if ( path.slice(0, 1) == '/' ) {
+      return `${this.backendUrl}${path}`
+    }
+    return `${this.backendUrl}/${path}`
+  }
 
   static workspace(workspaceId: string, callback: (workspace: BCWorkspace) => void) {
     // accessTokenがキャッシュされていたらそれを使う
