@@ -49,14 +49,16 @@ export default class Workspace {
       },
       responseType: 'json'
     });
-    axios.interceptors.request.use((request:any) => {
-      console.log('request: ', request)
-      return request
-    });
-    axios.interceptors.response.use((response:any) => {
-      console.log('response: ', response.data)
-      return response
-    });
+    if (process.env.NODE_ENV === 'development') {
+      axios.interceptors.request.use((request:any) => {
+        console.log('request: ', request)
+        return request
+      });
+      axios.interceptors.response.use((response:any) => {
+        console.log('response: ', response.data)
+        return response
+      });
+    }
     return axios;
   }
 

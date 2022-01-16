@@ -25,8 +25,10 @@ func workspaceAuth(workspace_id, token string) (bool, error) {
 func RouteInit(listener net.Listener) *echo.Echo {
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Debug = true
-	e.Use(echoMw.Logger())
+	if DEBUG_MODE {
+		e.Debug = true
+		e.Use(echoMw.Logger())
+	}
 	e.Use(echoMw.Gzip())
 	e.Use(echoMw.CORSWithConfig(echoMw.CORSConfig{
 		AllowOrigins: []string{"*"},

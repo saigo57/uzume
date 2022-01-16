@@ -4,6 +4,7 @@
 /backend/tmp/*
 /backend/.envrc
 /backend/uzume_backend
+/backend/dist
 
 # frontend
 frontend/node_modules
