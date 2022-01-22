@@ -136,39 +136,6 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('mousemove', (e: MouseEvent) => {
-      setPreview((state: Preview): Preview => {
-        let isDisplay = state.isDisplay;
-        let isFlagBreak = state.isFlagBreak;
-        let x = e.screenX;
-        let y = e.screenY;
-
-        if ( state.isDisplay ) {
-          let dx = Math.abs(state.startingPos.x - e.screenX);
-          let dy = Math.abs(state.startingPos.y - e.screenY);
-          x = state.startingPos.x;
-          y = state.startingPos.y;
-
-          if ( dx > 16 || dy > 16 ) {
-            // マウスを早く動かしたときscreenX,screenYが飛び飛びになって、
-            // 表示範囲に入った瞬間に消えてしまうため、範囲内で一回以上MouseEventが置きないと非表示にしない
-            if ( isFlagBreak ) {
-              isDisplay = false;
-            } else {
-              x = e.screenX;
-              y = e.screenY;
-            }
-          } else {
-            isFlagBreak = true;
-          }
-        }
-
-        return {isDisplay: isDisplay, isFlagBreak: isFlagBreak, startingPos: {x: x, y: y}}
-      });
-    });
-  }, []);
-
-  useEffect(() => {
     window.api.on(ImagesIpcId.REQUEST_ORIG_IMAGE_REPLY, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
       let imgPreview: any = document.getElementById("image-preview");
@@ -177,6 +144,15 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    let thumbnailArea: any = document.getElementById('thumbnail-area');
+    thumbnailArea.addEventListener('mousemove', onMousemove);
+
+    return () => {
+      thumbnailArea.removeEventListener('mousemove', onMousemove);
+    };
+  });
 
   const requestShowImages = (page: number) => {
     const showImages: ShowImages = {
@@ -221,6 +197,37 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
+  const onMousemove = (e: MouseEvent) => {
+    setPreview((state: Preview): Preview => {
+      let isDisplay = state.isDisplay;
+      let isFlagBreak = state.isFlagBreak;
+      let x = e.screenX;
+      let y = e.screenY;
+
+      if ( state.isDisplay ) {
+        let dx = Math.abs(state.startingPos.x - e.screenX);
+        let dy = Math.abs(state.startingPos.y - e.screenY);
+        x = state.startingPos.x;
+        y = state.startingPos.y;
+
+        if ( dx > 16 || dy > 16 ) {
+          // マウスを早く動かしたときscreenX,screenYが飛び飛びになって、
+          // 表示範囲に入った瞬間に消えてしまうため、範囲内で一回以上MouseEventが置きないと非表示にしない
+          if ( isFlagBreak ) {
+            isDisplay = false;
+          } else {
+            x = e.screenX;
+            y = e.screenY;
+          }
+        } else {
+          isFlagBreak = true;
+        }
+      }
+
+      return {isDisplay: isDisplay, isFlagBreak: isFlagBreak, startingPos: {x: x, y: y}}
+    });
+  };
+
   const onThumbnailAreaClick = (e:any) => {
     if ( e.target == e.currentTarget ) updateSelectImages([])
   };
@@ -234,10 +241,36 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     setSelectedImageId(imageIds)
   }
 
+  const onLeaveThumbneil = () => {
+    setPreview({isDisplay: false, isFlagBreak: false, startingPos: {x: 0, y: 0}});
+  };
+
   const thumbImgStyle = (width: number, height: number): React.CSSProperties => {
     const heightMax = 120;
     return { width: `${width * heightMax / height}px`, height: `${heightMax}px` }
   }
+
+  const iconEnter = (e: any) => {
+    setPreview((state: Preview): Preview => {
+      return {isDisplay: true, isFlagBreak: false, startingPos: state.startingPos};
+    });
+
+    let imageId = e.target.dataset.image_id;
+    let img: any = document.getElementById(`image-${imageId}`);
+    if ( img ) {
+      let imgPreview: any = document.getElementById("image-preview");
+      imgPreview.src = img.src;
+      imgPreview.style.width = `${e.target.dataset.width}px`;
+      imgPreview.style.height = `${e.target.dataset.height}px`;
+    }
+
+    const requestImage: RequestImage = {
+      workspaceId: props.workspaceId,
+      imageId: imageId,
+      isThumbnail: false,
+    }
+    window.api.send(ImagesIpcId.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
+  };
 
   // 無限スクロール発火の監視
   const ref = React.useRef<HTMLDivElement>(null);
@@ -263,28 +296,6 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     }
   });
 
-  const iconEnter = (e: any) => {
-    setPreview((state: Preview): Preview => {
-      return {isDisplay: true, isFlagBreak: false, startingPos: state.startingPos};
-    });
-
-    let imageId = e.target.dataset.image_id;
-    let img: any = document.getElementById(`image-${imageId}`);
-    if ( img ) {
-      let imgPreview: any = document.getElementById("image-preview");
-      imgPreview.src = img.src;
-      imgPreview.style.width = `${e.target.dataset.width}px`;
-      imgPreview.style.height = `${e.target.dataset.height}px`;
-    }
-
-    const requestImage: RequestImage = {
-      workspaceId: props.workspaceId,
-      imageId: imageId,
-      isThumbnail: false,
-    }
-    window.api.send(ImagesIpcId.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
-  };
-
   let thumbnailArea: HTMLElement | null = document.getElementById('thumbnail-area');
 
   const previewStyle: React.CSSProperties = {
@@ -304,6 +315,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={onThumbnailAreaClick}
+      onMouseLeave={onLeaveThumbneil}
     >
       {
         imageList.images.map((image) => {
