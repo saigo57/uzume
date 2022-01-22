@@ -137,9 +137,12 @@ func updateImageCache(image *Image, prev_image *Image) {
 }
 
 func resetSortedImages(workspace *Workspace) error {
-	g_image_cache[workspace.Id].SortedImages = []*Image{}
+	g_image_cache[workspace.Id].SortedImages = make([]*Image, len(g_image_cache[workspace.Id].IdToImages))
+
+	var i = 0
 	for _, v := range g_image_cache[workspace.Id].IdToImages {
-		g_image_cache[workspace.Id].SortedImages = append(g_image_cache[workspace.Id].SortedImages, v)
+		g_image_cache[workspace.Id].SortedImages[i] = v
+		i++
 	}
 
 	sortImageList(g_image_cache[workspace.Id].SortedImages)

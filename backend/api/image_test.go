@@ -22,7 +22,9 @@ import (
 // 画像一覧の取得に成功すること
 func TestGetImages_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -66,7 +68,9 @@ func TestGetImages_success(t *testing.T) {
 func TestGetImagesPagenationAndSort_success(t *testing.T) {
 	test_helper.InitializeTest()
 	model.ResetImageCache()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -141,7 +145,9 @@ func TestGetImagesPagenationAndSort_success(t *testing.T) {
 // access_tokenが間違っているとき、画像一覧の取得に失敗すること
 func TestGetImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
@@ -174,7 +180,9 @@ func TestGetImages_fail(t *testing.T) {
 // 画像情報の更新に成功すること
 func TestPatchImages_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -212,7 +220,9 @@ func TestPatchImages_success(t *testing.T) {
 // access_tokenが間違っているとき、画像情報の更新に失敗すること
 func TestPatchImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
@@ -245,7 +255,9 @@ func TestPatchImages_fail(t *testing.T) {
 // 画像自体の取得に成功すること
 func TestGetImageFile_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -287,7 +299,9 @@ func TestGetImageFile_success(t *testing.T) {
 // access_tokenが間違っているとき、画像自体の取得に失敗すること
 func TestGetImageFile_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
@@ -319,7 +333,9 @@ func TestGetImageFile_fail(t *testing.T) {
 // 画像と画像情報のPOSTに成功すること
 func TestPostImages_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -373,7 +389,9 @@ func TestPostImages_success(t *testing.T) {
 
 func TestPostImages_no_info_field_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, _ := model.GenerateAccessToken(workspace.Id)
@@ -419,7 +437,9 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 // access_tokenが間違っているとき、画像と画像情報のPOSTに失敗
 func TestPostImages_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
@@ -452,7 +472,9 @@ func TestPostImages_fail(t *testing.T) {
 // 画像へのタグ付与に成功すること
 func TestPatchImageTag_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, err := model.GenerateAccessToken(workspace.Id)
@@ -533,7 +555,9 @@ func TestPatchImageTag_success(t *testing.T) {
 // access_tokenが間違っているとき、画像へのタグ付与に失敗すること
 func TestPatchImageTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)
@@ -573,7 +597,9 @@ func TestPatchImageTag_fail(t *testing.T) {
 // 画像に付与されているタグを外すことに成功すること
 func TestDeleteImageTag_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	token, err := model.GenerateAccessToken(workspace.Id)
@@ -619,7 +645,9 @@ func TestDeleteImageTag_success(t *testing.T) {
 // 画像に付与されているタグを外すことに成功すること
 func TestDeleteImageTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	model.GenerateAccessToken(workspace.Id)

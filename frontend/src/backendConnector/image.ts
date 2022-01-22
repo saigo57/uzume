@@ -99,7 +99,7 @@ export default class Image {
       let res = await this.authorizeAxios().get('/', { params: params });
       return JSON.parse(JSON.stringify(res.data)) as ResImages
     } catch (e) {
-      console.log(`image get error [${e}]`)
+      console.log(`image list get error [${e}]`)
       throw e
     }
   }

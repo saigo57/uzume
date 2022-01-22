@@ -17,7 +17,9 @@ import (
 // タグ一覧の取得に成功すること
 func TestGetAllTags_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -81,7 +83,9 @@ func TestGetAllTags_success(t *testing.T) {
 // お気に入りタグ一覧の取得に成功すること
 func TestGetFavoriteTags_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -141,7 +145,9 @@ func TestGetFavoriteTags_success(t *testing.T) {
 // 認証に失敗したとき、タグ一覧の取得に失敗すること
 func TestGetTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -181,7 +187,9 @@ func TestGetTags_fail(t *testing.T) {
 // タグの作成に成功すること
 func TestPostTags_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -220,7 +228,9 @@ func TestPostTags_success(t *testing.T) {
 // 認証に失敗したとき、タグの作成に失敗すること
 func TestPostTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -257,7 +267,9 @@ func TestPostTags_fail(t *testing.T) {
 // タグの修正に成功すること
 func TestPatchTags_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -299,7 +311,9 @@ func TestPatchTags_success(t *testing.T) {
 // 認証に失敗したとき、タグの修正に失敗すること
 func TestPatchTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	workspace := new(model.Workspace)
 	workspace.Name = "ワークスペース"
@@ -341,7 +355,9 @@ func TestPatchTags_fail(t *testing.T) {
 // タグの削除に成功すること
 func TestDeleteTags_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
@@ -368,7 +384,9 @@ func TestDeleteTags_success(t *testing.T) {
 // 認証に失敗したとき、タグの削除に失敗すること
 func TestDeleteTags_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
@@ -395,7 +413,9 @@ func TestDeleteTags_fail(t *testing.T) {
 // 認証に失敗したとき、タグのお気に入り登録に失敗すること
 func TestPostFavoriteTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
@@ -419,7 +439,9 @@ func TestPostFavoriteTag_fail(t *testing.T) {
 // タグのお気に入り登録に成功すること
 func TestPostFavoriteTag_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
@@ -451,7 +473,9 @@ func TestPostFavoriteTag_success(t *testing.T) {
 // タグのお気に入り登録の解除に成功すること
 func TestDeleteFavoriteTag_success(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
@@ -484,7 +508,9 @@ func TestDeleteFavoriteTag_success(t *testing.T) {
 // 認証に失敗したとき、タグのお気に入り登録の解除に失敗すること
 func TestDeleteFavoriteTag_fail(t *testing.T) {
 	test_helper.InitializeTest()
-	router := RouteInit()
+	listener := test_helper.Listener()
+	defer listener.Close()
+	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 
