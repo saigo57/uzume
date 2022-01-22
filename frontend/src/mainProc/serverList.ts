@@ -119,7 +119,7 @@ function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
 
   replyWorkspaceList(e)
   callChangeCurrentWorkspace(e)
-  showImagesReply(e, workspace_id, 1)
+  showImagesReply(e, workspace_id, 1, [], '')
 }
 
 function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {

@@ -23,14 +23,14 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
   BackendConnector.workspace(imageFiles.workspaceId, (ws) => {
     ws.image.create(imageFiles.imageFileList).then(() => {
       // TODO: uploadしたときの画面の動きは整理する必要がある
-      showImagesReply(e, imageFiles.workspaceId, 1)
+      showImagesReply(e, imageFiles.workspaceId, 1, imageFiles.tagIds, imageFiles.searchType)
     });
   })
 });
 
 ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
   let showImages: ShowImages = JSON.parse(arg)
-  showImagesReply(e, showImages.workspaceId, showImages.page)
+  showImagesReply(e, showImages.workspaceId, showImages.page, showImages.tagIds, showImages.searchType)
 });
 
 ipcMain.on(IpcId.GET_IMAGE_INFO, (e, arg) => {
@@ -81,26 +81,30 @@ function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: str
   });
 }
 
-export function showImagesReply(e: Electron.IpcMainEvent, workspaceId: string, page: number) {
+export function showImagesReply(
+  e: Electron.IpcMainEvent, workspaceId: string, page: number,
+  tagIds: string[], searchType: string) {
   BackendConnector.workspace(workspaceId, (ws) => {
-    ws.image.getList(page).then((imgList) => {
+    ws.image.getList(page, tagIds, searchType).then((imgList) => {
       let imageInfos: ImageInfos = { workspaceId: workspaceId, page: imgList.page, images: [] }
 
-      for (let i = 0; i < imgList.images.length; i++) {
-        let imageInfo: ImageInfo = {
-          image_id: imgList.images[i].image_id,
-          file_name: imgList.images[i].file_name,
-          ext: imgList.images[i].ext,
-          memo: imgList.images[i].memo,
-          author: imgList.images[i].author,
-          created_at: imgList.images[i].created_at,
-          tags: imgList.images[i].tags,
-        };
+      if ( imgList.images != null ) {
+        for (let i = 0; i < imgList.images.length; i++) {
+          let imageInfo: ImageInfo = {
+            image_id: imgList.images[i].image_id,
+            file_name: imgList.images[i].file_name,
+            ext: imgList.images[i].ext,
+            memo: imgList.images[i].memo,
+            author: imgList.images[i].author,
+            created_at: imgList.images[i].created_at,
+            tags: imgList.images[i].tags,
+          };
 
-        imageInfos.images.push(imageInfo);
+          imageInfos.images.push(imageInfo);
 
-        if ( !(workspaceId in g_imageInfoList) ) g_imageInfoList[workspaceId] = {};
-        g_imageInfoList[workspaceId][imageInfo.image_id] = imageInfo;
+          if ( !(workspaceId in g_imageInfoList) ) g_imageInfoList[workspaceId] = {};
+          g_imageInfoList[workspaceId][imageInfo.image_id] = imageInfo;
+        }
       }
 
       e.reply(IpcId.SHOW_IMAGES_REPLY, JSON.stringify(imageInfos));

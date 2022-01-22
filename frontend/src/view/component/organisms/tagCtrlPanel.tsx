@@ -40,6 +40,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
 
   const createNewTag = (tagName: string) => {
     if ( props.imageIds.length == 0 ) return;
+    if ( tagName.length == 0 ) return;
 
     let req: CreateTagToImage = {
       workspaceId: props.workspaceId,
