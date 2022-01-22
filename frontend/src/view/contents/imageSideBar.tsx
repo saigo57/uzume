@@ -32,6 +32,8 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
     file_name: '',
     ext: '',
     memo: '',
+    width: 0,
+    height: 0,
     author: '',
     created_at: '',
   } as ImageInfo);
@@ -167,7 +169,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
         </li>
         <li className="info-item">
           <div className="info-title">解像度</div>
-          <div className="info-body freezed">256 × 256</div>
+          <div className="info-body freezed">{imageInfo.width} × {imageInfo.height}</div>
         </li>
         <li className="info-item">
           <div className="info-title">容量</div>

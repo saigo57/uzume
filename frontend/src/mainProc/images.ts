@@ -101,6 +101,8 @@ export function showImagesReply(
             image_id: imgList.images[i].image_id,
             file_name: imgList.images[i].file_name,
             ext: imgList.images[i].ext,
+            width: imgList.images[i].width,
+            height: imgList.images[i].height,
             memo: imgList.images[i].memo,
             author: imgList.images[i].author,
             created_at: imgList.images[i].created_at,

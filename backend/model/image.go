@@ -30,6 +30,8 @@ type Image struct {
 	Id        string     `json:"image_id"`
 	FileName  string     `json:"file_name"`
 	Ext       string     `json:"ext"`
+	Width     int        `json:"width"`
+	Height    int        `json:"height"`
 	Memo      string     `json:"memo"`
 	Author    string     `json:"author"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -147,12 +149,14 @@ func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buff
 		return err
 	}
 
-	thumb_img, _, err := image.Decode(org_file_data)
+	orig_img, _, err := image.Decode(org_file_data)
 	if err != nil {
 		return err
 	}
+	this.Width = orig_img.Bounds().Dx()
+	this.Height = orig_img.Bounds().Dy()
 
-	resizedImg := resize.Resize(0, THUMB_HEIGHT_SIZE, thumb_img, resize.NearestNeighbor)
+	resizedImg := resize.Resize(0, THUMB_HEIGHT_SIZE, orig_img, resize.NearestNeighbor)
 	output, err := os.Create(thumb_file_path)
 	if err != nil {
 		return err
