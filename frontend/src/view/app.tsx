@@ -1,28 +1,35 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef} from 'react';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import { useEvent } from './lib/eventCustomHooks';
+import { useDraggableSplitBar } from './lib/draggableSplitBarHooks';
 import { ServerList } from "./serverList";
 import { MainMenu } from "./mainMenu";
 import { ContentsArea } from "./contentsArea";
 import { Footer } from "./footer";
 import { IpcId as CurrWsIpcId, CurrentWorkspace } from "../ipc/currentWorkspace";
+import {
+  resetWorkspaceId as commonIpcResetWorkspaceId,
+} from './commonIpc';
 
 export function App() {
+  commonIpcResetWorkspaceId();
+
   const [currentWorkspaceState, setCurrentWorkspace] = useState<CurrentWorkspace>({
     workspace_name: '',
     workspace_id: '',
   });
   const [currMode, setCurrMode] = useState('home');
 
-  // イベント
-  const [showIndexImageEvent, setShowIndexImageEvent] = useState(0)
-  const raiseShowIndexImageEvent = () => {
-    setCurrMode('home')
-    setShowIndexImageEvent(prev => prev + 1)
-  };
-  const [uncategorizedEvent, setUncategorizedEvent] = useState(0)
-  const raiseUncategorizedEvent = () => {
-    setCurrMode('uncategorized')
-    setUncategorizedEvent(prev => prev + 1)
-  };
+  const [showIndexImageEvent, raiseShowIndexImageEvent] = useEvent(() => {
+    setCurrMode('home');
+  });
+  const [uncategorizedEvent, raiseUncategorizedEvent] = useEvent(() => {
+    setCurrMode('uncategorized');
+  });
+  const [tagManageEvent, raiseTagManageEvent] = useEvent(() => {
+    setCurrMode('tag_manage');
+  });
 
   useEffect(() => {
     setCurrMode('home')
@@ -36,24 +43,35 @@ export function App() {
     });
   }, []);
 
+  const dsb_left = useRef<HTMLDivElement>(null);
+  const dsb_split_bar = useRef<HTMLDivElement>(null);
+  const dsb_right = useRef<HTMLDivElement>(null);
+  useDraggableSplitBar(dsb_left, dsb_split_bar, dsb_right)
+
   const onMenuAction = (action: string) => {
     switch ( action ) {
       case 'home_click': raiseShowIndexImageEvent(); break;
       case 'uncategorized_click': raiseUncategorizedEvent(); break;
+      case 'tag_manage_click': raiseTagManageEvent(); break;
     }
   }
 
   return (
-    <div className="container">
-      <ServerList />
-      <MainMenu workspaceName={currentWorkspaceState.workspace_name} currMode={currMode} onAction={onMenuAction} />
-      <div id="before-main" className="split-bar"></div>
-      <ContentsArea
-        workspaceId={currentWorkspaceState.workspace_id}
-        uncategorized={currMode == 'uncategorized'}
-        showIndexImageEvent={showIndexImageEvent}
-        uncategorizedEvent={uncategorizedEvent} />
-      <Footer />
-    </div>
+    <DndProvider backend={HTML5Backend}>
+      <div className="container">
+        <ServerList />
+        <MainMenu workspaceName={currentWorkspaceState.workspace_name} currMode={currMode} onAction={onMenuAction} dsb_ref={dsb_left} />
+        <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>
+        <ContentsArea
+          workspaceId={currentWorkspaceState.workspace_id}
+          uncategorized={currMode == 'uncategorized'}
+          showIndexImageEvent={showIndexImageEvent}
+          uncategorizedEvent={uncategorizedEvent}
+          tagManageEvent={tagManageEvent}
+          dsb_ref={dsb_right}
+        />
+        <Footer />
+      </div>
+    </DndProvider>
   );
 }

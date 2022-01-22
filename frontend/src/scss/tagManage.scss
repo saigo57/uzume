@@ -1,0 +1,45 @@
+@import 'const';
+
+.tag-manage-menu-area {
+  .menu-item {
+    color: $main-font-color;
+    padding: 6px;
+    font-size: 14px;
+    background-color: $main-background-color;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    border: solid 1px $main-background-color;
+    user-select: none;
+
+    &:hover {
+      cursor: pointer;
+      background-color: $light-background-color;
+    }
+    &.selected, &.selected:hover {
+      background-color: $light-background-color;
+    }
+    &.drop-over {
+      background-color: $light-background-color;
+      border-color: $selected-border-color;
+    }
+  }
+  .menu-title {
+    color: $main-font-color;
+    padding: 6px;
+    margin-top: 6px;
+    font-size: 12px;
+    background-color: $main-background-color;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    user-select: none;
+
+    svg {
+      margin-top: 5px;
+      margin-left: 4px;
+      width: 12px;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}

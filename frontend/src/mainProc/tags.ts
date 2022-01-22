@@ -27,7 +27,7 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
   });
 });
 
-function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
+export function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
   BackendConnector.workspace(workspaceId, (ws) => {
     ws.tags.getList(false).then((resTagList) => {
       let tags: TagInfo[] = []
@@ -36,6 +36,7 @@ function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
           tags.push({
             tagId: resTagList.tags[i].tag_id,
             name: resTagList.tags[i].name,
+            tagGroupId: resTagList.tags[i].tag_group_id,
           })
         }
       }
