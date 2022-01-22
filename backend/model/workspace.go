@@ -147,6 +147,20 @@ func (this *Workspace) UpdateWorkspaceIcon(img *multipart.FileHeader) error {
 	return nil
 }
 
+func (this *Workspace) DeleteWorkspaceIcon() error {
+	icon_file_paths, err := this.WorkspaceIconFilePaths()
+	if err != nil {
+		return err
+	}
+	for _, f := range icon_file_paths {
+		if err := os.Remove(f); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (this *Workspace) WorkspaceIconFilePaths() ([]string, error) {
 	icon_files, err := filepath.Glob(filepath.Join(this.Path, "icon.*"))
 	if err != nil {
