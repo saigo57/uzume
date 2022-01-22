@@ -16,8 +16,9 @@ import (
 	"time"
 	"uzume_backend/helper"
 
+	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
-	"github.com/nfnt/resize"
+	"golang.org/x/image/draw"
 )
 
 const (
@@ -144,19 +145,13 @@ func (this *Image) CreateImageAndSave(file_name string, image_buffer *bytes.Buff
 
 	// サムネイルサイズの画像を作る
 	thumb_file_path := this.ImagePath("thumb")
-	org_file_data, err := os.Open(file_path)
-	if err != nil {
-		return err
-	}
-
-	orig_img, _, err := image.Decode(org_file_data)
-	if err != nil {
-		return err
-	}
+	orig_img, err := imaging.Open(file_path, imaging.AutoOrientation(true))
 	this.Width = orig_img.Bounds().Dx()
 	this.Height = orig_img.Bounds().Dy()
 
-	resizedImg := resize.Resize(0, THUMB_HEIGHT_SIZE, orig_img, resize.NearestNeighbor)
+	thumb_width := int(float64(this.Width) * THUMB_HEIGHT_SIZE / float64(this.Height))
+	resizedImg := image.NewRGBA(image.Rect(0, 0, thumb_width, THUMB_HEIGHT_SIZE))
+	draw.CatmullRom.Scale(resizedImg, resizedImg.Bounds(), orig_img, orig_img.Bounds(), draw.Over, nil)
 	output, err := os.Create(thumb_file_path)
 	if err != nil {
 		return err
