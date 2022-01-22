@@ -81,6 +81,7 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
                 workspaceId={props.workspaceId}
                 tagId={t.tagId}
                 tagName={t.name}
+                favorite={t.favorite}
                 delete={false}
                 alreadyAdded={selectedTagIds.includes(t.tagId)}
                 onClick={props.onTagAddClick}

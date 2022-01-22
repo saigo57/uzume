@@ -160,6 +160,7 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
               workspaceId={props.workspaceId}
               tagId={t.tagId}
               tagName={t.name}
+              favorite={t.favorite}
               delete={false}
               alreadyAdded={false}
               onClick={null}

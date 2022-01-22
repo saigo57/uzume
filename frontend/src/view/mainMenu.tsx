@@ -2,8 +2,12 @@ import React, { useState, useEffect} from 'react';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faStar, faQuestion, faTag, faFolder, faCaretRight, faCaretDown } from "@fortawesome/free-solid-svg-icons";
-import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { useTags } from './lib/tagCustomHooks';
+import {
+  IpcId as TagsIpcId,
+  ShowContextMenu,
+  TagInfo,
+} from '../ipc/tags';
 
 type MainMenuProps = {
   workspaceId: string
@@ -15,13 +19,17 @@ type MainMenuProps = {
 };
 
 export const MainMenu:React.VFC<MainMenuProps> = (props) => {
-  const [FavoriteTagListState, setFavoriteTagList] = useState(['タグ1', 'タグ2', 'タグ3', 'タグ4']);
+  const [FavoriteTagListState, setFavoriteTagList] = useState([] as TagInfo[]);
   const [tagGroupListState, tagAllListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(props.workspaceId);
   const [isTagGroupOpen, setIsTagGroupOpen] = useState({} as { [key: string]: boolean });
 
   useEffect(() => {
     setIsTagGroupOpen({})
   }, [tagGroupListState]);
+
+  useEffect(() => {
+    setFavoriteTagList(tagAllListState.filter(tag => tag.favorite))
+  }, [tagAllListState]);
 
   const onHomeClick = () => {
     if ( props.onAction ) props.onAction('home_click');
@@ -47,6 +55,20 @@ export const MainMenu:React.VFC<MainMenuProps> = (props) => {
     })
   }
 
+  const createOnContextMenu = (tag: TagInfo|null) => {
+    return () => {
+      if ( !tag ) return;
+
+      const req: ShowContextMenu = {
+        workspaceId: props.workspaceId,
+        tagId: tag.tagId,
+        tagName: tag.name,
+        currFavorite: tag.favorite,
+      }
+      window.api.send(TagsIpcId.SHOW_CONTEXT_MENU, JSON.stringify(req))
+    }
+  }
+
   return (
     <section id="main-menu" className="main-menu" ref={props.dsb_ref}>
       <h1 className="menu-title">
@@ -62,12 +84,16 @@ export const MainMenu:React.VFC<MainMenuProps> = (props) => {
         <FontAwesomeIcon icon={faTag} /><div className="menu-title-text">タグ管理</div>
       </h1>
       <h1 className="menu-title">
-        <FontAwesomeIcon icon={faStar} /><div className="menu-title-text">Favorite Tags</div>
+        <FontAwesomeIcon icon={faStar} /><div className="menu-title-text">お気に入りタグ</div>
       </h1>
       <ul>
         {
           FavoriteTagListState.map((tag) => {
-            return <li className="tag-item"><FontAwesomeIcon icon={faCircle} />{tag}</li>
+            return (
+              <li className="tag-item" onClick={() => { props.onSingleTagClick(tag.tagId) }} onContextMenu={createOnContextMenu(tag)}>
+                <FontAwesomeIcon icon={faTag} />{tag.name}
+              </li>
+            )
           }) 
         }
       </ul>
@@ -89,7 +115,11 @@ export const MainMenu:React.VFC<MainMenuProps> = (props) => {
                     return (
                       tagAllListState.map((tag) => {
                         if ( tag.tagGroupId != tag_group.tagGroupId ) return;
-                        return <li className="tag-item" onClick={() => { props.onSingleTagClick(tag.tagId) }}><FontAwesomeIcon icon={faTag} />{tag.name}</li>
+                        return (
+                          <li className="tag-item" onClick={() => { props.onSingleTagClick(tag.tagId) }} onContextMenu={createOnContextMenu(tag)}>
+                            <FontAwesomeIcon icon={faTag} />{tag.name}
+                          </li>
+                        )
                       })
                     )
                   }

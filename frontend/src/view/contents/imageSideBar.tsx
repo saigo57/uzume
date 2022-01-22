@@ -131,6 +131,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
                   workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
+                  favorite={t.favorite}
                   delete={true}
                   alreadyAdded={false}
                   onClick={null}
