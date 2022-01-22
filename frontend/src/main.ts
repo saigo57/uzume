@@ -29,6 +29,7 @@ function createWindow () {
 
   win.loadFile('dist/app.html');
 
+  BackendConnector.setBackendUrl('http://localhost:22113/');
   BackendConnector.onFailAuthorization = (err) => {
     showFooterMessageByBrowserWindow(win, `アクセストークンの取得に失敗しました。[${err}]`)
   }
