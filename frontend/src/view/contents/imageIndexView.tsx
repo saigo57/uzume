@@ -25,11 +25,23 @@ type ImageList = {
   images: ImageInfo[]
 }
 
+type Point = {
+  x: number,
+  y: number,
+}
+
+type Preview = {
+  isDisplay: boolean
+  isFlagBreak: boolean
+  startingPos: Point
+}
+
 export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isDragOverState, setIsDragOver] = useState(false);
   const [imageList, setImageList] = useState({page: 0, images: []} as ImageList);
   const [nextPageRequestableState, setNextPageRequestable] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState([] as string[]);
+  const [preview, setPreview] = useState({isDisplay: false, isFlagBreak: false, startingPos: {x: 0, y: 0}} as Preview);
 
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
@@ -122,6 +134,49 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     });
   }, []);
 
+  useEffect(() => {
+    window.addEventListener('mousemove', (e: MouseEvent) => {
+      setPreview((state: Preview): Preview => {
+        let isDisplay = state.isDisplay;
+        let isFlagBreak = state.isFlagBreak;
+        let x = e.screenX;
+        let y = e.screenY;
+
+        if ( state.isDisplay ) {
+          let dx = Math.abs(state.startingPos.x - e.screenX);
+          let dy = Math.abs(state.startingPos.y - e.screenY);
+          x = state.startingPos.x;
+          y = state.startingPos.y;
+
+          if ( dx > 16 || dy > 16 ) {
+            // マウスを早く動かしたときscreenX,screenYが飛び飛びになって、
+            // 表示範囲に入った瞬間に消えてしまうため、範囲内で一回以上MouseEventが置きないと非表示にしない
+            if ( isFlagBreak ) {
+              isDisplay = false;
+            } else {
+              x = e.screenX;
+              y = e.screenY;
+            }
+          } else {
+            isFlagBreak = true;
+          }
+        }
+
+        return {isDisplay: isDisplay, isFlagBreak: isFlagBreak, startingPos: {x: x, y: y}}
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    window.api.on(ImagesIpcId.REQUEST_ORIG_IMAGE_REPLY, (_e, arg) => {
+      let imageData = JSON.parse(arg) as ImageData
+      let imgPreview: any = document.getElementById("image-preview");
+      if ( imgPreview ) {
+        imgPreview.src = "data:image;base64," + imageData.imageBase64;
+      }
+    });
+  }, []);
+
   const requestShowImages = (page: number) => {
     const showImages: ShowImages = {
       workspaceId: props.workspaceId,
@@ -199,10 +254,49 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     if (ref.current === null) return;
     observer.unobserve(ref.current)
     if ( nextPageRequestableState ) observer.observe(ref.current);
+
+    return () => {
+      if (ref.current === null) return;
+      observer.unobserve(ref.current)
+    }
   });
+
+  const iconEnter = (e: any) => {
+    setPreview((state: Preview): Preview => {
+      return {isDisplay: true, isFlagBreak: false, startingPos: state.startingPos};
+    });
+
+    let imageId = e.target.dataset.image_id;
+    let img: any = document.getElementById(`image-${imageId}`);
+    if ( img ) {
+      let imgPreview: any = document.getElementById("image-preview");
+      imgPreview.src = img.src;
+      imgPreview.style.width = `${e.target.dataset.width}px`;
+      imgPreview.style.height = `${e.target.dataset.height}px`;
+    }
+
+    const requestImage: RequestImage = {
+      workspaceId: props.workspaceId,
+      imageId: imageId,
+      isThumbnail: false,
+    }
+    window.api.send(ImagesIpcId.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
+  };
+
+  let thumbnailArea: HTMLElement | null = document.getElementById('thumbnail-area');
+
+  const previewStyle: React.CSSProperties = {
+    position: 'absolute',
+    maxWidth: thumbnailArea?.offsetWidth,
+    maxHeight: thumbnailArea?.offsetHeight,
+    visibility: preview.isDisplay ? 'visible': 'hidden',
+    backgroundColor: 'rbga(0,0,0,0)',
+    objectFit: 'contain',
+  };
 
   return (
     <div
+      id="thumbnail-area"
       className={`thumbnail-area ${isDragOverState ? 'drag-over' : ''} ${props.hide ? 'hide' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -217,7 +311,14 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
               onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}
             >
               <img id={`image-${image.image_id}`} style={thumbImgStyle(image.width, image.height)}></img>
-              <div className="original-size-icon"><FontAwesomeIcon icon={faBars} /></div>
+              <div
+                className="original-size-icon"
+                onMouseEnter={iconEnter}
+                data-image_id={image.image_id}
+                data-width={image.width}
+                data-height={image.height}>
+                  <FontAwesomeIcon icon={faBars} />
+              </div>
             </div>
           )
         })
@@ -229,6 +330,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
           return;
         }
       })()}
+
+      <img id="image-preview" style={previewStyle}></img>
     </div>
   );
 }
