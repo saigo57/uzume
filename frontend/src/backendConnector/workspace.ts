@@ -81,6 +81,16 @@ export default class Workspace {
     return null as any
   }
 
+  static async add(path: string) {
+    try {
+      await this.noauthorizeAxios().post('/add', {workspace_path: path})
+    } catch (error) {
+      console.log(`workspace add error [${error}]`)
+    }
+
+    return null as any
+  }
+
   static async login(workspaceId: string): Promise<string> {
     const res = await this.noauthorizeAxios().post('/login', {workspace_id: workspaceId});
     let login = JSON.parse(JSON.stringify(res.data)) as ResLogin

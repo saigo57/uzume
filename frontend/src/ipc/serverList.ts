@@ -3,6 +3,9 @@ export class IpcId {
   // ワークスペースdir選択イベント(finder/explorer表示)
   static readonly SELECT_NEW_WORKSPACE_DIR: string = IpcId.NAME_SPACE + "select-new-workspace-dir";
   static readonly SELECT_NEW_WORKSPACE_DIR_REPLY: string = IpcId.NAME_SPACE + "select-new-workspace-dir-reply";
+  // ワークスペースdir選択イベント(finder/explorer表示)
+  static readonly SELECT_ADD_WORKSPACE_DIR: string = IpcId.NAME_SPACE + "select-add-workspace-dir";
+  static readonly SELECT_ADD_WORKSPACE_DIR_REPLY: string = IpcId.NAME_SPACE + "select-add-workspace-dir-reply";
   // ワークスペースを選択
   static readonly SELECT_WORKSPACE: string = IpcId.NAME_SPACE + "select-workspace";
   // コンテキストメニュー表示
@@ -11,6 +14,7 @@ export class IpcId {
   static readonly SHOW_DELETE_WORKSPACE_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-delete-workspace-modal";
   // リクエスト系
   static readonly CREATE_NEW_SERVER: string = IpcId.NAME_SPACE + "create-new-server";
+  static readonly CREATE_ADD_SERVER: string = IpcId.NAME_SPACE + "create-add-server";
   static readonly DELETE_WORKSPACE: string = IpcId.NAME_SPACE + "delete-workspace";
   static readonly FETCH_WORKSPACE_LIST: string = IpcId.NAME_SPACE + "fetch-server-list";
   static readonly FETCH_WORKSPACE_LIST_REPLY: string = IpcId.NAME_SPACE + "fetch-server-list-reply";
@@ -27,6 +31,10 @@ export type ServerInfo = {
 export type CreateWorkspaceInfo = {
   name: string
   dirName: string
+  dirPath: string
+}
+
+export type AddWorkspaceInfo = {
   dirPath: string
 }
 
