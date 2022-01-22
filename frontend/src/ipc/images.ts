@@ -13,6 +13,7 @@ export class IpcId {
   static readonly REMOVE_TAG: string = IpcId.NAME_SPACE + "remove-tag";
   static readonly UPDATE_IMAGE_INFO_REPLY: string = IpcId.NAME_SPACE + "update-image-info";
   static readonly IMAGE_INFO_LIST_UPDATED_REPLY: string = IpcId.NAME_SPACE + "image-info-list-updated-reply";
+  static readonly IMAGE_UPLOAD_PROGRESS_REPLY: string = IpcId.NAME_SPACE + "image-upload-progress-reply";
 }
 
 export type ImageFiles = {
@@ -74,4 +75,9 @@ export type RemoveTagFromImage = {
   workspaceId: string
   imageIds: string[]
   tagId: string
+}
+
+export type ImageUploadProgress = {
+  completeCnt: number
+  allImagesCnt: number
 }
