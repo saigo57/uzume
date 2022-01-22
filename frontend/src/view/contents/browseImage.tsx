@@ -24,6 +24,7 @@ import {
 type BrowseImageProps = {
   workspaceId: string
   imageId: string | null
+  uncategorized: boolean
   onModeChange: (imageId: string | null) => void
   onPrevClick: () => void
 };
@@ -40,16 +41,16 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
     setTagList([])
     setSearchTags([])
     sendIpcGetAllTags(props.workspaceId)
+
+    showImages()
   }, [props.workspaceId]);
 
   useEffect(() => {
-    const showImages: ShowImages = {
-      workspaceId: props.workspaceId,
-      page: 1,
-      tagIds: searchTags.map(tag => tag.tagId),
-      searchType: searchType,
-    }
-    window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+    setSearchTags([])
+  }, [props.uncategorized]);
+
+  useEffect(() => {
+    showImages()
   }, [searchTags, searchType]);
 
   useEffect(() => {
@@ -69,6 +70,17 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
       });
     }
   }, [showSearchPanel]);
+
+  const showImages = () => {
+    const showImages: ShowImages = {
+      workspaceId: props.workspaceId,
+      page: 1,
+      tagIds: searchTags.map(tag => tag.tagId),
+      searchType: searchType,
+      uncategorized: props.uncategorized,
+    }
+    window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+  }
 
   const onImageDoubleClick = (imageId: string) => {
     props.onModeChange(imageId)
@@ -152,7 +164,8 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           hide={!!props.imageId}
           tagIds={searchTags.map(tag => tag.tagId)}
           searchType={searchType}
-          />
+          uncategorized={props.uncategorized}
+        />
 
         {(() => {
           if ( props.imageId ) {

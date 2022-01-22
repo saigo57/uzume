@@ -3,7 +3,9 @@ import { BrowseImage } from "./contents/browseImage";
 
 type contentsAreaProps = {
   workspaceId: string
+  uncategorized: boolean
   showIndexImageEvent: number
+  uncategorizedEvent: number
 };
 
 type ContentsState = {
@@ -18,6 +20,10 @@ export const ContentsArea:React.VFC<contentsAreaProps> = (props) => {
     setShowAImage(null)
   }, [props.showIndexImageEvent]);
 
+  useEffect(() => {
+    setShowAImage(null)
+  }, [props.uncategorizedEvent]);
+
   const onBrowseImageModeChange = (imageId: string | null) => {
     setShowAImage(imageId)
   };
@@ -31,6 +37,7 @@ export const ContentsArea:React.VFC<contentsAreaProps> = (props) => {
     <BrowseImage
       workspaceId={props.workspaceId}
       imageId={showAImageState}
+      uncategorized={props.uncategorized}
       onModeChange={onBrowseImageModeChange}
       onPrevClick={onPrevClick} />
   );

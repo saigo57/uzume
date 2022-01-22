@@ -27,6 +27,7 @@ func TestGetImages_success(t *testing.T) {
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
+	workspace.Save()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
@@ -73,6 +74,7 @@ func TestGetImagesPagenationAndSort_success(t *testing.T) {
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
+	workspace.Save()
 	token, _ := model.GenerateAccessToken(workspace.Id)
 
 	create_image := func(author string, created_at time.Time) {

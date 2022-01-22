@@ -30,7 +30,9 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
 
 ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
   let showImages: ShowImages = JSON.parse(arg)
-  showImagesReply(e, showImages.workspaceId, showImages.page, showImages.tagIds, showImages.searchType)
+  let tags: string[] = showImages.tagIds;
+  if ( showImages.uncategorized ) tags = [...tags, '_system_tag_uncategorized']
+  showImagesReply(e, showImages.workspaceId, showImages.page, tags, showImages.searchType)
 });
 
 ipcMain.on(IpcId.GET_IMAGE_INFO, (e, arg) => {
