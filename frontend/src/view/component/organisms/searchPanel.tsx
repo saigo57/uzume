@@ -4,7 +4,7 @@ import { MenuItem, useTags } from '../../lib/tagCustomHooks';
 import CssConst from "./../../cssConst";
 import { TagInfo } from '../../../ipc/tags';
 
-import './searchPanel.scss';
+import './tagGroupMenu.scss';
 
 type SearchPanelProps = {
   id: string
