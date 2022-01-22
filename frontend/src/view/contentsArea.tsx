@@ -1,13 +1,15 @@
 import React, { useState, useEffect} from 'react';
 import { BrowseImage } from "./contents/browseImage";
 import { TagManage } from "./contents/tagManage";
+import { Event } from './lib/eventCustomHooks';
 
 type contentsAreaProps = {
   workspaceId: string
   uncategorized: boolean
-  showIndexImageEvent: number
-  uncategorizedEvent: number
-  tagManageEvent: number
+  showIndexImageEvent: Event
+  uncategorizedEvent: Event
+  tagManageEvent: Event
+  singleTagClickEvent: Event
   dsb_ref: React.RefObject<HTMLDivElement>
 };
 
@@ -52,6 +54,7 @@ export const ContentsArea:React.VFC<contentsAreaProps> = (props) => {
       <BrowseImage
         workspaceId={props.workspaceId}
         imageId={showAImageState}
+        singleTagClickEvent={props.singleTagClickEvent}
         uncategorized={props.uncategorized}
         onModeChange={onBrowseImageModeChange}
         onPrevClick={onPrevClick}
