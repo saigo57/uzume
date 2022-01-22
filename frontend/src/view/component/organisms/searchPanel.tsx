@@ -62,7 +62,7 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
       <div style={tagGroupArea}>
         <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>すべてのタグ</div>
         <div className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`} onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}>未分類のタグ</div>
-        { tagGroupListState.map((tg) => {
+        { tagGroupListState.map((tg:any) => {
           return (
             <div
               className={`menu-item ${menuSelected(tg.tagGroupId)}`}
@@ -73,9 +73,10 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
         }) }
       </div>
       <div style={tagArea}>
-        { showingTagAllListState.map((t) => {
+        { showingTagAllListState.map((t:any) => {
             return (
               <Tag
+                workspaceId={props.workspaceId}
                 tagId={t.tagId}
                 tagName={t.name}
                 delete={false}

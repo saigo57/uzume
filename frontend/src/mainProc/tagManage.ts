@@ -1,20 +1,37 @@
 import { ipcMain, BrowserWindow, Menu } from 'electron';
-import { IpcId, TagGroupContextMenu } from '../ipc/tagManage';
+import {
+  IpcId,
+  TagGroupContextMenu,
+  TagGroupRenameReply,
+  TagGroupRename,
+} from '../ipc/tagManage';
 import { getNewTags } from './tags';
 import { fetchAllTagGroups } from './tagGroups';
 import BackendConnector from '../backendConnector/backendConnector';
 
 ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
-  let req: TagGroupContextMenu = JSON.parse(arg)
+  let reqTagGroupContextMenu: TagGroupContextMenu = JSON.parse(arg)
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
     {
-      label: '削除',
+      label: 'タググループ名を変更',
       click: () => {
-        BackendConnector.workspace(req.workspaceId, (ws) => {
-          ws.tag_groups.DeleteTagGroup(req.tagGroupId).then(() => {
-            getNewTags(e, req.workspaceId);
-            fetchAllTagGroups(e, req.workspaceId);
+        let req: TagGroupRenameReply = {
+          workspaceId: reqTagGroupContextMenu.workspaceId,
+          tagGroupId: reqTagGroupContextMenu.tagGroupId,
+          tagGroupName: reqTagGroupContextMenu.tagGroupName,
+        }
+        e.reply(IpcId.TO_TAG_GROUP_RENAME_REPLY, JSON.stringify(req))
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'タググループを削除',
+      click: () => {
+        BackendConnector.workspace(reqTagGroupContextMenu.workspaceId, (ws) => {
+          ws.tag_groups.DeleteTagGroup(reqTagGroupContextMenu.tagGroupId).then(() => {
+            getNewTags(e, reqTagGroupContextMenu.workspaceId);
+            fetchAllTagGroups(e, reqTagGroupContextMenu.workspaceId);
             e.reply(IpcId.TAG_GROUP_DELETE_REPLY)
           })
         });
@@ -24,4 +41,14 @@ ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
   const menu = Menu.buildFromTemplate(template)
   let contents: any = BrowserWindow.fromWebContents(e.sender)
   menu.popup(contents)
+});
+
+ipcMain.on(IpcId.TAG_GROUP_RENAME, (e, arg) => {
+  let requestTagRename: TagGroupRename = JSON.parse(arg)
+
+  BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {
+    ws.tag_groups.RenameTagGroup(requestTagRename.tagGroupId, requestTagRename.tagGroupName).then(() => {
+      fetchAllTagGroups(e, requestTagRename.workspaceId);
+    });
+  });
 });

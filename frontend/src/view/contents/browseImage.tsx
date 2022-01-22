@@ -10,18 +10,9 @@ import { SearchPanel } from "./../component/organisms/searchPanel";
 import { ImageIndexView } from "./imageIndexView";
 import { ImageView } from "./imageView";
 import { ImageSideBar } from "./imageSideBar";
-import {
-  IpcId as TagsIpcId,
-  TagInfo,
-  TagList,
-} from '../../ipc/tags';
-import {
-  sendIpcGetAllTags,
-} from '../commonIpc';
-import {
-  IpcId as ImagesIpcId,
-  ShowImages,
-} from '../../ipc/images'
+import { TagInfo } from '../../ipc/tags';
+import { sendIpcGetAllTags } from '../commonIpc';
+import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images';
 
 type BrowseImageProps = {
   workspaceId: string
@@ -54,7 +45,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
 
   useEffect(() => {
     showImages()
-  }, [searchTags, searchType]);
+  }, [searchTags.length, searchType]); // renameのときは発火させない
 
   useEffect(() => {
     if ( showSearchPanel ) {
@@ -66,6 +57,13 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
       });
     }
   }, [showSearchPanel]);
+
+  useEffect(() => {
+    setSearchTags((state) => {
+      let tagIds = state.map(s => s.tagId);
+      return tagAllListState.filter((tag:any) => tagIds.includes(tag.tagId));
+    });
+  }, [tagAllListState]);
 
   const showImages = () => {
     const showImages: ShowImages = {
@@ -93,7 +91,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const onSearchPanelTagAddClick = (tagId: string | null, _tagName: string) => {
     if ( !tagId  ) return;
 
-    var clickTags = tagAllListState.filter((tag) => tag.tagId == tagId);
+    var clickTags = tagAllListState.filter((tag: any) => tag.tagId == tagId);
     if ( clickTags.length == 0 ) return;
     var clickTag = clickTags[0];
     setSearchTags((state) => [...state, clickTag])
@@ -120,6 +118,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           </div>
           <div id="search-bar-id" className="search-bar" onClick={searchBarClick}>
             <Tag
+              workspaceId={props.workspaceId}
               tagId={null}
               tagName={`type:${searchType}`}
               delete={false}
@@ -130,6 +129,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
             { searchTags.map((t) => {
               return (
                 <Tag
+                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   delete={true}

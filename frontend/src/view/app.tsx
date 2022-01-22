@@ -11,6 +11,8 @@ import { IpcId as CurrWsIpcId, CurrentWorkspace } from "../ipc/currentWorkspace"
 import {
   resetWorkspaceId as commonIpcResetWorkspaceId,
 } from './commonIpc';
+import { TagRenameModal } from './component/organisms/tagRenameModal';
+import { TagGroupRenameModal } from './component/organisms/tagGroupRenameModal';
 
 export function App() {
   commonIpcResetWorkspaceId();
@@ -72,6 +74,10 @@ export function App() {
         />
         <Footer />
       </div>
+
+      {/* 共通処理 */}
+      <TagRenameModal />
+      <TagGroupRenameModal />
     </DndProvider>
   );
 }

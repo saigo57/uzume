@@ -72,7 +72,7 @@ func PostTagGroup() echo.HandlerFunc {
 
 func PostTagToTagGroup() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		tag_group_id := c.Param("tag_group_id")
+		tag_group_id := c.Param("id")
 		param := new(struct {
 			TagId string `json:"tag_id"`
 		})
@@ -87,7 +87,7 @@ func PostTagToTagGroup() echo.HandlerFunc {
 		}
 
 		tag_groups := model.NewTagGroups(workspace)
-		_, err = tag_groups.FindTagById(tag_group_id)
+		_, err = tag_groups.FindTagGroupById(tag_group_id)
 		if err != nil {
 			return err
 		}
@@ -107,9 +107,41 @@ func PostTagToTagGroup() echo.HandlerFunc {
 	}
 }
 
+func PatchTagGroup() echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		tag_group_id := c.Param("id")
+		param := new(struct {
+			Name string `json:"name"`
+		})
+		if err := c.Bind(param); err != nil {
+			return err
+		}
+		workspace_id := helper.LoggedinWrokspaceId(c)
+
+		workspace, err := model.FindWorkspaceById(workspace_id)
+		if err != nil {
+			return err
+		}
+
+		tag_groups := model.NewTagGroups(workspace)
+		if err := tag_groups.UpdateTagGroup(tag_group_id, param.Name); err != nil {
+			if err.Error() == "The tag_group_id doesn't exist." {
+				return c.JSON(http.StatusBadRequest, "指定されたtagGroupIDは存在しません")
+			}
+			return err
+		}
+
+		if err := tag_groups.Save(); err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusNoContent, "")
+	}
+}
+
 func DeleteTagToTagGroup() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		tag_group_id := c.Param("tag_group_id")
+		tag_group_id := c.Param("id")
 		workspace_id := helper.LoggedinWrokspaceId(c)
 
 		workspace, err := model.FindWorkspaceById(workspace_id)
