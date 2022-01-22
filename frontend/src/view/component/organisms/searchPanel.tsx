@@ -41,12 +41,14 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     float: 'left',
     width: `${tagGroupAreaWidth}`,
     height: '100%',
+    overflowY: 'scroll',
   };
 
   const tagArea: React.CSSProperties = {
     float: 'right',
     width: `calc(100% - ${tagGroupAreaWidth})`,
     height: '100%',
+    overflowY: 'scroll',
   };
 
   const menuSelected = (menu: string): string => {
