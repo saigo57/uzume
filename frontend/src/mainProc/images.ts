@@ -11,9 +11,10 @@ import {
   AddTagToImage,
   RemoveTagFromImage,
   ImageUploadProgress,
-} from '../ipc/images'
+} from '../ipc/images';
 import BackendConnector from '../backendConnector/backendConnector';
 import BackendConnectorImage from '../backendConnector/image';
+import { showFooterMessage } from '../ipc/footer';
 
 type ImageInfoMap = { [key: string]: ImageInfo }
 let g_imageInfoList: { [key: string]: ImageInfoMap } = {}
@@ -34,6 +35,8 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
     ws.image.create(imageFiles.imageFileList, imageUploaded).then(() => {
       // TODO: uploadしたときの画面の動きは整理する必要がある
       showImagesReply(e, imageFiles.workspaceId, 1, imageFiles.tagIds, imageFiles.searchType)
+    }).catch((err) => {
+      showFooterMessage(e, `画像の登録に失敗しました。[${err}}]`);
     });
   })
 });
@@ -74,7 +77,9 @@ ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
   BackendConnector.workspace(removeTagFromImage.workspaceId, (ws) => {
     let imageInfoList: ImageInfo[] = []
     removeTagFromImage.imageIds.forEach((image_id) => {
-      ws.image.removeTag(image_id, removeTagFromImage.tagId);
+      ws.image.removeTag(image_id, removeTagFromImage.tagId).catch((err) => {
+        showFooterMessage(e, `タグの削除に失敗しました。[${err}}]`);
+      });
       let imageInfo = g_imageInfoList[removeTagFromImage.workspaceId][image_id];
       let newTags: string[] = []
       for (let i = 0; i < imageInfo.tags.length; i++) {
@@ -90,20 +95,17 @@ ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
 
 function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: string) {
   BackendConnector.workspace(reqImage.workspaceId, (ws) => {
-    let retry = 0;
-    while ( true ) {
-      ws.image.getImage(
-        reqImage.imageId,
-        reqImage.isThumbnail ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
-      ).then((imageBase64) => {
-        let imageData: ImageData = { imageId: reqImage.imageId, imageBase64: imageBase64  }
-        e.reply(replyId, JSON.stringify(imageData));
-      }).catch((err) => {
-        retry++;
-      })
-
-      if ( retry == 0 || retry > 5 ) break;
-    }
+    ws.image.getImage(
+      reqImage.imageId,
+      reqImage.isThumbnail ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
+    ).then((imageBase64) => {
+      let imageData: ImageData = { imageId: reqImage.imageId, imageBase64: imageBase64  }
+      e.reply(replyId, JSON.stringify(imageData));
+    }).catch((err) => {
+      // TODO: 現状機能的には問題なくてもエラーになってしまうため、エラーメッセージは出さない
+      // 複数回同じ画像をリクエストしているのが関係指定層
+      // showFooterMessage(e, `画像の取得に失敗しました。[${err}}]`);
+    })
   });
 }
 
@@ -136,6 +138,8 @@ export function showImagesReply(
       }
 
       e.reply(IpcId.SHOW_IMAGES_REPLY, JSON.stringify(imageInfos));
+    }).catch((err) => {
+      showFooterMessage(e, `画像リストの取得に失敗しました。[${err}}]`);
     });
   });
 }
@@ -147,7 +151,9 @@ export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, im
       let imageInfo = g_imageInfoList[workspaceId][imageIds[i]];
       if ( imageInfo.tags.includes(tagId) ) continue; // 既に付与されていたらスキップする
 
-      ws.image.addTag(imageIds[i], tagId)
+      ws.image.addTag(imageIds[i], tagId).catch((err) => {
+        showFooterMessage(e, `タグの付与に失敗しました。[${err}}]`);
+      })
       imageInfo.tags.push(tagId)
       imageInfoList.push(imageInfo)
     }

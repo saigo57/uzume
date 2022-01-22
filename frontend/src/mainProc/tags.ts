@@ -12,6 +12,7 @@ import {
   addTagToImages,
 } from './images'
 import BackendConnector from '../backendConnector/backendConnector';
+import { showFooterMessage } from '../ipc/footer';
 
 ipcMain.on(IpcId.GET_ALL_TAGS, (e, arg) => {
   let reqAllTags: GetAllTags = JSON.parse(arg)
@@ -26,6 +27,8 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
       getNewTags(e, createTag.workspaceId)
       // 画像にタグ付与
       addTagToImages(e, createTag.workspaceId, createTag.imageIds, tagInfo.tag_id)
+    }).catch((err) => {
+      showFooterMessage(e, `画像へのタグ付与に失敗しました。[${err}}]`);
     })
   });
 });
@@ -41,12 +44,16 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
           BackendConnector.workspace(requestShowContextMenu.workspaceId, (ws) => {
             ws.tags.removeFavorite(requestShowContextMenu.tagId).then(() => {
               getNewTags(e, requestShowContextMenu.workspaceId)
+            }).catch((err) => {
+              showFooterMessage(e, `お気に入りタグからの削除に失敗しました。[${err}}]`);
             })
           })
         } else {
           BackendConnector.workspace(requestShowContextMenu.workspaceId, (ws) => {
             ws.tags.addFavorite(requestShowContextMenu.tagId).then(() => {
               getNewTags(e, requestShowContextMenu.workspaceId)
+            }).catch((err) => {
+              showFooterMessage(e, `お気に入りタグへの追加に失敗しました。[${err}}]`);
             })
           })
         }
@@ -75,6 +82,8 @@ ipcMain.on(IpcId.TAG_RENAME, (e, arg) => {
   BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {
     ws.tags.renameTag(requestTagRename.tagId, requestTagRename.tagName).then(() => {
       getNewTags(e, requestTagRename.workspaceId)
+    }).catch((err) => {
+      showFooterMessage(e, `タグのリネームに失敗しました。[${err}}]`);
     });
   });
 });
@@ -94,6 +103,8 @@ export function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
         }
       }
       e.reply(IpcId.GET_ALL_TAGS_REPLY, JSON.stringify({tags: tags}));
+    }).catch((err) => {
+      showFooterMessage(e, `タグリストの取得に失敗しました。[${err}}]`);
     })
   });
 }

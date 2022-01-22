@@ -1,10 +1,11 @@
-// BC = BackendConnector
+// BC: BackendConnector
 import BCWorkspace from './workspace';
 
 export default class BackendConnector {
   static Workspace = BCWorkspace
   
   static workspaceList: { [key: string]: BCWorkspace; } = {}
+  static onFailAuthorization: ((err: any) => void) | null = null
 
   static workspace(workspaceId: string, callback: (workspace: BCWorkspace) => void) {
     // accessTokenがキャッシュされていたらそれを使う
@@ -25,6 +26,8 @@ export default class BackendConnector {
     BCWorkspace.createInstance(workspaceId).then((ws) => {
       this.workspaceList[workspaceId] = ws
       callback(ws)
+    }).catch((err) => {
+      if ( this.onFailAuthorization ) this.onFailAuthorization(err)
     });
   }
 };
