@@ -37,6 +37,8 @@ func RouteInit(listener net.Listener) *echo.Echo {
 	e.Logger.SetLevel(log.DEBUG)
 	e.Listener = listener
 
+	e.GET("/api/version", GetVersion())
+
 	v1 := e.Group("/api/v1")
 	{
 		v1.GET("/workspaces", GetWorkspaces())
