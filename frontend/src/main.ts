@@ -2,6 +2,7 @@ import path from 'path';
 import { app, BrowserWindow } from 'electron';
 import BackendConnector from './backendConnector/backendConnector';
 import { showFooterMessageByBrowserWindow } from './ipc/footer';
+import './mainProc/backendSetup';
 import './mainProc/serverList';
 import './mainProc/images';
 import './mainProc/tags';
@@ -29,9 +30,8 @@ function createWindow () {
 
   win.loadFile('dist/app.html');
 
-  BackendConnector.setBackendUrl('http://localhost:22113/');
   BackendConnector.onFailAuthorization = (err) => {
-    showFooterMessageByBrowserWindow(win, `アクセストークンの取得に失敗しました。[${err}]`)
+    showFooterMessageByBrowserWindow(win, `バックエンドに接続できませんでした。[${err}]`)
   }
 }
 
