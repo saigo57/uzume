@@ -46,7 +46,8 @@ export type AddWorkspaceInfo = {
 }
 
 export type ShowContextMenu = {
-  workspaceId: string
+  workspaceId: string,
+  is_available: boolean,
 }
 
 export type SelectWorkspace = {
