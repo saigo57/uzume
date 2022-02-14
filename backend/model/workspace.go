@@ -17,7 +17,7 @@ import (
 type Workspace struct {
 	Id   string `json:"workspace_id"`
 	Name string `json:"name"`
-	Path string `json:"path"`
+	Path string `json:"-"`
 }
 
 func FindWorkspaceById(workspace_id string) (*Workspace, error) {
