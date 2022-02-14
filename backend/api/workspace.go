@@ -41,10 +41,16 @@ func GetWorkspaces() echo.HandlerFunc {
 
 func PostWorkspaces() echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
-		workspace := new(model.Workspace)
-		if err := c.Bind(workspace); err != nil {
+		param := new(struct {
+			Name string `json:"name"`
+			Path string `json:"path"`
+		})
+		if err := c.Bind(param); err != nil {
 			return err
 		}
+		workspace := new(model.Workspace)
+		workspace.Name = param.Name
+		workspace.Path = param.Path
 
 		config, err := model.NewConfig()
 		if err != nil {
