@@ -12,7 +12,8 @@ import (
 // 初回Load
 func TestJsonAccessorLoad_first(t *testing.T) {
 	test_helper.InitializeTest()
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 
 	file_path := test_helper.BuildFilePath("/.uzume/access_token.json")
 	assert.Equal(t, helper.FileExists(file_path), false)
@@ -23,7 +24,8 @@ func TestJsonAccessorLoad_first(t *testing.T) {
 // Load 2回目以降
 func TestJsonAccessorLoad(t *testing.T) {
 	test_helper.InitializeTest()
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 	json_accessor := NewJsonAccessor()
 
 	file_path := test_helper.BuildFilePath("/.uzume/access_token.json")
@@ -44,7 +46,8 @@ func TestJsonAccessorLoad(t *testing.T) {
 
 func TestJsonAccessorSave(t *testing.T) {
 	test_helper.InitializeTest()
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 	file_path := test_helper.BuildFilePath("/.uzume/access_token.json")
 
 	assert.Equal(t, false, helper.FileExists(file_path))
@@ -64,7 +67,8 @@ func TestJsonAccessorSave(t *testing.T) {
 
 func TestJsonAccessorGetWorkspaceId(t *testing.T) {
 	test_helper.InitializeTest()
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 	access_token.AccessTokenList = append(access_token.AccessTokenList, AccessTokenInfo{
 		WorkspaceId: "test_workspace_id",
 		AccessToken: "test_access_token",
@@ -83,7 +87,8 @@ func TestJsonAccessorGetWorkspaceId(t *testing.T) {
 
 func TestJsonAccessorDeleteExpireToken(t *testing.T) {
 	test_helper.InitializeTest()
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 	access_token.AccessTokenList = append(access_token.AccessTokenList, AccessTokenInfo{
 		WorkspaceId: "test_workspace_id",
 		AccessToken: "test_access_token",
@@ -109,7 +114,8 @@ func TestJsonAccessorGenerateAccessToken(t *testing.T) {
 	token, _ := GenerateAccessToken("some_workspace_id")
 	assert.Equal(t, 36, len(token))
 
-	access_token, _ := NewAccessToken()
+	access_token, err := NewAccessToken()
+	assert.NoError(t, err)
 	access_token.Load()
 	assert.Equal(t, 1, len(access_token.AccessTokenList))
 
