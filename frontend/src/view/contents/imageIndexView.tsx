@@ -55,6 +55,9 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [isShowImageUploadModal, setIsShowImageUploadModal] = useState(false);
   const [uploadModalInfo, setUploadModalInfo] = useState({ completeCnt: 0, allImagesCnt: 0 } as UploadModalInfo);
 
+  // TODO: どこで持つべきか(少なくともここではなさそう)
+  const supportedExts = ["jpeg", "jpg", "png"];
+
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
       setImageList({images: [], page: 0 })
@@ -205,6 +208,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     e.stopPropagation();
     e.preventDefault();
     setIsDragOver(false);
+    if ( e.dataTransfer.files.length == 0 ) return;
 
     let imageFiles: ImageFiles = {
       workspaceId: props.workspaceId,
@@ -213,7 +217,14 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       searchType: props.searchType,
     }
     for (let i = 0; i < e.dataTransfer.files.length; i++) {
-      imageFiles.imageFileList.push(e.dataTransfer.files[i].path);
+      let filePath = e.dataTransfer.files[i].path;
+      let ext = filePath.split('.').pop();
+      if ( !supportedExts.includes(ext) ) {
+        window.showConfirmModal(`未対応のファイル形式です。\n一括登録の場合すべてキャンセルされます。\n${filePath}`)
+        return
+      }
+
+      imageFiles.imageFileList.push(filePath);
     }
 
     setIsShowImageUploadModal(true)

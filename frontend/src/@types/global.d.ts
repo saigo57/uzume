@@ -6,5 +6,6 @@ export default interface Api {
 declare global {
   interface Window {
     api: Api;
+    showConfirmModal: (message: string) => void;
   }
 }
