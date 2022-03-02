@@ -124,6 +124,10 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
     setSearchType(type => type == 'and' ? 'or' : 'and')
   };
 
+  const clearSearchTags = () => {
+    setSearchTags([])
+  };
+
   const dsb_split_bar = useRef<HTMLDivElement>(null);
   const dsb_right = useRef<HTMLDivElement>(null);
   useDraggableSplitBar(props.dsb_ref, dsb_split_bar, dsb_right)
@@ -182,6 +186,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           workspaceId={props.workspaceId}
           onChangeSelectedImages={onChangeSelectedImages}
           onImageDoubleClick={onImageDoubleClick}
+          clearSearchTags={clearSearchTags}
           hide={!!props.imageId}
           tagIds={searchTags.map(tag => tag.tagId)}
           searchType={searchType}
