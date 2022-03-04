@@ -1,9 +1,11 @@
 export class IpcId {
   static readonly NAME_SPACE: string = "images";
+  static readonly REPLY_REFLECT: string = IpcId.NAME_SPACE + "reflect";
   static readonly UPLOAD_IMAGES: string = IpcId.NAME_SPACE + "upload-images";
   static readonly SHOW_IMAGES: string = IpcId.NAME_SPACE + "show-images";
   static readonly SHOW_IMAGES_REPLY: string = IpcId.NAME_SPACE + "show-images-reply";
   static readonly REQUEST_THUMB_IMAGE: string = IpcId.NAME_SPACE + "request-thumb-image";
+  static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.NAME_SPACE + "actual-request-thumb-image";
   static readonly REQUEST_THUMB_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-thumb-reply";
   static readonly REQUEST_ORIG_IMAGE: string = IpcId.NAME_SPACE + "request-orig-image";
   static readonly REQUEST_ORIG_IMAGE_REPLY: string = IpcId.NAME_SPACE + "request-image-orig-reply";
@@ -14,6 +16,10 @@ export class IpcId {
   static readonly UPDATE_IMAGE_INFO_REPLY: string = IpcId.NAME_SPACE + "update-image-info";
   static readonly IMAGE_INFO_LIST_UPDATED_REPLY: string = IpcId.NAME_SPACE + "image-info-list-updated-reply";
   static readonly IMAGE_UPLOAD_PROGRESS_REPLY: string = IpcId.NAME_SPACE + "image-upload-progress-reply";
+}
+
+export type Reflect = {
+  replyId: string
 }
 
 export type ImageFiles = {

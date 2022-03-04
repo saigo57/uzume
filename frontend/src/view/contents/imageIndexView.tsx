@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import {
   IpcId as ImagesIpcId,
+  Reflect,
   ImageFiles,
   ImageInfo,
   ImageInfos,
@@ -127,6 +128,11 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
+    window.api.on(ImagesIpcId.REPLY_REFLECT, (_e, arg) => {
+      let reflect = JSON.parse(arg) as Reflect
+      window.api.send(reflect.replyId)
+    });
+
     window.api.on(ImagesIpcId.REQUEST_THUMB_IMAGE_REPLY, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
 
