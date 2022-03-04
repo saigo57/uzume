@@ -1,6 +1,8 @@
-import { ipcMain } from 'electron';
+import Electron, { ipcMain } from 'electron';
+import { isCurrentWorkspace } from './currWorkspace';
 import {
   IpcId,
+  Reflect,
   ImageFiles,
   ImageInfos,
   ShowImages,
@@ -16,8 +18,19 @@ import BackendConnector from '../backendConnector/backendConnector';
 import BackendConnectorImage from '../backendConnector/image';
 import { showFooterMessage } from '../ipc/footer';
 
+const THUMB_REQUEST_LIMIT = 5
+
 type ImageInfoMap = { [key: string]: ImageInfo }
 let g_imageInfoList: { [key: string]: ImageInfoMap } = {}
+let g_thumb_image_queue = [] as RequestImage[]
+
+// Rendererプロセスに、Mainプロセスにイベントを送信するように依頼する
+//   Main→Renderer(reflect)→Main→Rendererという流れになる
+//   本当はMain→Main→Rendererとしたいが、Main→Rendererがうまく行かない
+const sendReflect = (e: Electron.IpcMainEvent, replyId: string) => {
+  let reflect = { replyId: replyId } as Reflect
+  e.reply(IpcId.REPLY_REFLECT, JSON.stringify(reflect))
+}
 
 ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
   let imageFiles: ImageFiles = JSON.parse(arg)
@@ -58,7 +71,33 @@ ipcMain.on(IpcId.GET_IMAGE_INFO_LIST, (e, arg) => {
 
 ipcMain.on(IpcId.REQUEST_THUMB_IMAGE, (e, arg) => {
   let reqImage: RequestImage = JSON.parse(arg)
-  getImage(e, reqImage, IpcId.REQUEST_THUMB_IMAGE_REPLY)
+  if ( g_thumb_image_queue.length == 0 ) {
+    sendReflect(e, IpcId.ACTUAL_REQUEST_THUMB_IMAGE)
+  }
+
+  g_thumb_image_queue.push(reqImage)
+});
+
+ipcMain.on(IpcId.ACTUAL_REQUEST_THUMB_IMAGE, (e, arg) => {
+  // 現在のworkspace以外のリクエストが残っている場合削除する
+  let next_queue = []
+  for (let i = 0; i < g_thumb_image_queue.length; i++) {
+    if ( !isCurrentWorkspace(g_thumb_image_queue[i].workspaceId) ) continue;
+
+    next_queue.push(g_thumb_image_queue[i])
+  }
+  g_thumb_image_queue = next_queue;
+
+  // n枚バックエンドに要求する
+  for (let i = 0; i < THUMB_REQUEST_LIMIT; i++) {
+    let reqImage = g_thumb_image_queue.shift()
+    if ( reqImage ) getImage(e, reqImage, IpcId.REQUEST_THUMB_IMAGE_REPLY)
+  }
+
+  // queueが残っていたら再度この処理を呼ぶ
+  if ( g_thumb_image_queue.length > 0 ) {
+    sendReflect(e, IpcId.ACTUAL_REQUEST_THUMB_IMAGE)
+  }
 });
 
 ipcMain.on(IpcId.REQUEST_ORIG_IMAGE, (e, arg) => {
