@@ -102,6 +102,7 @@ ipcMain.on(IpcId.ACTUAL_REQUEST_THUMB_IMAGE, (e, arg) => {
 
 ipcMain.on(IpcId.REQUEST_ORIG_IMAGE, (e, arg) => {
   let reqImage: RequestImage = JSON.parse(arg)
+  if ( !reqImage.imageId ) return;
   getImage(e, reqImage, IpcId.REQUEST_ORIG_IMAGE_REPLY)
 });
 
