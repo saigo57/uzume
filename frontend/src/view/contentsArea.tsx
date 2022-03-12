@@ -45,13 +45,16 @@ export const ContentsArea:React.VFC<contentsAreaProps> = (props) => {
     setShowAImage(null)
   };
 
-  if ( currMode == "tag_manage" ) {
-    return (
-      <TagManage workspaceId={props.workspaceId} dsb_ref={props.dsb_ref} />
-    );
-  } else {
-    return (
+
+  return (
+    <>
+      {(() => {
+        return currMode == "tag_manage" ? <TagManage workspaceId={props.workspaceId} dsb_ref={props.dsb_ref} /> : <></> ;
+      })()}
+
+      {/* tag_manage表示時にレンダリングしない場合、stateが消えてしまうのでcomponent内で非表示にすることでstateを保持するようにする */}
       <BrowseImage
+        display={currMode == "browse_image"}
         workspaceId={props.workspaceId}
         imageId={showAImageState}
         singleTagClickEvent={props.singleTagClickEvent}
@@ -59,7 +62,7 @@ export const ContentsArea:React.VFC<contentsAreaProps> = (props) => {
         onModeChange={onBrowseImageModeChange}
         onPrevClick={onPrevClick}
         dsb_ref={props.dsb_ref}
-        />
-    );
-  }
+      />
+    </>
+  );
 }
