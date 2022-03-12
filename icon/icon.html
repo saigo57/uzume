@@ -1,0 +1,87 @@
+<!--
+* Apple Human Interface Guidelines: https://developer.apple.com/design/human-interface-guidelines/ios/icons-and-images/app-icon/
+* Android Google Playアイコンのデザイン仕様: https://developer.android.com/google-play/resources/icon-design-specifications?hl=ja
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <style text="text/css">
+      body {
+        margin: 50px;
+        padding: 0;
+        background-color: white;
+      }
+      .icon-frame {
+        height: 512px;
+        width: 512px;
+        padding: calc(512px * 0.1);
+        margin: 0;
+        box-sizing: border-box;
+        background-color: #4d9650;
+
+        /* iosの丸み(ざっくり) */
+        border-radius: 22%;
+      }
+
+      .contents {
+        padding: 0;
+        margin: 0;
+        height: calc(512px * 0.8);
+        width: calc(512px * 0.8);
+        box-sizing: border-box;
+      }
+
+      .contents .row {
+        margin: 0;
+        padding: 0;
+        height: calc((100% - 5% * (3 - 1)) / 3);
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 0; /* inline-blockの隙間をなくす */
+      }
+      .row + .row {
+        margin-top: 5%;
+      }
+
+      .image-box {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        /* width: 個別で指定;  */
+        border-radius: 5%;
+        box-sizing: border-box;
+
+        background-color: #b9dbba;
+      }
+      .image-box + .image-box {
+        margin-left: 5%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="icon-frame">
+      <div class="contents">
+        <div class="row">
+          <!-- image-boxの合計width: 100% - 5% * (3 - 1) = 90% -->
+          <div class="image-box" style="width: 35%;"></div>
+          <div class="image-box" style="width: 27.5%;"></div>
+          <div class="image-box" style="width: 27.5%;"></div>
+        </div>
+        <div class="row">
+          <!-- image-boxの合計width: 100% - 5% * (3 - 1) = 90% -->
+          <div class="image-box" style="width: 25%;"></div>
+          <div class="image-box" style="width: 25%;"></div>
+          <div class="image-box" style="width: 40%;"></div>
+        </div>
+        <div class="row">
+          <!-- image-boxの合計width: 100% - 5% * (2 - 1) = 95% -->
+          <div class="image-box" style="width: 45%;"></div>
+          <div class="image-box" style="width: 50%;"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
