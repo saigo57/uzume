@@ -55,6 +55,11 @@ export function UzumeMain() {
     }
   }
 
+  const onSingleTagClick = (tagId: string) => {
+    raiseShowIndexImageEvent(null);
+    raiseSingleTagClickEvent(tagId);
+  }
+
   return (
     <>
       <ServerList />
@@ -63,7 +68,7 @@ export function UzumeMain() {
         workspaceName={currentWorkspaceState.workspace_name}
         currMode={currMode}
         onAction={onMenuAction}
-        onSingleTagClick={raiseSingleTagClickEvent}
+        onSingleTagClick={onSingleTagClick}
         dsb_ref={dsb_left}
       />
       <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>

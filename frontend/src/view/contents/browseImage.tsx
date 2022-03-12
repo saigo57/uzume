@@ -16,6 +16,7 @@ import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images';
 import { Event } from './../lib/eventCustomHooks';
 
 type BrowseImageProps = {
+  display: boolean
   workspaceId: string
   imageId: string | null
   uncategorized: boolean
@@ -131,6 +132,8 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const dsb_split_bar = useRef<HTMLDivElement>(null);
   const dsb_right = useRef<HTMLDivElement>(null);
   useDraggableSplitBar(props.dsb_ref, dsb_split_bar, dsb_right)
+  
+  if ( !props.display ) return <></>;
 
   return (
     <>
