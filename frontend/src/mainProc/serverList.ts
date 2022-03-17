@@ -102,9 +102,33 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = []
 
   let item_reload = {
-    label: 'リロード(未実装)',
+    label: 'リロード',
     click: () => {
-      // TODO: 後で実装
+      BackendConnector.Workspace.getList().then((workspaceList) => {
+        let newWorkspaceList = workspaceList.map((w) => {
+          return {
+            workspaceId: w.workspace_id,
+            name: w.name,
+            isAvailable: w.available,
+            isSelected: false
+          } as ServerInfo
+        });
+
+        let g_ws_target: ServerInfo | null = null;
+        for (let i = 0; i < g_workspaceList.length; i++) {
+          if ( g_workspaceList[i].workspaceId == msg.workspaceId ) g_ws_target = g_workspaceList[i];
+        }
+        let new_ws_target: ServerInfo | null = null;
+        for (let i = 0; i < newWorkspaceList.length; i++) {
+          if ( newWorkspaceList[i].workspaceId == msg.workspaceId ) new_ws_target = newWorkspaceList[i];
+        }
+
+        if ( g_ws_target && new_ws_target ) {
+          g_ws_target.name = new_ws_target.name;
+          g_ws_target.isAvailable = new_ws_target.isAvailable;
+          e.reply(IpcId.FETCH_WORKSPACE_LIST_REPLY, JSON.stringify(g_workspaceList));
+        }
+      });
     }
   };
   let item_set_icon = {
@@ -132,8 +156,11 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
     }
   };
 
-  template.push(item_reload)
-  if ( msg.is_available ) template.push(item_set_icon)
+  if ( msg.is_available ) {
+    template.push(item_set_icon)
+  } else {
+    template.push(item_reload)
+  }
   template.push({ type: 'separator' })
   if ( msg.is_available ) template.push(item_delete_icon)
   template.push(item_delete_workspace)
