@@ -38,7 +38,7 @@ const reactModalStyle: ReactModal.Styles = {
 }
 
 export const ServerList = () => {
-  const DEFAULT_ICON_PATH = '../src/contents/img/design-server-icon.jpg';
+  const DEFAULT_ICON_PATH = '../src/contents/img/design-server-icon.png';
   const [serverListState, setServerList] = useState([] as ServerInfo[]);
   const [isShowNewWorkspaceModalState, setIsShowNewWorkspaceModal] = useState(false);
   const [isShowAddWorkspaceModalState, setIsShowAddWorkspaceModal] = useState(false);
