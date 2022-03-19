@@ -8,7 +8,8 @@
   <head>
     <style text="text/css">
       body {
-        margin: 50px;
+        /* margin: 50px; */
+        margin: 0;
         padding: 0;
         background-color: white;
       }
@@ -18,7 +19,8 @@
         padding: calc(512px * 0.1);
         margin: 0;
         box-sizing: border-box;
-        background-color: #4d9650;
+        /*background-color: #4d9650;*/
+        background-color: #151D3B;
 
         /* iosの丸み(ざっくり) */
         border-radius: 22%;
@@ -27,21 +29,21 @@
       .contents {
         padding: 0;
         margin: 0;
-        height: calc(512px * 0.8);
-        width: calc(512px * 0.8);
+        height: calc(512px * (1 - 0.1 * 2));
+        width: calc(512px * (1 - 0.1 * 2));
         box-sizing: border-box;
       }
 
       .contents .row {
         margin: 0;
         padding: 0;
-        height: calc((100% - 5% * (3 - 1)) / 3);
+        height: calc((100% - 8% * (3 - 1)) / 3);
         width: 100%;
         box-sizing: border-box;
         font-size: 0; /* inline-blockの隙間をなくす */
       }
       .row + .row {
-        margin-top: 5%;
+        margin-top: 8%;
       }
 
       .image-box {
@@ -53,10 +55,11 @@
         border-radius: 5%;
         box-sizing: border-box;
 
-        background-color: #b9dbba;
+        /*background-color: #b9dbba;*/
+        background-color: #6EBF8B;
       }
       .image-box + .image-box {
-        margin-left: 5%;
+        margin-left: 8%;
       }
     </style>
   </head>
@@ -65,21 +68,21 @@
     <div class="icon-frame">
       <div class="contents">
         <div class="row">
-          <!-- image-boxの合計width: 100% - 5% * (3 - 1) = 90% -->
-          <div class="image-box" style="width: 35%;"></div>
-          <div class="image-box" style="width: 27.5%;"></div>
-          <div class="image-box" style="width: 27.5%;"></div>
+          <!-- image-boxの合計width: 100% - 8% * (3 - 1) = 84% -->
+          <div class="image-box" style="width: 33%;"></div>
+          <div class="image-box" style="width: 25.5%;"></div>
+          <div class="image-box" style="width: 25.5%;"></div>
         </div>
         <div class="row">
-          <!-- image-boxの合計width: 100% - 5% * (3 - 1) = 90% -->
-          <div class="image-box" style="width: 25%;"></div>
-          <div class="image-box" style="width: 25%;"></div>
-          <div class="image-box" style="width: 40%;"></div>
+          <!-- image-boxの合計width: 100% - 8% * (3 - 1) = 84% -->
+          <div class="image-box" style="width: 23%;"></div>
+          <div class="image-box" style="width: 23%;"></div>
+          <div class="image-box" style="width: 38%;"></div>
         </div>
         <div class="row">
-          <!-- image-boxの合計width: 100% - 5% * (2 - 1) = 95% -->
-          <div class="image-box" style="width: 45%;"></div>
-          <div class="image-box" style="width: 50%;"></div>
+          <!-- image-boxの合計width: 100% - 8% * (2 - 1) = 92% -->
+          <div class="image-box" style="width: 42%;"></div>
+          <div class="image-box" style="width: 47%;"></div>
         </div>
       </div>
     </div>
