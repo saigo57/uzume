@@ -17,7 +17,6 @@ export const ConfirmModal:React.VFC<ConfirmModalProps> = (props) => {
       left: '50%',
       right: 'auto',
       bottom: 'auto',
-      width: '350px',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
       backgroundColor: CssConst.MAIN_BACKGROUND_COLOR,
@@ -40,7 +39,7 @@ export const ConfirmModal:React.VFC<ConfirmModalProps> = (props) => {
       <form className="modal-form" onSubmit={ props.onClose }>
         <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ props.onClose } />
         <div className="title">確認</div>
-        <div className="show-block">
+        <div className="content">
           {props.message}
         </div>
         <div className="form-buttons">
