@@ -8,18 +8,16 @@
   <head>
     <style text="text/css">
       body {
-        /* margin: 50px; */
-        margin: 0;
+        margin: 51px; /* 51.2px */
         padding: 0;
         background-color: white;
       }
       .icon-frame {
         height: 512px;
         width: 512px;
-        padding: calc(512px * 0.1);
+        padding: calc(512px * 0.15);
         margin: 0;
         box-sizing: border-box;
-        /*background-color: #4d9650;*/
         background-color: #151D3B;
 
         /* iosの丸み(ざっくり) */
@@ -29,8 +27,8 @@
       .contents {
         padding: 0;
         margin: 0;
-        height: calc(512px * (1 - 0.1 * 2));
-        width: calc(512px * (1 - 0.1 * 2));
+        height: calc(512px * (1 - 0.15 * 2));
+        width: calc(512px * (1 - 0.15 * 2));
         box-sizing: border-box;
       }
 
@@ -55,7 +53,6 @@
         border-radius: 5%;
         box-sizing: border-box;
 
-        /*background-color: #b9dbba;*/
         background-color: #6EBF8B;
       }
       .image-box + .image-box {
@@ -82,7 +79,7 @@
         <div class="row">
           <!-- image-boxの合計width: 100% - 8% * (2 - 1) = 92% -->
           <div class="image-box" style="width: 42%;"></div>
-          <div class="image-box" style="width: 47%;"></div>
+          <div class="image-box" style="width: 50%;"></div>
         </div>
       </div>
     </div>
