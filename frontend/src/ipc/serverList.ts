@@ -17,6 +17,8 @@ export class IpcId {
   static readonly SHOW_DELETE_WORKSPACE_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-delete-workspace-modal-reply";
   // ワークスペースアイコン設定モーダル表示
   static readonly SHOW_SET_ICON_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-set-icon-modal-reply";
+  // ワークスペース名更新モーダル表示
+  static readonly SHOW_UPDATE_WORKSPACE_NAME_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-update-workspace-name-modal-reply";
   // リクエスト系
   static readonly CREATE_NEW_SERVER: string = IpcId.NAME_SPACE + "create-new-server";
   static readonly CREATE_ADD_SERVER: string = IpcId.NAME_SPACE + "create-add-server";
@@ -26,6 +28,7 @@ export class IpcId {
   static readonly FETCH_WORKSPACE_ICON: string = IpcId.NAME_SPACE + "fetch-server-icon";
   static readonly FETCH_WORKSPACE_ICON_REPLY: string = IpcId.NAME_SPACE + "fetch-server-icon-reply";
   static readonly SET_WORKSPACE_ICON: string = IpcId.NAME_SPACE + "set-server-icon";
+  static readonly UPDATE_WORKSPACE_NAME: string = IpcId.NAME_SPACE + "update-workspace-name";
 }
 
 export type ServerInfo = {
@@ -36,7 +39,6 @@ export type ServerInfo = {
 }
 
 export type CreateWorkspaceInfo = {
-  name: string
   dirName: string
   dirPath: string
 }
@@ -71,4 +73,9 @@ export type IconImageData = {
 export type SetWorkspaceIcon = {
   workspaceId: string
   iconPath: string
+}
+
+export type UpdateWorkspaceName = {
+  workspaceId: string
+  name: string
 }

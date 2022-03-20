@@ -9,6 +9,7 @@ import {
   FetchWorkspaceIcon,
   IconImageData,
   SetWorkspaceIcon,
+  UpdateWorkspaceName,
 } from '../ipc/serverList';
 import BackendConnector from '../backendConnector/backendConnector';
 import { changeCurrentWorkspace } from './currWorkspace'
@@ -63,7 +64,7 @@ ipcMain.on(IpcId.SELECT_SET_WORKSPACE_ICON, (e, _arg) => {
 ipcMain.on(IpcId.CREATE_NEW_SERVER, (e, arg) => {
   let wsInfo: CreateWorkspaceInfo = JSON.parse(arg)
   BackendConnector.Workspace.create(
-    wsInfo.name,
+    wsInfo.dirName, // 一旦ディレクトリ名と同じにする
     path.join(wsInfo.dirPath, wsInfo.dirName + ".uzume")
   ).then((workspaceId) => {
     fetchWorkspaceList(e, workspaceId.workspace_id)
@@ -92,6 +93,18 @@ ipcMain.on(IpcId.SET_WORKSPACE_ICON, (e, arg) => {
       fetchWorkspaceList(e, null as any)
     }).catch((err) => {
       showFooterMessage(e, `ワークスペースアイコンの設定に失敗しました。[${err}}]`);
+    });
+  })
+});
+
+// ワークスペース名を変更
+ipcMain.on(IpcId.UPDATE_WORKSPACE_NAME, (e, arg) => {
+  let updateWorkspaceName: UpdateWorkspaceName = JSON.parse(arg)
+  BackendConnector.workspace(updateWorkspaceName.workspaceId, (ws) => {
+    ws.update(updateWorkspaceName.name).then(() => {
+      fetchWorkspaceList(e, updateWorkspaceName.workspaceId)
+    }).catch((err) => {
+      showFooterMessage(e, `ワークスペース名の変更に失敗しました。[${err}}]`);
     });
   })
 });
@@ -137,6 +150,12 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
       showSelectWorkspaceIconModal(e, msg.workspaceId)
     }
   };
+  let item_update_workspace_name = {
+    label: 'ワークスペース名変更',
+    click: () => {
+      showUpdateWorkspaceNameModal(e, msg.workspaceId)
+    }
+  };
   let item_delete_icon = {
     label: 'アイコンを削除',
     click: () => {
@@ -158,6 +177,7 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
 
   if ( msg.is_available ) {
     template.push(item_set_icon)
+    template.push(item_update_workspace_name)
   } else {
     template.push(item_reload)
   }
@@ -278,5 +298,13 @@ function showSelectWorkspaceIconModal(e: Electron.IpcMainEvent, workspaceId: str
     if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
 
     e.reply(IpcId.SHOW_SET_ICON_MODAL_REPLY, JSON.stringify(g_workspaceList[i]))
+  }
+}
+
+function showUpdateWorkspaceNameModal(e: Electron.IpcMainEvent, workspaceId: string) {
+  for (let i = 0; i < g_workspaceList.length; i++) {
+    if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
+
+    e.reply(IpcId.SHOW_UPDATE_WORKSPACE_NAME_MODAL_REPLY, JSON.stringify(g_workspaceList[i]))
   }
 }

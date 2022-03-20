@@ -125,6 +125,15 @@ export default class Workspace {
     return axios;
   }
 
+  public async update(workspaceName: string) {
+    try {
+      return await this.authorizeAxios().patch('/', {name: workspaceName})
+    } catch (e) {
+      console.log(`workspace update error [${e}]`)
+      throw e
+    }
+  }
+
   public async delete() {
     try {
       return await this.authorizeAxios().delete('/')
