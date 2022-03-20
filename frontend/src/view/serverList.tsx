@@ -11,6 +11,7 @@ import {
   FetchWorkspaceIcon,
   IconImageData,
   SetWorkspaceIcon,
+  UpdateWorkspaceName,
 } from "../ipc/serverList";
 import CssConst from "./cssConst";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -44,10 +45,13 @@ export const ServerList = () => {
   const [isShowAddWorkspaceModalState, setIsShowAddWorkspaceModal] = useState(false);
   const [isShowDeleteWorkspaceModalState, setIsShowDeleteWorkspaceModal] = useState(false);
   const [isShowSetIconModalState, setIsShowSetIconModalState] = useState(false);
-  const [workspaceInfoState, setWorkspaceInfo] = useState<CreateWorkspaceInfo>({name:'', dirName:'', dirPath:''});
+  const [isShowUpdateWorkspaceNameModalState, setIsShowUpdateWorkspaceNameModalState] = useState(false);
+  const [workspaceInfoState, setWorkspaceInfo] = useState<CreateWorkspaceInfo>({dirName:'', dirPath:''});
   const [deleteWorkspaceState, setDeleteWorkspaceState] = useState<ServerInfo>(
     {workspaceId:'', name:'', isAvailable: false, isSelected: false});
   const [workspaceIconState, setWorkspaceIconState] = useState<ServerInfo>(
+    {workspaceId:'', name:'', isAvailable: false, isSelected: false});
+  const [updateWorkspaceNameState, setUpdateWorkspaceNameState] = useState<ServerInfo>(
     {workspaceId:'', name:'', isAvailable: false, isSelected: false});
   const [addWorkspacePathState, setAddWorkspacePathState] = useState('');
   const [workspaceIconPathState, setWorkspaceIconPathState] = useState('');
@@ -76,6 +80,14 @@ export const ServerList = () => {
       const targetWorkspace = JSON.parse(arg) as ServerInfo
       setWorkspaceIconState(targetWorkspace)
       setIsShowSetIconModalState(true)
+    });
+  }, []);
+
+  useEffect(() => {
+    window.api.on(serverListIpcId.SHOW_UPDATE_WORKSPACE_NAME_MODAL_REPLY, (_e, arg) => {
+      const targetWorkspace = JSON.parse(arg) as ServerInfo
+      setUpdateWorkspaceNameState(targetWorkspace)
+      setIsShowUpdateWorkspaceNameModalState(true)
     });
   }, []);
 
@@ -138,7 +150,7 @@ export const ServerList = () => {
 
   const createNewServer = () => {
     window.api.send(serverListIpcId.CREATE_NEW_SERVER, JSON.stringify(workspaceInfoState));
-    setWorkspaceInfo({name:'', dirName:'', dirPath:''})
+    setWorkspaceInfo({dirName:'', dirPath:''})
   }
 
   const AddExistingServer = () => {
@@ -164,8 +176,12 @@ export const ServerList = () => {
     window.api.send(serverListIpcId.SET_WORKSPACE_ICON, msg)
   }
 
-  const inputNameOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWorkspaceInfo({...workspaceInfoState, name: event.target.value})
+  const updateWorkspaceName = () => {
+    let msg = JSON.stringify({
+      workspaceId: updateWorkspaceNameState.workspaceId,
+      name: updateWorkspaceNameState.name,
+    } as UpdateWorkspaceName)
+    window.api.send(serverListIpcId.UPDATE_WORKSPACE_NAME, msg)
   }
 
   const inputDirNameOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,6 +216,12 @@ export const ServerList = () => {
   const showAddWorkspaceModal = () => {
     setIsShowNewWorkspaceModal(false)
     setIsShowAddWorkspaceModal(true)
+  }
+
+  const updateWorkspaceNameOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUpdateWorkspaceNameState((state) => {
+      return {...state, name: event.target.value}
+    })
   }
 
   return (
@@ -239,11 +261,11 @@ export const ServerList = () => {
           <div className="title">ワークスペース新規作成</div>
           <div className="input-block">
             <label className="label-name">ワークスペース名</label>
-            <input type="text" className="text-box" value={workspaceInfoState.name} onChange={inputNameOnChange}></input>
+            <input type="text" className="text-box" value={workspaceInfoState.dirName} onChange={inputDirNameOnChange}></input>
           </div>
           <div className="input-block">
-            <label className="label-name">ワークスペースフォルダ名</label>
-            <input type="text" className="text-box" value={workspaceInfoState.dirName} onChange={inputDirNameOnChange}></input>
+            <label className="label-name">作成されるフォルダ</label>
+            <input type="text" className="text-box" value={`${workspaceInfoState.dirName}.uzume`} readOnly></input>
           </div>
           <div className="show-block">
             <label className="label-name">ワークスペースを作成するフォルダ</label>
@@ -327,6 +349,25 @@ export const ServerList = () => {
           <div className="form-buttons">
             <button type="submit" className="button" onClick={() => { setIsShowSetIconModalState(false) }}>キャンセル</button>
             <button type="submit" className="button" onClick={() => { setWorkspaceIcon(workspaceIconState.workspaceId) }}>設定</button>
+          </div>
+        </form>
+      </ReactModal>
+
+      <ReactModal
+        isOpen={isShowUpdateWorkspaceNameModalState}
+        onRequestClose={ () => { setIsShowUpdateWorkspaceNameModalState(false) } }
+        style={reactModalStyle}
+      >
+        <form className="modal-form" onSubmit={ () => { setIsShowUpdateWorkspaceNameModalState(false) } }>
+          <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ () => { setIsShowUpdateWorkspaceNameModalState(false) } } />
+          <div className="title">ワークスペース名変更</div>
+          <div className="show-block">
+            <label className="label-name">ワークスペース名</label>
+            <input type="text" className="text-box" value={updateWorkspaceNameState.name} onChange={updateWorkspaceNameOnChange}></input>
+          </div>
+          <div className="form-buttons">
+            <button type="submit" className="button" onClick={() => { setIsShowUpdateWorkspaceNameModalState(false) }}>キャンセル</button>
+            <button type="submit" className="button" onClick={updateWorkspaceName}>変更</button>
           </div>
         </form>
       </ReactModal>
