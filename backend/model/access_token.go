@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"sync"
 	"time"
 	"uzume_backend/helper"
 	"uzume_backend/test_helper"
@@ -93,7 +94,12 @@ func (a *AccessToken) DeleteExpireToken() {
 	a.AccessTokenList = new_list
 }
 
+var generate_access_token_mutex sync.Mutex
+
 func GenerateAccessToken(workspace_id string) (string, error) {
+	generate_access_token_mutex.Lock()
+	defer generate_access_token_mutex.Unlock()
+
 	access_token_info := new(AccessTokenInfo)
 	access_token_info.WorkspaceId = workspace_id
 	access_token_info.AccessToken = helper.SecureRandomStr(18)

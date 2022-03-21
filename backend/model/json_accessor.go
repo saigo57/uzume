@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 	"uzume_backend/helper"
 	"uzume_backend/test_helper"
 )
@@ -29,7 +30,12 @@ func NewJsonAccessor() JsonAccessor {
 type FileSystem struct {
 }
 
+var fs_mutex sync.Mutex
+
 func (fs *FileSystem) ReadJson(path string) ([]byte, error) {
+	fs_mutex.Lock()
+	defer fs_mutex.Unlock()
+
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -39,6 +45,9 @@ func (fs *FileSystem) ReadJson(path string) ([]byte, error) {
 }
 
 func (fs *FileSystem) SaveJson(path string, v interface{}) error {
+	fs_mutex.Lock()
+	defer fs_mutex.Unlock()
+
 	if helper.IsTesting() {
 		if !strings.HasPrefix(path, test_helper.BuildFilePath("")) {
 			return errors.New("テスト用フォルダ外へのアクセスです")
