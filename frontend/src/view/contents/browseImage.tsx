@@ -87,6 +87,8 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   }, [tagAllListState]);
 
   const showImages = () => {
+    if ( props.workspaceId == "" ) return;
+
     const showImages: ShowImages = {
       workspaceId: props.workspaceId,
       page: 1,
