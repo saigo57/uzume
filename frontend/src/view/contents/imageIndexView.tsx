@@ -18,6 +18,7 @@ type ImageIndexViewProps = {
   workspaceId: string
   onChangeSelectedImages: (imageIds: string[]) => void
   onImageDoubleClick: (imageId: string) => void
+  clearSearchTags: () => void,
   hide: boolean
   tagIds: string[]
   searchType: string
@@ -165,6 +166,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       if ( progress.completeCnt < progress.allImagesCnt ) {
         setUploadModalInfo({completeCnt: progress.completeCnt, allImagesCnt: progress.allImagesCnt })
       } else {
+        props.clearSearchTags()
         setIsShowImageUploadModal(false)
       }
     });
