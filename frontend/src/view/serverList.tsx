@@ -14,7 +14,7 @@ import {
 } from "../ipc/serverList";
 import CssConst from "./cssConst";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTimes, faUnlink } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTimes, faUnlink, faFolder } from "@fortawesome/free-solid-svg-icons";
 
 export type ServerListProps = {
   serverList: ServerInfo[]
@@ -238,23 +238,21 @@ export const ServerList = () => {
           <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ () => { setIsShowNewWorkspaceModal(false) } } />
           <div className="title">ワークスペース新規作成</div>
           <div className="input-block">
-            <label className="label-name">ワークスペース名
-              <div>
-                <input type="text" className="text-box" value={workspaceInfoState.name} onChange={inputNameOnChange}></input>
-              </div>
-            </label>
+            <label className="label-name">ワークスペース名</label>
+            <input type="text" className="text-box" value={workspaceInfoState.name} onChange={inputNameOnChange}></input>
           </div>
           <div className="input-block">
-            <label className="label-name">ワークスペースフォルダ名
-              <div>
-                <input type="text" className="text-box" value={workspaceInfoState.dirName} onChange={inputDirNameOnChange}></input>
-              </div>
-            </label>
+            <label className="label-name">ワークスペースフォルダ名</label>
+            <input type="text" className="text-box" value={workspaceInfoState.dirName} onChange={inputDirNameOnChange}></input>
           </div>
           <div className="show-block">
             <label className="label-name">ワークスペースを作成するフォルダ</label>
-            <div>{workspaceInfoState.dirPath}</div>
-            <button type="button" className="button" onClick={selectNewWorkspaceDir}>フォルダ選択</button>
+            <div className="input-dir-path">
+              <input type="text" className="text-box" value={workspaceInfoState.dirPath} readOnly></input>
+              <button type="button" className="button" onClick={selectNewWorkspaceDir}>
+                <FontAwesomeIcon icon={faFolder}></FontAwesomeIcon>
+              </button>
+            </div>
           </div>
           <div className="form-buttons">
             <button type="submit" className="button" onClick={ () => { setIsShowNewWorkspaceModal(false) } }>キャンセル</button>
@@ -274,8 +272,12 @@ export const ServerList = () => {
           <div className="title">ワークスペース追加</div>
           <div className="show-block">
             <label className="label-name">追加するワークスペースのフォルダ</label>
-            <div>{addWorkspacePathState}</div>
-            <button type="button" className="button" onClick={selectAddWorkspaceDir}>フォルダ選択</button>
+            <div className="input-dir-path">
+              <input type="text" className="text-box" value={addWorkspacePathState} readOnly></input>
+              <button type="button" className="button" onClick={selectAddWorkspaceDir}>
+                <FontAwesomeIcon icon={faFolder}></FontAwesomeIcon>
+              </button>
+            </div>
           </div>
           <div className="form-buttons">
             <button type="submit" className="button" onClick={() => { setIsShowAddWorkspaceModal(false) }}>キャンセル</button>
@@ -297,11 +299,11 @@ export const ServerList = () => {
           </div>
           <div className="show-block">
             <label className="label-name">ワークスペースID</label>
-            <div className="show-value">{deleteWorkspaceState.workspaceId}</div>
+            <input type="text" className="text-box" value={deleteWorkspaceState.workspaceId} readOnly></input>
           </div>
           <div className="show-block">
             <label className="label-name">ワークスペース名</label>
-            <div className="show-value">{deleteWorkspaceState.name}</div>
+            <input type="text" className="text-box" value={deleteWorkspaceState.name} readOnly></input>
           </div>
           <div className="form-buttons">
             <button type="submit" className="button" onClick={ () => { setIsShowDeleteWorkspaceModal(false) } }>キャンセル</button>

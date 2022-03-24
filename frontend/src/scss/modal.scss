@@ -1,37 +1,8 @@
 @import 'const';
 
 .modal-form {
-  .title {
-    font-size: 1.2em;
-    margin-bottom: 16px;
-  }
-  .content {
-    font-size: 1em;
-    margin-bottom: 15px;
-  }
-  .text-box {
-    background-color: #444;
-    border: none;
-    height: 22px;
-    width: 300px;
-    color: $main-font-color;
-    border-radius: 2px;
-  }
-  .input-block {
-    margin-bottom: 10px;
-  }
-  .show-block {
-    margin-bottom: 10px;
-  }
-  .show-value {
-    padding: 4px;
-    font-size: 1em;
-    background-color: $verylight-background-color;
-    border-radius: 4px;
-  }
-  .label-name {
-    font-size: 0.9em;
-  }
+  width: 400px;
+
   .close-button {
     display: block;
     width: 18px;
@@ -45,14 +16,56 @@
       color: $hover-font-color;
     }
   }
+
+  .title {
+    font-size: 1.2em;
+    margin-bottom: 16px;
+  }
+  .input-block, .show-block {
+    margin-bottom: 10px;
+  }
+  .content {
+    font-size: 1em;
+    margin-bottom: 15px;
+  }
+
+  .label-name {
+    display: block;
+    font-size: 0.9em;
+    margin-bottom: 6px;
+  }
+  .text-box {
+    display: block;
+    background-color: #444;
+    border: none;
+    height: 22px;
+    width: 100%;
+    color: $main-font-color;
+    border-radius: 2px;
+  }
+  .input-dir-path {
+    display: flex;
+
+    .text-box {
+      box-sizing: border-box;
+      width: calc(100% - 34px);
+      margin-right: 4px;
+    }
+    .button {
+      box-sizing: border-box;
+      margin: 0;
+      height: 22px;
+      width: 30px;
+    }
+  }
   .form-buttons {
     display: flex;
     justify-content: flex-end;
+    .button:nth-child(n + 2) {
+      margin-left: 10px;
+    }
   }
-  .button-area {
-    display: flex;
-    justify-content: flex-end;
-  }
+
   .button {
     display: block;
     height: 25px;
@@ -66,9 +79,7 @@
       background-color: $verylight-background-color;
     }
   }
-  .button:nth-child(n + 2) {
-    margin-left: 10px;
-  }
+
   .existing-workspace-link {
     margin-top: 10px;
     font-size: 12px;
