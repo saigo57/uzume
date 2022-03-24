@@ -99,39 +99,45 @@ ipcMain.on(IpcId.SET_WORKSPACE_ICON, (e, arg) => {
 ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
   let msg: ShowContextMenu = JSON.parse(arg)
 
-  const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
-    {
-      label: 'リロード(未実装)',
-      click: () => {
-        // TODO: 後で実装
-      }
-    },
-    {
-      label: 'アイコンを設定',
-      click: () => {
-        showSelectWorkspaceIconModal(e, msg.workspaceId)
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'アイコンを削除',
-      click: () => {
-        BackendConnector.workspace(msg.workspaceId, (ws) => {
-          ws.deleteIcon().then(() => {
-            fetchWorkspaceList(e, null as any)
-          }).catch((err) => {
-            showFooterMessage(e, `アイコンの削除に失敗しました。[${err}}]`);
-          });
-        })
-      }
-    },
-    {
-      label: 'ワークスペースを削除',
-      click: () => {
-        showDeleteWorkspaceModal(e, msg.workspaceId)
-      }
-    },
-  ]
+  const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = []
+
+  let item_reload = {
+    label: 'リロード(未実装)',
+    click: () => {
+      // TODO: 後で実装
+    }
+  };
+  let item_set_icon = {
+    label: 'アイコンを設定',
+    click: () => {
+      showSelectWorkspaceIconModal(e, msg.workspaceId)
+    }
+  };
+  let item_delete_icon = {
+    label: 'アイコンを削除',
+    click: () => {
+      BackendConnector.workspace(msg.workspaceId, (ws) => {
+        ws.deleteIcon().then(() => {
+          fetchWorkspaceList(e, null as any)
+        }).catch((err) => {
+          showFooterMessage(e, `アイコンの削除に失敗しました。[${err}}]`);
+        });
+      })
+    }
+  };
+  let item_delete_workspace = {
+    label: 'ワークスペースを削除',
+    click: () => {
+      showDeleteWorkspaceModal(e, msg.workspaceId)
+    }
+  };
+
+  template.push(item_reload)
+  if ( msg.is_available ) template.push(item_set_icon)
+  template.push({ type: 'separator' })
+  if ( msg.is_available ) template.push(item_delete_icon)
+  template.push(item_delete_workspace)
+
   const menu = Menu.buildFromTemplate(template)
   let contents: any = BrowserWindow.fromWebContents(e.sender)
   menu.popup(contents)
@@ -186,7 +192,7 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
       return {
         workspaceId: w.workspace_id,
         name: w.name,
-        isAvailable: true,
+        isAvailable: w.available,
         isSelected: false
       } as ServerInfo
     });

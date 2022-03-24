@@ -18,7 +18,7 @@ export type ResWorkspaceId = {
 export type ResWorkspace = {
   workspace_id: string
   name: string
-  available: string
+  available: boolean
 }
 
 export default class Workspace {

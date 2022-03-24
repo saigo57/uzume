@@ -14,8 +14,7 @@ import {
 } from "../ipc/serverList";
 import CssConst from "./cssConst";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTimes, faUnlink } from "@fortawesome/free-solid-svg-icons";
 
 export type ServerListProps = {
   serverList: ServerInfo[]
@@ -111,7 +110,8 @@ export const ServerList = () => {
   const showContextMenu = (e:any) => {
     e.preventDefault()
     let msg = JSON.stringify({
-      workspaceId: e.target.dataset.workspace_id
+      workspaceId: e.target.dataset.workspace_id,
+      is_available: e.target.dataset.is_available === "true",
     } as ShowContextMenu)
     window.api.send(serverListIpcId.SHOW_CONTEXT_MENU, msg)
   }
@@ -130,6 +130,10 @@ export const ServerList = () => {
 
   const selectedClassName = (is_selected: boolean) => {
     return is_selected ? 'selected' : '';
+  }
+
+  const availableClassName = (is_available: boolean) => {
+    return is_available ? '' : 'not_available';
   }
 
   const createNewServer = () => {
@@ -169,6 +173,8 @@ export const ServerList = () => {
   }
 
   const workspaceIconClick = (e:any) => {
+    if ( e.target.dataset.is_available === "false" ) return;
+
     let sw: SelectWorkspace = { workspaceId: e.target.dataset.workspace_id }
     window.api.send(serverListIpcId.SELECT_WORKSPACE, JSON.stringify(sw));
   }
@@ -201,13 +207,19 @@ export const ServerList = () => {
       {
         serverListState.map((s) => {
           return (
-            <img
-              id={`icon-image-${s.workspaceId}`}
-              className={`server-icon actually-workspace-icon ${selectedClassName(s.isSelected)}`} 
-              src={DEFAULT_ICON_PATH}
-              data-workspace_id={s.workspaceId}
-              onClick={workspaceIconClick}>
-            </img>
+            <div className={`server-icon ${selectedClassName(s.isSelected)} ${availableClassName(s.isAvailable)}`}>
+              <img
+                id={`icon-image-${s.workspaceId}`}
+                className={`actually-workspace-icon`} 
+                src={DEFAULT_ICON_PATH}
+                data-workspace_id={s.workspaceId}
+                data-is_available={s.isAvailable}
+                onClick={workspaceIconClick}>
+              </img>
+              <div className="server-icon-unlink">
+                <FontAwesomeIcon icon={faUnlink} />
+              </div>
+            </div>
           );
         })
       }
