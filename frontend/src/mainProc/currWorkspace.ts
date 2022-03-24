@@ -7,11 +7,14 @@ let g_currentWorkspace: CurrentWorkspace = {
 }
 
 export function changeCurrentWorkspace(e: Electron.IpcMainEvent, workspaceId: string, name: string) {
-
   BackendConnector.workspace(workspaceId, (ws) => {
     g_currentWorkspace.workspace_id = workspaceId
     g_currentWorkspace.workspace_name = name
   
     e.reply(IpcId.GET_CURRENT_WORKSPACE_REPLY, JSON.stringify(g_currentWorkspace));
   });
+}
+
+export function isCurrentWorkspace(workspace_id: string): boolean {
+  return g_currentWorkspace.workspace_id == workspace_id
 }
