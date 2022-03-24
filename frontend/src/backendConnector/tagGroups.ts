@@ -35,7 +35,7 @@ export default class TagGroups {
       },
       responseType: 'json'
     })
-    if (process.env.NODE_ENV === 'development') {
+    if ( BackendConnector.loggingEnable && process.env.NODE_ENV === 'development' ) {
       axios.interceptors.request.use((request:any) => {
         console.log('request: ', request)
         return request
