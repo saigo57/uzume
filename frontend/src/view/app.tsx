@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef} from 'react';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { ConfirmModal } from './component/organisms/confirmModal';
 import { TagRenameModal } from './component/organisms/tagRenameModal';
 import { TagGroupRenameModal } from './component/organisms/tagGroupRenameModal';
 import { UzumeMain } from './uzumeMain';
@@ -20,8 +21,14 @@ type WindowMode = typeof WINDOW_MODE[keyof typeof WINDOW_MODE];
 export function App() {
   const [windowMode, setWindowMode] = useState(WINDOW_MODE.INIT as WindowMode);
   const [backendState, setBackendState] = useState({} as BackendState);
+  const [confirmMessage, setConfirmMessage] = useState(null as string | null);
 
   useEffect(() => {
+    // 初期化
+    window.showConfirmModal = (message: string) => {
+      setConfirmMessage(message)
+    }
+    // 初期処理
     window.api.on(WindowModeIpcId.UZUME_MAIN_MODE_REPLY, (_e, _arg) => {
       setWindowMode(WINDOW_MODE.UZUME_MAIN);
     });
@@ -51,6 +58,7 @@ export function App() {
       </div>
 
       {/* 共通処理 */}
+      <ConfirmModal display={confirmMessage != null} message={confirmMessage || ''} onClose={() => { setConfirmMessage(null)} } />
       <TagRenameModal />
       <TagGroupRenameModal />
     </DndProvider>
