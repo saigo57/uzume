@@ -13,7 +13,7 @@ import { ImageSideBar } from "./imageSideBar";
 import { TagInfo } from '../../ipc/tags';
 import { sendIpcGetAllTags } from '../commonIpc';
 import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images';
-import { Event } from './../lib/eventCustomHooks';
+import { useEvent, Event } from './../lib/eventCustomHooks';
 
 type BrowseImageProps = {
   display: boolean
@@ -33,6 +33,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const [searchType, setSearchType] = useState('and');
   const [tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null);
+  const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null);
 
   useEffect(() => {
     setSelectedImageIds([])
@@ -93,6 +94,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
       searchType: searchType,
       uncategorized: props.uncategorized,
     }
+    raiseOnShowImagesEvent(null)
     window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
   }
 
@@ -194,6 +196,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
           tagIds={searchTags.map(tag => tag.tagId)}
           searchType={searchType}
           uncategorized={props.uncategorized}
+          onShowImagesEvent={onShowImagesEvent}
         />
 
         {(() => {

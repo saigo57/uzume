@@ -14,6 +14,7 @@ import {
   ImageUploadProgress,
 } from '../../ipc/images';
 import CssConst from "./../cssConst";
+import { Event } from './../lib/eventCustomHooks';
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -24,6 +25,7 @@ type ImageIndexViewProps = {
   tagIds: string[]
   searchType: string
   uncategorized: boolean
+  onShowImagesEvent: Event
 };
 
 type ImageList = {
@@ -59,6 +61,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   // TODO: どこで持つべきか(少なくともここではなさそう)
   const supportedExts = ["jpeg", "jpg", "png"];
+  const dummyImageBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mM0/g8AAWsBNAUUB5MAAAAASUVORK5CYII=";
 
   useEffect(() => {
     if ( props.workspaceId.length > 0 ) {
@@ -67,6 +70,15 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       requestShowImages(1)
     }
   }, [props.workspaceId, props.uncategorized]);
+
+  useEffect(() => {
+    let imgs: any = document.getElementsByClassName("thumbnail-img");
+    if ( !imgs ) return;
+
+    for (let i = 0; i < imgs.length; i++) {
+      imgs[i].src = dummyImageBase64;
+    }
+  }, [props.onShowImagesEvent]);
 
   useEffect(() => {
     if ( imageList.page > 0 ) setNextPageRequestable(true)
@@ -407,7 +419,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
               onClick={(e)=>{ onImageClick(e, image.image_id) }}
               onDoubleClick={()=>{ if ( props.onImageDoubleClick ) props.onImageDoubleClick(image.image_id); }}
             >
-              <img id={`image-${image.image_id}`} style={thumbImgStyle(image.width, image.height)}></img>
+              <img id={`image-${image.image_id}`} className="thumbnail-img" style={thumbImgStyle(image.width, image.height)}></img>
               <div
                 className="original-size-icon"
                 onMouseEnter={iconEnter}
