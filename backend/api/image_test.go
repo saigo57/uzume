@@ -21,14 +21,15 @@ import (
 
 // 画像一覧の取得に成功すること
 func TestGetImages_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	workspace.Save()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -67,15 +68,15 @@ func TestGetImages_success(t *testing.T) {
 
 // 画像一覧の取得時にページネーション・ソートされること
 func TestGetImagesPagenationAndSort_success(t *testing.T) {
-	test_helper.InitializeTest()
-	model.ResetImageCache()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
 	workspace.Save()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	create_image := func(author string, created_at time.Time) {
 		image, err := model.FixtureCreateImage(workspace, "testimage1.png")
@@ -146,13 +147,14 @@ func TestGetImagesPagenationAndSort_success(t *testing.T) {
 
 // access_tokenが間違っているとき、画像一覧の取得に失敗すること
 func TestGetImages_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -181,13 +183,14 @@ func TestGetImages_fail(t *testing.T) {
 
 // 画像情報の更新に成功すること
 func TestPatchImages_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -221,13 +224,14 @@ func TestPatchImages_success(t *testing.T) {
 
 // access_tokenが間違っているとき、画像情報の更新に失敗すること
 func TestPatchImages_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -256,13 +260,14 @@ func TestPatchImages_fail(t *testing.T) {
 
 // 画像自体の取得に成功すること
 func TestGetImageFile_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -300,13 +305,14 @@ func TestGetImageFile_success(t *testing.T) {
 
 // access_tokenが間違っているとき、画像自体の取得に失敗すること
 func TestGetImageFile_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
 	assert.NoError(t, err)
@@ -334,18 +340,19 @@ func TestGetImageFile_fail(t *testing.T) {
 
 // 画像と画像情報のPOSTに成功すること
 func TestPostImages_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
-	err := tags.Save()
+	err = tags.Save()
 	assert.NoError(t, err)
 
 	multipart_body := new(bytes.Buffer)
@@ -390,13 +397,14 @@ func TestPostImages_success(t *testing.T) {
 }
 
 func TestPostImages_no_info_field_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	token, _ := model.GenerateAccessToken(workspace.Id)
+	token, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	multipart_body := new(bytes.Buffer)
 	multipart_writer := multipart.NewWriter(multipart_body)
@@ -438,18 +446,19 @@ func TestPostImages_no_info_field_success(t *testing.T) {
 
 // access_tokenが間違っているとき、画像と画像情報のPOSTに失敗
 func TestPostImages_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
-	err := tags.Save()
+	err = tags.Save()
 	assert.NoError(t, err)
 
 	multipart_body := new(bytes.Buffer)
@@ -473,7 +482,7 @@ func TestPostImages_fail(t *testing.T) {
 
 // 画像へのタグ付与に成功すること
 func TestPatchImageTag_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
@@ -556,17 +565,18 @@ func TestPatchImageTag_success(t *testing.T) {
 
 // access_tokenが間違っているとき、画像へのタグ付与に失敗すること
 func TestPatchImageTag_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
-	err := tags.Save()
+	err = tags.Save()
 	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")
@@ -598,7 +608,7 @@ func TestPatchImageTag_fail(t *testing.T) {
 
 // 画像に付与されているタグを外すことに成功すること
 func TestDeleteImageTag_success(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
@@ -646,18 +656,19 @@ func TestDeleteImageTag_success(t *testing.T) {
 
 // 画像に付与されているタグを外すことに成功すること
 func TestDeleteImageTag_fail(t *testing.T) {
-	test_helper.InitializeTest()
+	InitializeTest()
 	listener := test_helper.Listener()
 	defer listener.Close()
 	router := RouteInit(listener)
 
 	_, workspace := model.FixtureSetupOneWorkspace()
-	model.GenerateAccessToken(workspace.Id)
+	_, err := model.GenerateAccessToken(workspace.Id)
+	assert.NoError(t, err)
 
 	tags := model.NewTags(workspace)
 	tag1, _ := tags.CreateNewTag("タグ1")
 	tag2, _ := tags.CreateNewTag("タグ2")
-	err := tags.Save()
+	err = tags.Save()
 	assert.NoError(t, err)
 
 	image, err := model.FixtureCreateImage(workspace, "testimage1.png")

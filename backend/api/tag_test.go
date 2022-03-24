@@ -55,24 +55,34 @@ func TestGetAllTags_success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	expect_body, _ := json.Marshal([]struct {
-		TagId string `json:"tag_id"`
-		Name  string `json:"name"`
+		TagId      string `json:"tag_id"`
+		Name       string `json:"name"`
+		Favorite   bool   `json:"favorite"`
+		TagGroupId string `json:"tag_group_id"`
 	}{
 		{
-			TagId: tag1.Id,
-			Name:  tag1.Name,
+			TagId:      tag1.Id,
+			Name:       tag1.Name,
+			Favorite:   false,
+			TagGroupId: "",
 		},
 		{
-			TagId: tag2.Id,
-			Name:  tag2.Name,
+			TagId:      tag2.Id,
+			Name:       tag2.Name,
+			Favorite:   false,
+			TagGroupId: "",
 		},
 		{
-			TagId: tag3.Id,
-			Name:  tag3.Name,
+			TagId:      tag3.Id,
+			Name:       tag3.Name,
+			Favorite:   false,
+			TagGroupId: "",
 		},
 		{
-			TagId: tag4.Id,
-			Name:  tag4.Name,
+			TagId:      tag4.Id,
+			Name:       tag4.Name,
+			Favorite:   false,
+			TagGroupId: "",
 		},
 	})
 
@@ -125,16 +135,22 @@ func TestGetFavoriteTags_success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	expect_body, _ := json.Marshal([]struct {
-		TagId string `json:"tag_id"`
-		Name  string `json:"name"`
+		TagId      string `json:"tag_id"`
+		Name       string `json:"name"`
+		Favorite   bool   `json:"favorite"`
+		TagGroupId string `json:"tag_group_id"`
 	}{
 		{
-			TagId: tag2.Id,
-			Name:  tag2.Name,
+			TagId:      tag2.Id,
+			Name:       tag2.Name,
+			Favorite:   true,
+			TagGroupId: "",
 		},
 		{
-			TagId: tag3.Id,
-			Name:  tag3.Name,
+			TagId:      tag3.Id,
+			Name:       tag3.Name,
+			Favorite:   true,
+			TagGroupId: "",
 		},
 	})
 

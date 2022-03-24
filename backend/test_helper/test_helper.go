@@ -5,66 +5,42 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/netutil"
 )
+
+var g_test_dir_serial string
 
 func exists(name string) bool {
 	_, err := os.Stat(name)
 	return !os.IsNotExist(err)
 }
 
-func myRemoveAll(dir string) error {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			if err := myRemoveAll(filepath.Join(dir, file.Name())); err != nil {
-				return err
-			}
-		} else {
-			// file
-			if err := os.Remove(filepath.Join(dir, file.Name())); err != nil {
-				return err
-			}
-		}
-	}
-
-	if err := os.Remove(dir); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func InitializeTest() {
-	test_work_dir := BuildFilePath("")
-
-	files, err := ioutil.ReadDir(test_work_dir)
+	new_uuid, err := uuid.NewRandom()
 	if err != nil {
-		fmt.Println(err)
+		panic("InitializeTestでuuidの生成に失敗しました")
 	}
+	g_test_dir_serial = new_uuid.String()
 
-	for _, file := range files {
-		if file.IsDir() {
-			if err := myRemoveAll(filepath.Join(test_work_dir, file.Name())); err != nil {
-				fmt.Println(err)
-			}
+	root_dir := TestDirRoot()
+	if !exists(root_dir) {
+		if err := os.Mkdir(root_dir, 0777); err != nil {
+			panic(err)
 		}
 	}
+
+	test_work_dir := BuildFilePath("")
 	if !exists(test_work_dir) {
 		if err := os.Mkdir(test_work_dir, 0777); err != nil {
-			fmt.Println(err)
+			panic(err)
 		}
 	}
 }
@@ -74,9 +50,13 @@ func BuildBasicAuthorization(id, token string) string {
 	return "basic " + base64.StdEncoding.EncodeToString([]byte(authorization))
 }
 
-func BuildFilePath(path string) string {
+func TestDirRoot() string {
 	project_root := os.Getenv("PROJECT_ROOT")
-	return filepath.Join(project_root, "/backend/tmp/uzume_test_work/", path)
+	return filepath.Join(project_root, "/backend/tmp/uzume_test_dirs/")
+}
+
+func BuildFilePath(path string) string {
+	return filepath.Join(TestDirRoot(), g_test_dir_serial, path)
 }
 
 func EqualBuffer(t *testing.T, expect, actual *bytes.Buffer) bool {
