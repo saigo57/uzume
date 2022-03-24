@@ -1,5 +1,5 @@
 {
-  "name": "electron-app",
+  "name": "uzume",
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
@@ -7,11 +7,39 @@
     "start": "run-s clean build serve",
     "clean": "rimraf dist",
     "build": "cross-env NODE_ENV=\"development\" webpack --progress",
+    "prodbuild": "cross-env NODE_ENV=\"production\" webpack --progress",
     "serve": "electron ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "build": {
+    "appId": "link.amanoiwato.uzume",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "assets",
+      "src",
+      "dist",
+      "package.json",
+      "package-lock.json"
+    ],
+    "mac": {
+      "icon": "./assets/mac/uzume-app-icon.icns",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "icon": "./assets/win/uzume-app-icon.ico",
+      "target": "nsis"
+    },
+    "nsis":{
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
   "devDependencies": {
     "@types/mini-css-extract-plugin": "^2.0.1",
     "@types/node": "^16.4.1",
@@ -21,7 +49,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^6.2.0",
     "electron": "^13.1.7",
-    "electron-builder": "^22.11.7",
+    "electron-builder": "^22.14.5",
     "html-webpack-plugin": "^5.3.2",
     "mini-css-extract-plugin": "^2.1.0",
     "npm-run-all": "^4.1.5",
