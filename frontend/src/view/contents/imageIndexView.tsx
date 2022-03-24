@@ -227,7 +227,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     for (let i = 0; i < e.dataTransfer.files.length; i++) {
       let filePath = e.dataTransfer.files[i].path;
       let ext = filePath.split('.').pop();
-      if ( !supportedExts.includes(ext) ) {
+      if ( !supportedExts.includes(ext.toLowerCase()) ) {
         window.showConfirmModal(`未対応のファイル形式です。\n一括登録の場合すべてキャンセルされます。\n${filePath}`)
         return
       }
