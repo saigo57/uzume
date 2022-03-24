@@ -200,6 +200,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   });
 
   const requestShowImages = (page: number) => {
+    if ( props.workspaceId == "" ) return;
+
     const showImages: ShowImages = {
       workspaceId: props.workspaceId,
       page: page,

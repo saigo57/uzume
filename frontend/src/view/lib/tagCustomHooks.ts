@@ -25,6 +25,8 @@ export const useTags = (workspaceId: string): [TagGroupInfo[], TagInfo[], TagInf
   const [selectingMenu, setSelectingMenu] = useState(MenuItem.ALL_TAG);
 
   useEffect(() => {
+    if ( workspaceId == "" ) return;
+
     setSelectingMenu(MenuItem.ALL_TAG)
     sendIpcGetAllTags(workspaceId)
 

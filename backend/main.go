@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	listener := netutil.LimitListener(ln, 1) // TODO: 複数のコネクションを持てるようにする
+	listener := netutil.LimitListener(ln, 10)
 	defer listener.Close()
 	router := api.RouteInit(listener)
 	router.Logger.Fatal(router.Start(""))
