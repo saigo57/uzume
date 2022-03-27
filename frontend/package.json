@@ -1,20 +1,27 @@
 {
   "name": "uzume",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "start": "run-s clean build serve",
+    "start": "run-s clean transpile-dev serve",
+    "deploy-mac": "run-s clean transpile-prd build-mac-publish",
+    "deploy-win": "run-s clean transpile-prd build-win-publish",
     "clean": "rimraf dist",
-    "build": "cross-env NODE_ENV=\"development\" webpack --progress",
-    "prodbuild": "cross-env NODE_ENV=\"production\" webpack --progress",
-    "serve": "electron ."
+    "serve": "electron .",
+    "transpile-dev": "cross-env NODE_ENV=\"development\" webpack --progress",
+    "transpile-prd": "cross-env NODE_ENV=\"production\" webpack --progress",
+    "build-mac": "electron-builder --mac --x64",
+    "build-win": "electron-builder --win --x64",
+    "build-mac-publish": "electron-builder --mac --x64 --publish always",
+    "build-win-publish": "electron-builder --win --x64 --publish always"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "build": {
     "appId": "link.amanoiwato.uzume",
+    "afterSign": "scripts/notarize.js",
     "directories": {
       "output": "dist"
     },
@@ -26,18 +33,38 @@
       "package-lock.json"
     ],
     "mac": {
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "./assets/mac/uzume-app-icon.icns",
       "target": [
+        "zip",
         "dmg"
-      ]
+      ],
+      "publish": {
+        "provider": "s3",
+        "bucket": "uzume",
+        "region": "ap-northeast-1",
+        "path": "deploy/frontend/darwin/"
+      }
     },
     "win": {
       "icon": "./assets/win/uzume-app-icon.ico",
-      "target": "nsis"
+      "target": "nsis",
+      "publish": {
+        "provider": "s3",
+        "bucket": "uzume",
+        "region": "ap-northeast-1",
+        "path": "deploy/frontend/win32/"
+      }
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
+    },
+    "dmg": {
+      "sign": false
     }
   },
   "devDependencies": {
@@ -48,8 +75,11 @@
     "@types/react-modal": "^3.13.1",
     "cross-env": "^7.0.3",
     "css-loader": "^6.2.0",
+    "dotenv": "^9.0.2",
     "electron": "^13.1.7",
     "electron-builder": "^22.14.5",
+    "electron-notarize": "^1.2.1",
+    "grunt-electron-installer": "^2.1.0",
     "html-webpack-plugin": "^5.3.2",
     "mini-css-extract-plugin": "^2.1.0",
     "npm-run-all": "^4.1.5",
@@ -69,6 +99,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "axios": "^0.24.0",
+    "electron-log": "^4.4.6",
     "form-data": "^4.0.0",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.12.1",
@@ -76,6 +107,7 @@
     "react-dnd": "^14.0.4",
     "react-dnd-html5-backend": "^14.0.2",
     "react-dom": "^17.0.2",
-    "react-modal": "^3.14.4"
+    "react-modal": "^3.14.4",
+    "update-electron-app": "^2.0.1"
   }
 }

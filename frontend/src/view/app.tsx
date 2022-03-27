@@ -4,6 +4,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ConfirmModal } from './component/organisms/confirmModal';
 import { TagRenameModal } from './component/organisms/tagRenameModal';
 import { TagGroupRenameModal } from './component/organisms/tagGroupRenameModal';
+import { AppUpdateModal } from './component/organisms/appUpdateModal';
 import { UzumeMain } from './uzumeMain';
 import { BackendSetup } from './backendSetup';
 import {
@@ -61,6 +62,7 @@ export function App() {
       <ConfirmModal display={confirmMessage != null} message={confirmMessage || ''} onClose={() => { setConfirmMessage(null)} } />
       <TagRenameModal />
       <TagGroupRenameModal />
+      <AppUpdateModal />
     </DndProvider>
   );
 }

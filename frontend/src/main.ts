@@ -1,7 +1,8 @@
 import path from 'path';
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, autoUpdater, Menu } from 'electron';
 import BackendConnector from './backendConnector/backendConnector';
 import { showFooterMessageByBrowserWindow } from './ipc/footer';
+import { autoUpdateInit, checkUpdate } from './autoUpdate';
 import './mainProc/backendSetup';
 import './mainProc/serverList';
 import './mainProc/images';
@@ -28,6 +29,7 @@ function createWindow () {
         label: app.name,
         submenu: [
           {role:'about',      label:`${app.name}について` },
+          {label:`アップデートを確認`, click: () => { autoUpdater.checkForUpdates() }},
           {type:'separator'},
           // {role:'services',   label:'サービス'},
           // {type:'separator'},
@@ -125,6 +127,11 @@ function createWindow () {
 
   BackendConnector.onFailAuthorization = (err) => {
     showFooterMessageByBrowserWindow(win, `バックエンドに接続できませんでした。[${err}]`)
+  }
+
+  if ( isMac ) {
+    autoUpdateInit();
+    checkUpdate(win);
   }
 }
 
