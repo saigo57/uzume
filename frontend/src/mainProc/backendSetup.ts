@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-import { ipcMain, shell } from 'electron';
+import electron, { app, ipcMain } from 'electron';
 import {
   IpcId,
   BackendState,
@@ -9,12 +9,11 @@ import BackendConnector from '../backendConnector/backendConnector';
 
 const PLATFORM_MAC = 'darwin';
 const PLATFORM_WIN = 'win32';
+const BACKEND_DOWNLOAD_URL_BASE = 'https://uzume.s3.ap-northeast-1.amazonaws.com/deploy/backend';
 
 type Platform = {
   supported: Boolean
-  backendInstallDir: string
-  tmpDir: string
-  backendAppFileName: string
+  deployedBackendAppUrl: string
 }
 
 function currPlatformInfo(): Platform {
@@ -23,17 +22,12 @@ function currPlatformInfo(): Platform {
   switch ( process.platform ) {
     case PLATFORM_MAC:
       platform.supported = true
-      platform.backendInstallDir = '/Applications'
-      platform.tmpDir = '/tmp'
-      platform.backendAppFileName = 'uzumeServer.app'
+      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${app.getVersion()}.dmg`)
       break;
 
     case PLATFORM_WIN:
-      let home = process.env['USERPROFILE']
       platform.supported = true
-      platform.backendInstallDir = path.join(home, '.uzume')
-      platform.tmpDir = path.join(home, 'AppData/Local/Temp')
-      platform.backendAppFileName = 'uzumeServer.exe'
+      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${app.getVersion()}.msi`)
       break;
 
     default:
@@ -42,17 +36,6 @@ function currPlatformInfo(): Platform {
   }
 
   return platform
-}
-
-function isExistFile(file: string): boolean {
-  try {
-    fs.statSync(file);
-    return true
-  } catch(err:any) {
-    if(err.code === 'ENOENT') return false
-  }
-
-  return false
 }
 
 function backendUrl() {
@@ -68,16 +51,7 @@ function moveToBackendNotfoundMode(e: Electron.IpcMainEvent) {
   var state = {} as BackendState
   state.host = 'localhost'
   state.port = '22113'
-  state.defaultInstallDir = platform.backendInstallDir
-
-  if ( platform.supported ) {
-    let app_path = path.join(platform.backendInstallDir, platform.backendAppFileName)
-    state.isSupportedEnv = true
-    state.installed = isExistFile(app_path)
-  } else {
-    state.installed = false
-    state.isSupportedEnv = false
-  }
+  state.isSupportedEnv = !!platform.supported
 
   e.reply(IpcId.BACKEND_NOTFOUND_REPLY, JSON.stringify(state))
 }
@@ -97,19 +71,7 @@ ipcMain.on(IpcId.BACKEND_RELOAD, (e, _arg) => {
   BackendConnector.setBackendUrl(backendUrl());
 });
 
-ipcMain.on(IpcId.BACKEND_INSTALL, (e, _arg) => {
+ipcMain.on(IpcId.BACKEND_DOWNLOAD, (e, _arg) => {
   let platform = currPlatformInfo()
-  // TODO: サーバーからバックエンドを落としてくる
-
-  let tmp_app_path = path.join(platform.tmpDir, platform.backendAppFileName)
-  let app_path = path.join(platform.backendInstallDir, platform.backendAppFileName)
-  fs.copyFileSync(tmp_app_path, app_path);
-
-  BackendConnector.resetStatus();
-  BackendConnector.setBackendUrl(backendUrl());
-});
-
-ipcMain.on(IpcId.OPEN_BACKEND_APP_DIR, (_e, _arg) => {
-  let platform = currPlatformInfo()
-  shell.openPath(platform.backendInstallDir)
+  electron.shell.openExternal(platform.deployedBackendAppUrl)
 });
