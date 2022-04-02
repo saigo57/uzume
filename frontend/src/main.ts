@@ -1,5 +1,5 @@
 import path from 'path';
-import { app, BrowserWindow, autoUpdater, Menu } from 'electron';
+import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron';
 import BackendConnector from './backendConnector/backendConnector';
 import { showFooterMessageByBrowserWindow } from './ipc/footer';
 import { autoUpdateInit, checkUpdate } from './autoUpdate';
@@ -122,6 +122,12 @@ function createWindow () {
   if (process.env.NODE_ENV === 'development') {
     win.webContents.openDevTools({ mode: 'detach' });
   }
+
+  // 外部リンククリック時にデフォルトブラウザで開くように
+  win.webContents.on('new-window', (event, url) => {
+    event.preventDefault();
+    electron.shell.openExternal(url);
+  });
 
   win.loadFile('dist/app.html');
 

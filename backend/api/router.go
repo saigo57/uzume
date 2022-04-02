@@ -10,6 +10,10 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+func SetVersion(version string) {
+	g_version_str = version
+}
+
 func workspaceAuth(workspace_id, token string) (bool, error) {
 	access_token, err := model.NewAccessToken()
 	if err != nil {
