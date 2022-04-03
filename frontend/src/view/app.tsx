@@ -15,7 +15,7 @@ import {
 const WINDOW_MODE = {
   INIT: "init",
   UZUME_MAIN: "uzume_main",
-  BACKEND_NOTFOUNED: "backend_notfound",
+  BACKEND_ERROR: "backend_notfound",
 } as const;
 type WindowMode = typeof WINDOW_MODE[keyof typeof WINDOW_MODE];
 
@@ -33,10 +33,10 @@ export function App() {
     window.api.on(WindowModeIpcId.UZUME_MAIN_MODE_REPLY, (_e, _arg) => {
       setWindowMode(WINDOW_MODE.UZUME_MAIN);
     });
-    window.api.on(WindowModeIpcId.BACKEND_NOTFOUND_REPLY, (_e, arg) => {
+    window.api.on(WindowModeIpcId.BACKEND_ERROR_REPLY, (_e, arg) => {
       const state = JSON.parse(arg) as BackendState;
       setBackendState(state);
-      setWindowMode(WINDOW_MODE.BACKEND_NOTFOUNED);
+      setWindowMode(WINDOW_MODE.BACKEND_ERROR);
     });
     window.api.send(WindowModeIpcId.BACKEND_INIT);
   }, []);
@@ -49,7 +49,7 @@ export function App() {
             case WINDOW_MODE.INIT:
               return <div>読込中</div>
 
-            case WINDOW_MODE.BACKEND_NOTFOUNED:
+            case WINDOW_MODE.BACKEND_ERROR:
               return <BackendSetup backendState={backendState} />
 
             case WINDOW_MODE.UZUME_MAIN:

@@ -1,6 +1,7 @@
 // BC: BackendConnector
 import BCWorkspace from './workspace';
 const axiosBase = require('axios');
+const compareVersions = require('compare-versions');
 
 export type ResVersion = {
   version: string
@@ -15,12 +16,17 @@ class BackendStatus {
 }
 
 export default class BackendConnector {
+  // バージョン設定
+  private static backendMinorVersion = '0.0'
+  static latestBackendVersion = `${BackendConnector.backendMinorVersion}.2`
+
   static loggingEnable = true
   static backendStatus = BackendStatus.INIT
   static Workspace = BCWorkspace
   
   static workspaceList: { [key: string]: BCWorkspace; } = {}
   static onBackendOk: (() => void) | null = null
+  static onBackendVersionError: (() => void) | null = null
   static onBackendNotFound: (() => void) | null = null
   static onFailAuthorization: ((err: any) => void) | null = null
   private static backendUrl: string | null = null
@@ -40,10 +46,14 @@ export default class BackendConnector {
     }
 
     this.fetchVersion((version: string) => {
-      console.log(version)
-      // TODO: versionのチェックをここで行う
-      this.backendStatus = BackendStatus.BACKEND_OK;
-      if ( this.onBackendOk ) this.onBackendOk();
+      // マイナーバージョンの一致まで確認するため、patchは0固定
+      if ( compareVersions.satisfies(version, `~${BackendConnector.backendMinorVersion}.0`) ) {
+        this.backendStatus = BackendStatus.BACKEND_OK;
+        if ( this.onBackendOk ) this.onBackendOk();
+      } else {
+        this.backendStatus = BackendStatus.BACKEND_VERSION_ERROR;
+        if ( this.onBackendVersionError ) this.onBackendVersionError();
+      }
     })
   }
 

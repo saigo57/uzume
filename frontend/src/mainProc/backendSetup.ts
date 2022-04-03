@@ -22,12 +22,12 @@ function currPlatformInfo(): Platform {
   switch ( process.platform ) {
     case PLATFORM_MAC:
       platform.supported = true
-      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${app.getVersion()}.dmg`)
+      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${BackendConnector.latestBackendVersion}.dmg`)
       break;
 
     case PLATFORM_WIN:
       platform.supported = true
-      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${app.getVersion()}.msi`)
+      platform.deployedBackendAppUrl = path.join(BACKEND_DOWNLOAD_URL_BASE, process.platform, `uzume-server-${BackendConnector.latestBackendVersion}.msi`)
       break;
 
     default:
@@ -46,14 +46,15 @@ function moveToUzumeMainMode(e: Electron.IpcMainEvent) {
   e.reply(IpcId.UZUME_MAIN_MODE_REPLY)
 }
 
-function moveToBackendNotfoundMode(e: Electron.IpcMainEvent) {
+function moveToBackendErrorMode(e: Electron.IpcMainEvent, is_version_ok: boolean) {
   let platform = currPlatformInfo()
   var state = {} as BackendState
   state.host = 'localhost'
   state.port = '22113'
   state.isSupportedEnv = !!platform.supported
+  state.isVersionOk = is_version_ok
 
-  e.reply(IpcId.BACKEND_NOTFOUND_REPLY, JSON.stringify(state))
+  e.reply(IpcId.BACKEND_ERROR_REPLY, JSON.stringify(state))
 }
 
 ipcMain.on(IpcId.BACKEND_INIT, (e, _arg) => {
@@ -61,7 +62,10 @@ ipcMain.on(IpcId.BACKEND_INIT, (e, _arg) => {
     moveToUzumeMainMode(e)
   }
   BackendConnector.onBackendNotFound = () => {
-    moveToBackendNotfoundMode(e)
+    moveToBackendErrorMode(e, true)
+  }
+  BackendConnector.onBackendVersionError = () => {
+    moveToBackendErrorMode(e, false)
   }
   BackendConnector.setBackendUrl(backendUrl());
 });

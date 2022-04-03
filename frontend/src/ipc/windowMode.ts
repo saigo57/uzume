@@ -5,12 +5,12 @@ export class IpcId {
   static readonly BACKEND_DOWNLOAD: string = IpcId.NAME_SPACE + "backend-download";
   static readonly FETCH_WINDOW_MODE: string = IpcId.NAME_SPACE + "fetch-window-mode";
   static readonly UZUME_MAIN_MODE_REPLY: string = IpcId.NAME_SPACE + "uzume-main-mode";
-  static readonly BACKEND_NOTFOUND_REPLY: string = IpcId.NAME_SPACE + "backend-notfound";
+  static readonly BACKEND_ERROR_REPLY: string = IpcId.NAME_SPACE + "backend-error-reply";
 }
 
 export type BackendState = {
   host: string
   port: string
   isSupportedEnv: boolean
-  installed: boolean
+  isVersionOk: boolean
 }
