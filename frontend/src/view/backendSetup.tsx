@@ -26,18 +26,35 @@ export const BackendSetup:React.VFC<BackendSetupProps> = (props) => {
     width: '80%',
   }
 
-  const linkStyle: React.CSSProperties = {
-    textDecoration: 'underline',
-    cursor: 'pointer',
-  }
-
   return (
     <div style={setupStyle}>
-      <h1 style={{fontSize: '20px'}}>uzume-serverに接続できませんでした。</h1>
+      {(() => {
+        if ( props.backendState.isVersionOk ) {
+          return <h1 style={{fontSize: '20px'}}>uzume-serverに接続できませんでした。</h1>;
+        } else {
+          return <h1 style={{fontSize: '20px'}}>uzume-serverのバージョンが非対応です。</h1>;
+        }
+      })()}
       <div style={{margin: '10px 0', lineHeight: '1.2em'}}>
         <div>現在の接続先: {props.backendState.host}:{props.backendState.port}</div>
-        <div>uzume-serverを起動して、下のボタンからリロードを行ってください。</div>
-        <div>まだインストールしていない場合は、インストーラーをダウンロードして、インストールしてください。</div>
+
+        {(() => {
+          if ( props.backendState.isVersionOk ) {
+            return (
+              <>
+                <div>uzume-serverを起動して、下のボタンからリロードを行ってください。</div>
+                <div>まだインストールしていない場合は、インストーラーをダウンロードして、インストールしてください。</div>
+              </>
+            );
+          } else {
+            return (
+              <>
+                <div>このアプリかuzume-serverをアップデートしてください。</div>
+                <div>uzume-serverをインストールする場合は下記からインストーラーをダウンロードしてください。</div>
+              </>
+            );
+          }
+        })()}
       </div>
 
       <button onClick={backendDownload}>インストーラーをダウンロード</button>
