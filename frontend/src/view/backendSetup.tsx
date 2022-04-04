@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  IpcId as WindowModeIpcId,
+  IpcId as BackendSetupIpcId,
   BackendState,
-} from "../ipc/windowMode";
+} from "../ipc/backendSetup";
 import CssConst from "./cssConst";
 
 type BackendSetupProps = {
@@ -11,11 +11,15 @@ type BackendSetupProps = {
 
 export const BackendSetup:React.VFC<BackendSetupProps> = (props) => {
   const backendDownload = () => {
-    window.api.send(WindowModeIpcId.BACKEND_DOWNLOAD);
+    window.api.send(BackendSetupIpcId.BACKEND_DOWNLOAD);
+  }
+
+  const backendConfig = () => {
+    window.api.send(BackendSetupIpcId.BACKEND_CONFIG);
   }
 
   const frontEndReload = () => {
-    window.api.send(WindowModeIpcId.BACKEND_RELOAD);
+    window.api.send(BackendSetupIpcId.BACKEND_RELOAD);
   }
 
   const setupStyle: React.CSSProperties = {
@@ -58,7 +62,7 @@ export const BackendSetup:React.VFC<BackendSetupProps> = (props) => {
       </div>
 
       <button onClick={backendDownload}>インストーラーをダウンロード</button>
-      <button>接続先を変更(未実装)</button>
+      <button onClick={backendConfig}>接続先を変更</button>
       <button onClick={frontEndReload}>リロード</button>
     </div>
   )
