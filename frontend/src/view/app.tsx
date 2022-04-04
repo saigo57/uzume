@@ -4,13 +4,14 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ConfirmModal } from './component/organisms/confirmModal';
 import { TagRenameModal } from './component/organisms/tagRenameModal';
 import { TagGroupRenameModal } from './component/organisms/tagGroupRenameModal';
+import { BackendConfigModal } from './component/organisms/backendConfigModal';
 import { AppUpdateModal } from './component/organisms/appUpdateModal';
 import { UzumeMain } from './uzumeMain';
 import { BackendSetup } from './backendSetup';
 import {
-  IpcId as WindowModeIpcId,
+  IpcId as backendSetupIpcId,
   BackendState,
-} from "../ipc/windowMode";
+} from "../ipc/backendSetup";
 
 const WINDOW_MODE = {
   INIT: "init",
@@ -30,15 +31,15 @@ export function App() {
       setConfirmMessage(message)
     }
     // 初期処理
-    window.api.on(WindowModeIpcId.UZUME_MAIN_MODE_REPLY, (_e, _arg) => {
+    window.api.on(backendSetupIpcId.UZUME_MAIN_MODE_REPLY, (_e, _arg) => {
       setWindowMode(WINDOW_MODE.UZUME_MAIN);
     });
-    window.api.on(WindowModeIpcId.BACKEND_ERROR_REPLY, (_e, arg) => {
+    window.api.on(backendSetupIpcId.BACKEND_ERROR_REPLY, (_e, arg) => {
       const state = JSON.parse(arg) as BackendState;
       setBackendState(state);
       setWindowMode(WINDOW_MODE.BACKEND_ERROR);
     });
-    window.api.send(WindowModeIpcId.BACKEND_INIT);
+    window.api.send(backendSetupIpcId.BACKEND_INIT);
   }, []);
 
   return (
@@ -63,6 +64,7 @@ export function App() {
       <TagRenameModal />
       <TagGroupRenameModal />
       <AppUpdateModal />
+      <BackendConfigModal />
     </DndProvider>
   );
 }

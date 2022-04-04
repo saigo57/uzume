@@ -4,8 +4,10 @@ import electron, { app, ipcMain } from 'electron';
 import {
   IpcId,
   BackendState,
-} from '../ipc/windowMode';
+  BackendUrlHost,
+} from '../ipc/backendSetup';
 import BackendConnector from '../backendConnector/backendConnector';
+import electronStore from 'electron-store';
 
 const PLATFORM_MAC = 'darwin';
 const PLATFORM_WIN = 'win32';
@@ -38,8 +40,29 @@ function currPlatformInfo(): Platform {
   return platform
 }
 
+const BACKEND_HOST_KEY = 'backend_host'
+const BACKEND_PORT_KEY = 'backend_port'
+
+function backendHost(): string {
+  const store = new electronStore();
+  if ( !store.has(BACKEND_HOST_KEY) ) {
+    store.set(BACKEND_HOST_KEY, 'localhost')
+  }
+
+  return store.get(BACKEND_HOST_KEY) as string;
+}
+
+function backendPort(): string {
+  const store = new electronStore();
+  if ( !store.has(BACKEND_PORT_KEY) ) {
+    store.set(BACKEND_PORT_KEY, '22113')
+  }
+
+  return store.get(BACKEND_PORT_KEY) as string;
+}
+
 function backendUrl() {
-  return 'http://localhost:22113/';
+  return `http://${backendHost()}:${backendPort()}/`;
 }
 
 function moveToUzumeMainMode(e: Electron.IpcMainEvent) {
@@ -49,8 +72,8 @@ function moveToUzumeMainMode(e: Electron.IpcMainEvent) {
 function moveToBackendErrorMode(e: Electron.IpcMainEvent, is_version_ok: boolean) {
   let platform = currPlatformInfo()
   var state = {} as BackendState
-  state.host = 'localhost'
-  state.port = '22113'
+  state.host = backendHost()
+  state.port = backendPort()
   state.isSupportedEnv = !!platform.supported
   state.isVersionOk = is_version_ok
 
@@ -67,6 +90,22 @@ ipcMain.on(IpcId.BACKEND_INIT, (e, _arg) => {
   BackendConnector.onBackendVersionError = () => {
     moveToBackendErrorMode(e, false)
   }
+  BackendConnector.setBackendUrl(backendUrl());
+});
+
+ipcMain.on(IpcId.BACKEND_CONFIG, (e, _arg) => {
+  var backendUrlHost = {} as BackendUrlHost
+  backendUrlHost.host = backendHost()
+  backendUrlHost.port = backendPort()
+  e.reply(IpcId.SHOW_BACKEND_CONFIG_MODAL_REPLY, JSON.stringify(backendUrlHost))
+});
+
+ipcMain.on(IpcId.UPDATE_BACKEND_URL_HOST, (e, arg) => {
+  let backendUrlHost = JSON.parse(arg) as BackendUrlHost
+  const store = new electronStore();
+  store.set(BACKEND_HOST_KEY, backendUrlHost.host)
+  store.set(BACKEND_PORT_KEY, backendUrlHost.port)
+  BackendConnector.resetStatus();
   BackendConnector.setBackendUrl(backendUrl());
 });
 
