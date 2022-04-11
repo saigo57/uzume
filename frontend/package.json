@@ -39,12 +39,11 @@
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "./assets/mac/uzume-app-icon.icns",
       "target": [
-        "zip",
         "dmg"
       ],
       "publish": {
         "provider": "s3",
-        "bucket": "uzume",
+        "bucket": "uzume-prod",
         "region": "ap-northeast-1",
         "path": "deploy/frontend/darwin/"
       }
@@ -54,7 +53,7 @@
       "target": "nsis",
       "publish": {
         "provider": "s3",
-        "bucket": "uzume",
+        "bucket": "uzume-prod",
         "region": "ap-northeast-1",
         "path": "deploy/frontend/win32/"
       }
