@@ -43,7 +43,7 @@ xcrun notarytool submit `echo $DMG_NAME` \
 # s3にアップロード
 aws s3 cp \
   `echo $DMG_NAME` \
-  s3://uzume/deploy/backend/darwin/`echo $DMG_NAME` \
+  s3://uzume-prod/deploy/backend/darwin/`echo $DMG_NAME` \
   --acl public-read
 
 cd ../../

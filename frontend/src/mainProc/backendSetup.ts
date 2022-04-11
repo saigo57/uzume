@@ -11,7 +11,7 @@ import electronStore from 'electron-store';
 
 const PLATFORM_MAC = 'darwin';
 const PLATFORM_WIN = 'win32';
-const BACKEND_DOWNLOAD_URL_BASE = 'https://uzume.s3.ap-northeast-1.amazonaws.com/deploy/backend';
+const BACKEND_DOWNLOAD_URL_BASE = 'https://uzume-prod.s3.ap-northeast-1.amazonaws.com/deploy/backend';
 
 type Platform = {
   supported: Boolean
