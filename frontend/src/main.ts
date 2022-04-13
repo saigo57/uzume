@@ -45,34 +45,34 @@ function createWindow () {
     //     isMac ? {role:'close', label:'ウィンドウを閉じる'} : {role:'quit', label:'終了'}
     //   ]
     // },
-    // {
-    //   label: '編集',
-    //   submenu: [
-    //     {role:'undo',  label:'元に戻す'},
-    //     {role:'redo',  label:'やり直す'},
-    //     {type:'separator'},
-    //     {role:'cut',   label:'切り取り'},
-    //     {role:'copy',  label:'コピー'},
-    //     {role:'paste', label:'貼り付け'},
-    //     ...(isMac ? [
-    //         {role:'pasteAndMatchStyle', label:'ペーストしてスタイルを合わせる'},
-    //         {role:'delete',    label:'削除'},
-    //         {role:'selectAll', label:'すべてを選択'},
-    //         {type:'separator' },
-    //         {
-    //           label: 'スピーチ',
-    //           submenu: [
-    //             {role:'startSpeaking', label:'読み上げを開始'},
-    //             {role:'stopSpeaking',  label:'読み上げを停止'}
-    //           ]
-    //         }
-    //       ] : [
-    //         {role:'delete',    label:'削除'},
-    //         {type:'separator'},
-    //         {role:'selectAll', label:'すべてを選択'}
-    //       ])
-    //    ]
-    // },
+    {
+      label: '編集',
+      submenu: [
+        {role:'undo',  label:'元に戻す'},
+        {role:'redo',  label:'やり直す'},
+        {type:'separator'},
+        {role:'cut',   label:'切り取り'},
+        {role:'copy',  label:'コピー'},
+        {role:'paste', label:'貼り付け'},
+      //   ...(isMac ? [
+      //       {role:'pasteAndMatchStyle', label:'ペーストしてスタイルを合わせる'},
+      //       {role:'delete',    label:'削除'},
+      //       {role:'selectAll', label:'すべてを選択'},
+      //       {type:'separator' },
+      //       {
+      //         label: 'スピーチ',
+      //         submenu: [
+      //           {role:'startSpeaking', label:'読み上げを開始'},
+      //           {role:'stopSpeaking',  label:'読み上げを停止'}
+      //         ]
+      //       }
+      //     ] : [
+      //       {role:'delete',    label:'削除'},
+      //       {type:'separator'},
+      //       {role:'selectAll', label:'すべてを選択'}
+      //     ])
+      ]
+    }
     // {
     //   label: '表示',
     //   submenu: [
