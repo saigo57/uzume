@@ -127,7 +127,7 @@ function createWindow () {
     electron.shell.openExternal(url);
   });
 
-  win.loadFile('dist/app.html');
+  win.loadFile(path.join(__dirname, 'app.html'));
 
   BackendConnector.onFailAuthorization = (err) => {
     showFooterMessageByBrowserWindow(win, `バックエンドに接続できませんでした。[${err}]`)
