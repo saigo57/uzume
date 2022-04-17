@@ -28,6 +28,7 @@ func workspaceAuth(workspace_id, token string) (bool, error) {
 
 func RouteInit(listener net.Listener) *echo.Echo {
 	e := echo.New()
+	e.HideBanner = true
 	e.Pre(middleware.RemoveTrailingSlash())
 	if DEBUG_MODE {
 		e.Debug = true
