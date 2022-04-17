@@ -18,6 +18,7 @@ type WorkspaceInfo struct {
 
 type Config struct {
 	configFilePath string          `json:"-"`
+	ServerPort     int             `json:"server_port"`
 	WorkspaceList  []WorkspaceInfo `json:"workspace_list"`
 }
 
