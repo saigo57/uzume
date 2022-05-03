@@ -117,7 +117,7 @@ function createWindow () {
   const win = new BrowserWindow(options);
 
   // 開発時にはデベロッパーツールを開く
-  if (process.env.NODE_ENV === 'development') {
+  if ( process.env.NODE_ENV === 'development' && process.env['E2E_TEST'] != 'true' ) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
 

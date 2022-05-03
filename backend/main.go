@@ -34,6 +34,15 @@ func main() {
 		port = strconv.Itoa(config.ServerPort)
 	case 2:
 		port = os.Args[1]
+	case 3:
+		port = os.Args[1]
+		if os.Args[2] == "this-is-e2e-test" {
+			model.IsE2ETest = true
+			fmt.Println("E2E test mode")
+		} else {
+			fmt.Println("引数が異常です。")
+			return
+		}
 	default:
 		fmt.Printf("コマンドライン引数の数が異常です。\n")
 		return

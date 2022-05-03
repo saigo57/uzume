@@ -44,6 +44,8 @@ const BACKEND_HOST_KEY = 'backend_host'
 const BACKEND_PORT_KEY = 'backend_port'
 
 function backendHost(): string {
+  if ( process.env['E2E_TEST'] == 'true' ) return 'localhost'
+
   const store = new electronStore();
   if ( !store.has(BACKEND_HOST_KEY) ) {
     store.set(BACKEND_HOST_KEY, 'localhost')
@@ -53,6 +55,8 @@ function backendHost(): string {
 }
 
 function backendPort(): string {
+  if ( process.env['E2E_TEST'] == 'true' ) return '22112'
+
   const store = new electronStore();
   if ( !store.has(BACKEND_PORT_KEY) ) {
     store.set(BACKEND_PORT_KEY, '22113')

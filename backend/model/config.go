@@ -10,6 +10,8 @@ import (
 	"uzume_backend/test_helper"
 )
 
+var IsE2ETest = false
+
 type WorkspaceInfo struct {
 	Path        string `json:"path"`
 	WorkspaceId string `json:"workspace_id"`
@@ -34,7 +36,10 @@ func NewConfig() (*Config, error) {
 }
 
 func (c *Config) Load() error {
-	if helper.IsTesting() {
+	if IsE2ETest {
+		usr, _ := user.Current()
+		c.configFilePath = filepath.Join(usr.HomeDir, "/.uzume/e2e-test/e2e-test-config.json")
+	} else if helper.IsTesting() {
 		c.configFilePath = test_helper.BuildFilePath("/.uzume/config.json")
 	} else {
 		usr, _ := user.Current()

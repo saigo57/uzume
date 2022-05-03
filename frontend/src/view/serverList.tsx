@@ -246,7 +246,7 @@ export const ServerList = () => {
         })
       }
 
-      <div className="server-icon" onClick={ () => { setIsShowNewWorkspaceModal(true) } }>
+      <div id="server-icon-id" className="server-icon" onClick={ () => { setIsShowNewWorkspaceModal(true) } }>
         <FontAwesomeIcon icon={faPlus} />
       </div>
 
