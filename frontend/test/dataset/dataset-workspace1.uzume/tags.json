@@ -1,0 +1,22 @@
+{
+  "tags": [
+    {
+      "tag_id": "7e3f85fb-c1e5-4ea3-a4a1-4cee0eb311c5",
+      "name": "桜",
+      "favorite": true,
+      "tag_group_id": "23a66dcc-7a1e-4cfa-a69e-3c809e239b3d"
+    },
+    {
+      "tag_id": "5d3c6b49-1a51-4277-858e-dd11d0bcf44f",
+      "name": "富士山",
+      "favorite": false,
+      "tag_group_id": "23a66dcc-7a1e-4cfa-a69e-3c809e239b3d"
+    },
+    {
+      "tag_id": "84da8ca7-9065-488e-bb79-aaf56d65ae01",
+      "name": "五重塔",
+      "favorite": false,
+      "tag_group_id": ""
+    }
+  ]
+}

@@ -36,7 +36,10 @@ func NewAccessToken() (*AccessToken, error) {
 }
 
 func (a *AccessToken) Load() error {
-	if helper.IsTesting() {
+	if IsE2ETest {
+		usr, _ := user.Current()
+		a.FilePath = filepath.Join(usr.HomeDir, "/.uzume/e2e-test/access_token.json")
+	} else if helper.IsTesting() {
 		a.FilePath = test_helper.BuildFilePath("/.uzume/access_token.json")
 	} else {
 		usr, _ := user.Current()

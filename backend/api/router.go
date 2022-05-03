@@ -2,6 +2,7 @@ package api
 
 import (
 	"net"
+	"net/http"
 	"uzume_backend/model"
 
 	"github.com/labstack/echo"
@@ -82,6 +83,13 @@ func RouteInit(listener net.Listener) *echo.Echo {
 			auth.POST("/tag_groups/:id", PostTagToTagGroup())
 			auth.DELETE("/tag_groups/:id", DeleteTagToTagGroup())
 		}
+	}
+
+	if model.IsE2ETest {
+		e.POST("/e2etest/resetcache", func(c echo.Context) (err error) {
+			model.ResetImageCache()
+			return c.JSON(http.StatusOK, "")
+		})
 	}
 
 	return e

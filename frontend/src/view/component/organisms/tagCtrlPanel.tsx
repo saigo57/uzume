@@ -133,7 +133,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
       </div>
 
       <div style={tagAreaStyle}>
-        <div>
+        <div id="tag-ctrl-panel-tagsarea-id">
           {(() => {
             // 入力したタグ名が登録されていないとき、新規追加UIを表示する
             if ( !showingTagAllListState.map(t=>t.name).includes(searchTagText) ) {
