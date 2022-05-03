@@ -60,7 +60,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   const [uploadModalInfo, setUploadModalInfo] = useState({ completeCnt: 0, allImagesCnt: 0 } as UploadModalInfo);
 
   // TODO: どこで持つべきか(少なくともここではなさそう)
-  const supportedExts = ["jpeg", "jpg", "png"];
+  const supportedExts = ["jpeg", "jpg", "png", "gif"];
   const dummyImageBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mM0/g8AAWsBNAUUB5MAAAAASUVORK5CYII=";
 
   useEffect(() => {
