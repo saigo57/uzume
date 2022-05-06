@@ -1,15 +1,8 @@
 .DS_Store
 
-# backend
-/backend/tmp/*
-/backend/.envrc
-/backend/uzume_backend
-/backend/dist
-
-# frontend
-frontend/node_modules
-frontend/dist
-frontend/tmp/*
-frontend/.env
-frontend/test/backend_bin/*
-frontend/test/testarea/*
+/node_modules
+/dist
+/tmp/*
+/.env
+/test/backend_bin/*
+/test/testarea/*
