@@ -11,7 +11,7 @@ import {
   SetWorkspaceIcon,
   UpdateWorkspaceName,
 } from '../ipc/serverList';
-import BackendConnector from '../backendConnector/backendConnector';
+import { BackendConnector } from 'uzume-backend-connector';
 import { changeCurrentWorkspace } from './currWorkspace'
 import { showImagesReply } from './images'
 const path = require('path');

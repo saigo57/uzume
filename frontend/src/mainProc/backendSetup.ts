@@ -6,7 +6,7 @@ import {
   BackendState,
   BackendUrlHost,
 } from '../ipc/backendSetup';
-import BackendConnector from '../backendConnector/backendConnector';
+import { BackendConnector } from 'uzume-backend-connector';
 import electronStore from 'electron-store';
 
 const PLATFORM_MAC = 'darwin';

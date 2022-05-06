@@ -11,7 +11,7 @@ import {
 import {
   addTagToImages,
 } from './images'
-import BackendConnector from '../backendConnector/backendConnector';
+import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
 
 ipcMain.on(IpcId.GET_ALL_TAGS, (e, arg) => {
