@@ -1,5 +1,5 @@
 import { IpcId, CurrentWorkspace } from '../ipc/currentWorkspace';
-import BackendConnector from '../backendConnector/backendConnector';
+import { BackendConnector } from 'uzume-backend-connector';
 
 let g_currentWorkspace: CurrentWorkspace = {
   workspace_name: '',

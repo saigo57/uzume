@@ -14,8 +14,7 @@ import {
   RemoveTagFromImage,
   ImageUploadProgress,
 } from '../ipc/images';
-import BackendConnector from '../backendConnector/backendConnector';
-import BackendConnectorImage from '../backendConnector/image';
+import { BackendConnector, Image as BackendConnectorImage } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
 
 const THUMB_REQUEST_LIMIT = 5

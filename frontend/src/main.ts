@@ -1,6 +1,6 @@
 import path from 'path';
 import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron';
-import BackendConnector from './backendConnector/backendConnector';
+import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessageByBrowserWindow } from './ipc/footer';
 import './mainProc/backendSetup';
 import './mainProc/serverList';
