@@ -1,4 +1,6 @@
 # uzume
+[BackendConnectorリポジトリ](https://github.com/Saigo1997/uzume-backend-connector)
+[uzumeLPリポジトリ](https://github.com/Saigo1997/uzume-LP)
 
 ## やりたいこと
 * NASにある画像をPCで見たい
