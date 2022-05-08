@@ -16,8 +16,7 @@ import { changeCurrentWorkspace } from './currWorkspace'
 import { showImagesReply } from './images'
 const path = require('path');
 import { showFooterMessage } from '../ipc/footer';
-
-let g_workspaceList: ServerInfo[] = []
+import { Globals } from './globals';
 
 // ワークスペース一覧取得
 ipcMain.on(IpcId.ToMainProc.FETCH_WORKSPACE_LIST, (e, _arg) => {
@@ -128,8 +127,8 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
         });
 
         let g_ws_target: ServerInfo | null = null;
-        for (let i = 0; i < g_workspaceList.length; i++) {
-          if ( g_workspaceList[i].workspaceId == msg.workspaceId ) g_ws_target = g_workspaceList[i];
+        for (let i = 0; i < Globals.workspaceList.length; i++) {
+          if ( Globals.workspaceList[i].workspaceId == msg.workspaceId ) g_ws_target = Globals.workspaceList[i];
         }
         let new_ws_target: ServerInfo | null = null;
         for (let i = 0; i < newWorkspaceList.length; i++) {
@@ -139,7 +138,7 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
         if ( g_ws_target && new_ws_target ) {
           g_ws_target.name = new_ws_target.name;
           g_ws_target.isAvailable = new_ws_target.isAvailable;
-          e.reply(IpcId.ToRenderer.FETCH_WORKSPACE_LIST, JSON.stringify(g_workspaceList));
+          e.reply(IpcId.ToRenderer.FETCH_WORKSPACE_LIST, JSON.stringify(Globals.workspaceList));
         }
       });
     }
@@ -235,7 +234,7 @@ ipcMain.on(IpcId.ToMainProc.FETCH_WORKSPACE_ICON, (e, arg) => {
 // selectWorkspaceIdをnullにすると一番上を選択
 function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string) {
   BackendConnector.Workspace.getList().then((workspaceList) => {
-    g_workspaceList = workspaceList.map((w) => {
+    Globals.workspaceList = workspaceList.map((w) => {
       return {
         workspaceId: w.workspace_id,
         name: w.name,
@@ -243,8 +242,8 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
         isSelected: false
       } as ServerInfo
     });
-    if ( g_workspaceList.length > 0 ) {
-      g_workspaceList[0].isSelected = true
+    if ( Globals.workspaceList.length > 0 ) {
+      Globals.workspaceList[0].isSelected = true
     }
 
     if ( selectWorkspaceId ) {
@@ -260,11 +259,11 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
 }
 
 function replyWorkspaceList(e: Electron.IpcMainEvent) {
-  e.reply(IpcId.ToRenderer.FETCH_WORKSPACE_LIST, JSON.stringify(g_workspaceList));
+  e.reply(IpcId.ToRenderer.FETCH_WORKSPACE_LIST, JSON.stringify(Globals.workspaceList));
 }
 
 function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
-  g_workspaceList.forEach((w) => {
+  Globals.workspaceList.forEach((w) => {
     if ( w.workspaceId == workspace_id ) {
       w.isSelected = true
     } else {
@@ -278,7 +277,7 @@ function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
 }
 
 function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {
-  g_workspaceList.forEach((w) => {
+  Globals.workspaceList.forEach((w) => {
     if ( w.isSelected ) {
       changeCurrentWorkspace(e, w.workspaceId, w.name)
     }
@@ -286,25 +285,25 @@ function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {
 }
 
 function showDeleteWorkspaceModal(e: Electron.IpcMainEvent, workspaceId: string) {
-  for (let i = 0; i < g_workspaceList.length; i++) {
-    if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
+  for (let i = 0; i < Globals.workspaceList.length; i++) {
+    if ( Globals.workspaceList[i].workspaceId != workspaceId ) continue;
 
-    e.reply(IpcId.ToRenderer.SHOW_DELETE_WORKSPACE_MODAL, JSON.stringify(g_workspaceList[i]))
+    e.reply(IpcId.ToRenderer.SHOW_DELETE_WORKSPACE_MODAL, JSON.stringify(Globals.workspaceList[i]))
   }
 }
 
 function showSelectWorkspaceIconModal(e: Electron.IpcMainEvent, workspaceId: string) {
-  for (let i = 0; i < g_workspaceList.length; i++) {
-    if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
+  for (let i = 0; i < Globals.workspaceList.length; i++) {
+    if ( Globals.workspaceList[i].workspaceId != workspaceId ) continue;
 
-    e.reply(IpcId.ToRenderer.SHOW_SET_ICON_MODAL, JSON.stringify(g_workspaceList[i]))
+    e.reply(IpcId.ToRenderer.SHOW_SET_ICON_MODAL, JSON.stringify(Globals.workspaceList[i]))
   }
 }
 
 function showUpdateWorkspaceNameModal(e: Electron.IpcMainEvent, workspaceId: string) {
-  for (let i = 0; i < g_workspaceList.length; i++) {
-    if ( g_workspaceList[i].workspaceId != workspaceId ) continue;
+  for (let i = 0; i < Globals.workspaceList.length; i++) {
+    if ( Globals.workspaceList[i].workspaceId != workspaceId ) continue;
 
-    e.reply(IpcId.ToRenderer.SHOW_UPDATE_WORKSPACE_NAME_MODAL, JSON.stringify(g_workspaceList[i]))
+    e.reply(IpcId.ToRenderer.SHOW_UPDATE_WORKSPACE_NAME_MODAL, JSON.stringify(Globals.workspaceList[i]))
   }
 }
