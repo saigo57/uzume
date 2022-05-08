@@ -89,7 +89,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, [selectedImageId]);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.SHOW_IMAGES_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.SHOW_IMAGES, (_e, arg) => {
       let rcvImageInfos = JSON.parse(arg) as ImageInfos
       setSelectedImageId([])
 
@@ -107,7 +107,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
               imageId: image.image_id,
               isThumbnail: true,
             }
-            window.api.send(ImagesIpcId.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage));
+            window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage));
           });
         }
 
@@ -140,12 +140,12 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.REPLY_REFLECT, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
       let reflect = JSON.parse(arg) as Reflect
       window.api.send(reflect.replyId)
     });
 
-    window.api.on(ImagesIpcId.REQUEST_THUMB_IMAGE_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.REQUEST_THUMB_IMAGE, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
 
       let img: any = document.getElementById(`image-${imageData.imageId}`);
@@ -156,7 +156,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.UPDATE_IMAGE_INFO_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.UPDATE_IMAGE_INFO, (_e, arg) => {
       const imageInfoList = JSON.parse(arg) as ImageInfo[]
       imageInfoList.forEach((img) => {
         for (let i = 0; i < imageList.images.length; i++) {
@@ -169,7 +169,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.REQUEST_ORIG_IMAGE_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
       let imgPreview: any = document.getElementById("image-preview");
       if ( imgPreview ) {
@@ -179,7 +179,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.IMAGE_UPLOAD_PROGRESS_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, (_e, arg) => {
       let progress = JSON.parse(arg) as ImageUploadProgress
       if ( progress.completeCnt < progress.allImagesCnt ) {
         setUploadModalInfo({completeCnt: progress.completeCnt, allImagesCnt: progress.allImagesCnt })
@@ -209,7 +209,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       searchType: props.searchType,
       uncategorized: props.uncategorized,
     }
-    window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages));
   };
 
   const handleDragOver = (e: any) => {
@@ -251,7 +251,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
     setIsShowImageUploadModal(true)
     setUploadModalInfo({ completeCnt: 0, allImagesCnt: imageFiles.imageFileList.length })
-    window.api.send(ImagesIpcId.UPLOAD_IMAGES, JSON.stringify(imageFiles));
+    window.api.send(ImagesIpcId.ToMainProc.UPLOAD_IMAGES, JSON.stringify(imageFiles));
   };
 
   const onMousemove = (e: MouseEvent) => {
@@ -345,7 +345,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       imageId: imageId,
       isThumbnail: false,
     }
-    window.api.send(ImagesIpcId.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
+    window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
   };
 
   // 無限スクロール発火の監視

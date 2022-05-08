@@ -97,7 +97,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
       uncategorized: props.uncategorized,
     }
     raiseOnShowImagesEvent(null)
-    window.api.send(ImagesIpcId.SHOW_IMAGES, JSON.stringify(showImages));
+    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages));
   }
 
   const onImageDoubleClick = (imageId: string) => {

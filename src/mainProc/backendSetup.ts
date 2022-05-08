@@ -70,7 +70,7 @@ function backendUrl() {
 }
 
 function moveToUzumeMainMode(e: Electron.IpcMainEvent) {
-  e.reply(IpcId.UZUME_MAIN_MODE_REPLY)
+  e.reply(IpcId.ToRenderer.UZUME_MAIN_MODE)
 }
 
 function moveToBackendErrorMode(e: Electron.IpcMainEvent, is_version_ok: boolean) {
@@ -81,10 +81,10 @@ function moveToBackendErrorMode(e: Electron.IpcMainEvent, is_version_ok: boolean
   state.isSupportedEnv = !!platform.supported
   state.isVersionOk = is_version_ok
 
-  e.reply(IpcId.BACKEND_ERROR_REPLY, JSON.stringify(state))
+  e.reply(IpcId.ToRenderer.BACKEND_ERROR, JSON.stringify(state))
 }
 
-ipcMain.on(IpcId.BACKEND_INIT, (e, _arg) => {
+ipcMain.on(IpcId.ToMainProc.BACKEND_INIT, (e, _arg) => {
   BackendConnector.onBackendOk = () => {
     moveToUzumeMainMode(e)
   }
@@ -97,14 +97,14 @@ ipcMain.on(IpcId.BACKEND_INIT, (e, _arg) => {
   BackendConnector.setBackendUrl(backendUrl());
 });
 
-ipcMain.on(IpcId.BACKEND_CONFIG, (e, _arg) => {
+ipcMain.on(IpcId.ToMainProc.BACKEND_CONFIG, (e, _arg) => {
   var backendUrlHost = {} as BackendUrlHost
   backendUrlHost.host = backendHost()
   backendUrlHost.port = backendPort()
-  e.reply(IpcId.SHOW_BACKEND_CONFIG_MODAL_REPLY, JSON.stringify(backendUrlHost))
+  e.reply(IpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, JSON.stringify(backendUrlHost))
 });
 
-ipcMain.on(IpcId.UPDATE_BACKEND_URL_HOST, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.UPDATE_BACKEND_URL_HOST, (e, arg) => {
   let backendUrlHost = JSON.parse(arg) as BackendUrlHost
   const store = new electronStore();
   store.set(BACKEND_HOST_KEY, backendUrlHost.host)
@@ -113,12 +113,12 @@ ipcMain.on(IpcId.UPDATE_BACKEND_URL_HOST, (e, arg) => {
   BackendConnector.setBackendUrl(backendUrl());
 });
 
-ipcMain.on(IpcId.BACKEND_RELOAD, (e, _arg) => {
+ipcMain.on(IpcId.ToMainProc.BACKEND_RELOAD, (e, _arg) => {
   BackendConnector.resetStatus();
   BackendConnector.setBackendUrl(backendUrl());
 });
 
-ipcMain.on(IpcId.BACKEND_DOWNLOAD, (e, _arg) => {
+ipcMain.on(IpcId.ToMainProc.BACKEND_DOWNLOAD, (e, _arg) => {
   let platform = currPlatformInfo()
   electron.shell.openExternal(platform.deployedBackendAppUrl)
 });

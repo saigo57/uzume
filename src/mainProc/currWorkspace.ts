@@ -1,20 +1,16 @@
 import { IpcId, CurrentWorkspace } from '../ipc/currentWorkspace';
 import { BackendConnector } from 'uzume-backend-connector';
-
-let g_currentWorkspace: CurrentWorkspace = {
-  workspace_name: '',
-  workspace_id: '',
-}
+import { Globals } from './globals';
 
 export function changeCurrentWorkspace(e: Electron.IpcMainEvent, workspaceId: string, name: string) {
   BackendConnector.workspace(workspaceId, (ws) => {
-    g_currentWorkspace.workspace_id = workspaceId
-    g_currentWorkspace.workspace_name = name
+    Globals.currentWorkspace.workspace_id = workspaceId
+    Globals.currentWorkspace.workspace_name = name
   
-    e.reply(IpcId.GET_CURRENT_WORKSPACE_REPLY, JSON.stringify(g_currentWorkspace));
+    e.reply(IpcId.ToRenderer.GET_CURRENT_WORKSPACE, JSON.stringify(Globals.currentWorkspace));
   });
 }
 
 export function isCurrentWorkspace(workspace_id: string): boolean {
-  return g_currentWorkspace.workspace_id == workspace_id
+  return Globals.currentWorkspace.workspace_id == workspace_id
 }

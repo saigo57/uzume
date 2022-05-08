@@ -57,18 +57,18 @@ export const ServerList = () => {
   const [workspaceIconPathState, setWorkspaceIconPathState] = useState('');
 
   useEffect(() => {
-    window.api.send(serverListIpcId.FETCH_WORKSPACE_LIST);
+    window.api.send(serverListIpcId.ToMainProc.FETCH_WORKSPACE_LIST);
   }, []);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.FETCH_WORKSPACE_LIST_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.FETCH_WORKSPACE_LIST, (_e, arg) => {
       const serverList = JSON.parse(arg) as ServerInfo[]
       setServerList(serverList);
     });
   }, []);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.SHOW_DELETE_WORKSPACE_MODAL_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.SHOW_DELETE_WORKSPACE_MODAL, (_e, arg) => {
       const deleteWorkspace = JSON.parse(arg) as ServerInfo
       setDeleteWorkspaceState(deleteWorkspace)
       setIsShowDeleteWorkspaceModal(true)
@@ -76,7 +76,7 @@ export const ServerList = () => {
   }, []);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.SHOW_SET_ICON_MODAL_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.SHOW_SET_ICON_MODAL, (_e, arg) => {
       const targetWorkspace = JSON.parse(arg) as ServerInfo
       setWorkspaceIconState(targetWorkspace)
       setIsShowSetIconModalState(true)
@@ -84,7 +84,7 @@ export const ServerList = () => {
   }, []);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.SHOW_UPDATE_WORKSPACE_NAME_MODAL_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.SHOW_UPDATE_WORKSPACE_NAME_MODAL, (_e, arg) => {
       const targetWorkspace = JSON.parse(arg) as ServerInfo
       setUpdateWorkspaceNameState(targetWorkspace)
       setIsShowUpdateWorkspaceNameModalState(true)
@@ -92,7 +92,7 @@ export const ServerList = () => {
   }, []);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.SELECT_SET_WORKSPACE_ICON_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.SELECT_SET_WORKSPACE_ICON, (_e, arg) => {
       setWorkspaceIconPathState(arg[0])
     });
   }, []);
@@ -100,12 +100,12 @@ export const ServerList = () => {
   useEffect(() => {
     serverListState.forEach((server) => {
       let req = { workspaceId: server.workspaceId } as FetchWorkspaceIcon
-      window.api.send(serverListIpcId.FETCH_WORKSPACE_ICON, JSON.stringify(req));
+      window.api.send(serverListIpcId.ToMainProc.FETCH_WORKSPACE_ICON, JSON.stringify(req));
     })
   }, [serverListState]);
 
   useEffect(() => {
-    window.api.on(serverListIpcId.FETCH_WORKSPACE_ICON_REPLY, (_e, arg) => {
+    window.api.on(serverListIpcId.ToRenderer.FETCH_WORKSPACE_ICON, (_e, arg) => {
       const iconImageData = JSON.parse(arg) as IconImageData;
       let img: any = document.getElementById(`icon-image-${iconImageData.workspaceId}`);
 
@@ -125,7 +125,7 @@ export const ServerList = () => {
       workspaceId: e.target.dataset.workspace_id,
       is_available: e.target.dataset.is_available === "true",
     } as ShowContextMenu)
-    window.api.send(serverListIpcId.SHOW_CONTEXT_MENU, msg)
+    window.api.send(serverListIpcId.ToMainProc.SHOW_CONTEXT_MENU, msg)
   }
 
   useEffect(() => {
@@ -149,7 +149,7 @@ export const ServerList = () => {
   }
 
   const createNewServer = () => {
-    window.api.send(serverListIpcId.CREATE_NEW_SERVER, JSON.stringify(workspaceInfoState));
+    window.api.send(serverListIpcId.ToMainProc.CREATE_NEW_SERVER, JSON.stringify(workspaceInfoState));
     setWorkspaceInfo({dirName:'', dirPath:''})
   }
 
@@ -157,7 +157,7 @@ export const ServerList = () => {
     let req: AddWorkspaceInfo = {
       dirPath: addWorkspacePathState
     }
-    window.api.send(serverListIpcId.CREATE_ADD_SERVER, JSON.stringify(req));
+    window.api.send(serverListIpcId.ToMainProc.CREATE_ADD_SERVER, JSON.stringify(req));
     setAddWorkspacePathState('')
   }
 
@@ -165,7 +165,7 @@ export const ServerList = () => {
     let msg = JSON.stringify({
       workspaceId: workspaceId
     } as DeleteWorkspace)
-    window.api.send(serverListIpcId.DELETE_WORKSPACE, msg)
+    window.api.send(serverListIpcId.ToMainProc.DELETE_WORKSPACE, msg)
   }
 
   const setWorkspaceIcon = (workspaceId: string) => {
@@ -173,7 +173,7 @@ export const ServerList = () => {
       workspaceId: workspaceId,
       iconPath: workspaceIconPathState,
     } as SetWorkspaceIcon)
-    window.api.send(serverListIpcId.SET_WORKSPACE_ICON, msg)
+    window.api.send(serverListIpcId.ToMainProc.SET_WORKSPACE_ICON, msg)
   }
 
   const updateWorkspaceName = () => {
@@ -181,7 +181,7 @@ export const ServerList = () => {
       workspaceId: updateWorkspaceNameState.workspaceId,
       name: updateWorkspaceNameState.name,
     } as UpdateWorkspaceName)
-    window.api.send(serverListIpcId.UPDATE_WORKSPACE_NAME, msg)
+    window.api.send(serverListIpcId.ToMainProc.UPDATE_WORKSPACE_NAME, msg)
   }
 
   const inputDirNameOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,25 +192,25 @@ export const ServerList = () => {
     if ( e.target.dataset.is_available === "false" ) return;
 
     let sw: SelectWorkspace = { workspaceId: e.target.dataset.workspace_id }
-    window.api.send(serverListIpcId.SELECT_WORKSPACE, JSON.stringify(sw));
+    window.api.send(serverListIpcId.ToMainProc.SELECT_WORKSPACE, JSON.stringify(sw));
   }
 
   const selectNewWorkspaceDir = () => {
-    window.api.send(serverListIpcId.SELECT_NEW_WORKSPACE_DIR);
-    window.api.on(serverListIpcId.SELECT_NEW_WORKSPACE_DIR_REPLY, (_e, arg) => {
+    window.api.send(serverListIpcId.ToMainProc.SELECT_NEW_WORKSPACE_DIR);
+    window.api.on(serverListIpcId.ToRenderer.SELECT_NEW_WORKSPACE_DIR, (_e, arg) => {
       setWorkspaceInfo({...workspaceInfoState, dirPath: arg[0]})
     });
   }
 
   const selectAddWorkspaceDir = () => {
-    window.api.send(serverListIpcId.SELECT_ADD_WORKSPACE_DIR);
-    window.api.on(serverListIpcId.SELECT_ADD_WORKSPACE_DIR_REPLY, (_e, arg) => {
+    window.api.send(serverListIpcId.ToMainProc.SELECT_ADD_WORKSPACE_DIR);
+    window.api.on(serverListIpcId.ToRenderer.SELECT_ADD_WORKSPACE_DIR, (_e, arg) => {
       setAddWorkspacePathState(arg[0])
     });
   }
 
   const selectWorkspaceIcon = () => {
-    window.api.send(serverListIpcId.SELECT_SET_WORKSPACE_ICON);
+    window.api.send(serverListIpcId.ToMainProc.SELECT_SET_WORKSPACE_ICON);
   }
 
   const showAddWorkspaceModal = () => {

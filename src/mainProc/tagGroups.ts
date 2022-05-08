@@ -12,12 +12,12 @@ import {
 import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
 
-ipcMain.on(IpcId.GET_ALL_TAG_GROUPS, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.GET_ALL_TAG_GROUPS, (e, arg) => {
   let reqAllTagGroups: GetAllTagGroups = JSON.parse(arg)
   fetchAllTagGroups(e, reqAllTagGroups.workspaceId);
 });
 
-ipcMain.on(IpcId.CREATE_NEW_TAG_GROUP, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.CREATE_NEW_TAG_GROUP, (e, arg) => {
   let reqCreateTagGroup: CreateTagGroup = JSON.parse(arg)
   BackendConnector.workspace(reqCreateTagGroup.workspaceId, (ws) => {
     ws.tag_groups.createNewTagGroup(reqCreateTagGroup.name).then(() => {
@@ -28,7 +28,7 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_GROUP, (e, arg) => {
   });
 });
 
-ipcMain.on(IpcId.ADD_TO_TAG_GROUP, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.ADD_TO_TAG_GROUP, (e, arg) => {
   let reqAddToTagGroup: AddToTagGroup = JSON.parse(arg)
   BackendConnector.workspace(reqAddToTagGroup.workspaceId, (ws) => {
     ws.tag_groups.AddTagToTagGroup(reqAddToTagGroup.tagGroupId, reqAddToTagGroup.tagId).then(() => {
@@ -51,7 +51,7 @@ export function fetchAllTagGroups(e: Electron.IpcMainEvent, workspace_id: string
           })
         }
       }
-      e.reply(IpcId.GET_ALL_TAG_GROUPS_REPLY, JSON.stringify({tag_groups: tag_groups}));
+      e.reply(IpcId.ToRenderer.GET_ALL_TAG_GROUPS, JSON.stringify({tag_groups: tag_groups}));
     }).catch((err) => {
       showFooterMessage(e, `タググループリストの取得に失敗しました。[${err}}]`);
     })

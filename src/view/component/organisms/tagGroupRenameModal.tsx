@@ -16,7 +16,7 @@ export const TagGroupRenameModal = () => {
   const [tagGroupId, setTagGroupId] = useState("");
 
   useEffect(() => {
-    window.api.on(TagGroupsIpcId.TO_TAG_GROUP_RENAME_REPLY, (_e, arg) => {
+    window.api.on(TagGroupsIpcId.ToRenderer.TO_TAG_GROUP_RENAME, (_e, arg) => {
       let tagRenameReply = JSON.parse(arg) as TagGroupRenameReply
       setWorkspaceId(tagRenameReply.workspaceId)
       setTagGroupId(tagRenameReply.tagGroupId)
@@ -36,7 +36,7 @@ export const TagGroupRenameModal = () => {
       tagGroupName: tagGroupNameState,
     }
     
-    window.api.send(TagGroupsIpcId.TAG_GROUP_RENAME, JSON.stringify(req))
+    window.api.send(TagGroupsIpcId.ToMainProc.TAG_GROUP_RENAME, JSON.stringify(req))
   }
 
   const reactModalStyle: ReactModal.Styles = {

@@ -1,9 +1,17 @@
-export class IpcId {
-  static readonly NAME_SPACE: string = "tag_groups";
-  static readonly GET_ALL_TAG_GROUPS: string = IpcId.NAME_SPACE + "get-all-tag-groups";
-  static readonly GET_ALL_TAG_GROUPS_REPLY: string = IpcId.NAME_SPACE + "get-all-tag-groups-reply";
-  static readonly CREATE_NEW_TAG_GROUP: string = IpcId.NAME_SPACE + "create-new-tag-group";
-  static readonly ADD_TO_TAG_GROUP: string = IpcId.NAME_SPACE + "add-to-tag-group";
+import { IpcIdBase } from './ipcIdBase';
+
+export class IpcId extends IpcIdBase {
+  static readonly NAME_SPACE: string = "tagGroups";
+
+  public static ToMainProc = class {
+    static readonly GET_ALL_TAG_GROUPS: string = IpcId.generateIpcId();
+    static readonly CREATE_NEW_TAG_GROUP: string = IpcId.generateIpcId();
+    static readonly ADD_TO_TAG_GROUP: string = IpcId.generateIpcId();
+  }
+
+  public static ToRenderer = class {
+    static readonly GET_ALL_TAG_GROUPS: string = IpcId.generateIpcId();
+  }
 }
 
 export type GetAllTagGroups = {

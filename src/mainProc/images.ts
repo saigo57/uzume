@@ -16,22 +16,19 @@ import {
 } from '../ipc/images';
 import { BackendConnector, Image as BackendConnectorImage } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
+import { Globals } from './globals';
 
 const THUMB_REQUEST_LIMIT = 5
-
-type ImageInfoMap = { [key: string]: ImageInfo }
-let g_imageInfoList: { [key: string]: ImageInfoMap } = {}
-let g_thumb_image_queue = [] as RequestImage[]
 
 // Rendererプロセスに、Mainプロセスにイベントを送信するように依頼する
 //   Main→Renderer(reflect)→Main→Rendererという流れになる
 //   本当はMain→Main→Rendererとしたいが、Main→Rendererがうまく行かない
 const sendReflect = (e: Electron.IpcMainEvent, replyId: string) => {
   let reflect = { replyId: replyId } as Reflect
-  e.reply(IpcId.REPLY_REFLECT, JSON.stringify(reflect))
+  e.reply(IpcId.ToRenderer.REPLY_REFLECT, JSON.stringify(reflect))
 }
 
-ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.UPLOAD_IMAGES, (e, arg) => {
   let imageFiles: ImageFiles = JSON.parse(arg)
 
   const imageUploaded = (finishNum: number, allNum: number) => {
@@ -40,7 +37,7 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
       allImagesCnt: allNum,
     } as ImageUploadProgress
 
-    e.reply(IpcId.IMAGE_UPLOAD_PROGRESS_REPLY, JSON.stringify(progress))
+    e.reply(IpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, JSON.stringify(progress))
   };
 
   BackendConnector.workspace(imageFiles.workspaceId, (ws) => {
@@ -53,64 +50,64 @@ ipcMain.on(IpcId.UPLOAD_IMAGES, (e, arg) => {
   })
 });
 
-ipcMain.on(IpcId.SHOW_IMAGES, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.SHOW_IMAGES, (e, arg) => {
   let showImages: ShowImages = JSON.parse(arg)
   let tags: string[] = showImages.tagIds;
   if ( showImages.uncategorized ) tags = [...tags, '_system_tag_uncategorized']
   showImagesReply(e, showImages.workspaceId, showImages.page, tags, showImages.searchType)
 });
 
-ipcMain.on(IpcId.GET_IMAGE_INFO_LIST, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.GET_IMAGE_INFO_LIST, (e, arg) => {
   let reqImage: RequestImageInfo = JSON.parse(arg)
   let imageInfoList: ImageInfo[] = reqImage.imageIds.map(
-    (image_id) => g_imageInfoList[reqImage.workspaceId][image_id]
+    (image_id) => Globals.imageInfoList[reqImage.workspaceId][image_id]
   );
-  e.reply(IpcId.GET_IMAGE_INFO_LIST_REPLY, JSON.stringify(imageInfoList));
+  e.reply(IpcId.ToRenderer.GET_IMAGE_INFO_LIST, JSON.stringify(imageInfoList));
 });
 
-ipcMain.on(IpcId.REQUEST_THUMB_IMAGE, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.REQUEST_THUMB_IMAGE, (e, arg) => {
   let reqImage: RequestImage = JSON.parse(arg)
-  if ( g_thumb_image_queue.length == 0 ) {
+  if ( Globals.thumb_image_queue.length == 0 ) {
     sendReflect(e, IpcId.ACTUAL_REQUEST_THUMB_IMAGE)
   }
 
-  g_thumb_image_queue.push(reqImage)
+  Globals.thumb_image_queue.push(reqImage)
 });
 
 ipcMain.on(IpcId.ACTUAL_REQUEST_THUMB_IMAGE, (e, arg) => {
   // 現在のworkspace以外のリクエストが残っている場合削除する
   let next_queue = []
-  for (let i = 0; i < g_thumb_image_queue.length; i++) {
-    if ( !isCurrentWorkspace(g_thumb_image_queue[i].workspaceId) ) continue;
+  for (let i = 0; i < Globals.thumb_image_queue.length; i++) {
+    if ( !isCurrentWorkspace(Globals.thumb_image_queue[i].workspaceId) ) continue;
 
-    next_queue.push(g_thumb_image_queue[i])
+    next_queue.push(Globals.thumb_image_queue[i])
   }
-  g_thumb_image_queue = next_queue;
+  Globals.thumb_image_queue = next_queue;
 
   // n枚バックエンドに要求する
   for (let i = 0; i < THUMB_REQUEST_LIMIT; i++) {
-    let reqImage = g_thumb_image_queue.shift()
-    if ( reqImage ) getImage(e, reqImage, IpcId.REQUEST_THUMB_IMAGE_REPLY)
+    let reqImage = Globals.thumb_image_queue.shift()
+    if ( reqImage ) getImage(e, reqImage, IpcId.ToRenderer.REQUEST_THUMB_IMAGE)
   }
 
   // queueが残っていたら再度この処理を呼ぶ
-  if ( g_thumb_image_queue.length > 0 ) {
+  if ( Globals.thumb_image_queue.length > 0 ) {
     sendReflect(e, IpcId.ACTUAL_REQUEST_THUMB_IMAGE)
   }
 });
 
-ipcMain.on(IpcId.REQUEST_ORIG_IMAGE, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.REQUEST_ORIG_IMAGE, (e, arg) => {
   let reqImage: RequestImage = JSON.parse(arg)
   if ( !reqImage.imageId ) return;
-  getImage(e, reqImage, IpcId.REQUEST_ORIG_IMAGE_REPLY)
+  getImage(e, reqImage, IpcId.ToRenderer.REQUEST_ORIG_IMAGE)
 });
 
-ipcMain.on(IpcId.ADD_TAG, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.ADD_TAG, (e, arg) => {
   let addTagToImage: AddTagToImage = JSON.parse(arg)
   addTagToImages(e, addTagToImage.workspaceId, addTagToImage.imageIds, addTagToImage.tagId)
 });
 
-ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.REMOVE_TAG, (e, arg) => {
   let removeTagFromImage: RemoveTagFromImage = JSON.parse(arg)
 
   BackendConnector.workspace(removeTagFromImage.workspaceId, (ws) => {
@@ -119,7 +116,7 @@ ipcMain.on(IpcId.REMOVE_TAG, (e, arg) => {
       ws.image.removeTag(image_id, removeTagFromImage.tagId).catch((err) => {
         showFooterMessage(e, `タグの削除に失敗しました。[${err}}]`);
       });
-      let imageInfo = g_imageInfoList[removeTagFromImage.workspaceId][image_id];
+      let imageInfo = Globals.imageInfoList[removeTagFromImage.workspaceId][image_id];
       let newTags: string[] = []
       for (let i = 0; i < imageInfo.tags.length; i++) {
         if ( imageInfo.tags[i] != removeTagFromImage.tagId ) newTags.push(imageInfo.tags[i]);
@@ -171,12 +168,12 @@ export function showImagesReply(
 
           imageInfos.images.push(imageInfo);
 
-          if ( !(workspaceId in g_imageInfoList) ) g_imageInfoList[workspaceId] = {};
-          g_imageInfoList[workspaceId][imageInfo.image_id] = imageInfo;
+          if ( !(workspaceId in Globals.imageInfoList) ) Globals.imageInfoList[workspaceId] = {};
+          Globals.imageInfoList[workspaceId][imageInfo.image_id] = imageInfo;
         }
       }
 
-      e.reply(IpcId.SHOW_IMAGES_REPLY, JSON.stringify(imageInfos));
+      e.reply(IpcId.ToRenderer.SHOW_IMAGES, JSON.stringify(imageInfos));
     }).catch((err) => {
       showFooterMessage(e, `画像リストの取得に失敗しました。[${err}}]`);
     });
@@ -187,7 +184,7 @@ export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, im
   BackendConnector.workspace(workspaceId, (ws) => {
     let imageInfoList: ImageInfo[] = []
     for (let i = 0; i < imageIds.length; i++) {
-      let imageInfo = g_imageInfoList[workspaceId][imageIds[i]];
+      let imageInfo = Globals.imageInfoList[workspaceId][imageIds[i]];
       if ( imageInfo.tags.includes(tagId) ) continue; // 既に付与されていたらスキップする
 
       ws.image.addTag(imageIds[i], tagId).catch((err) => {
@@ -202,6 +199,6 @@ export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, im
 }
 
 function afterUpdateImageInfo(e: Electron.IpcMainEvent, imageInfoList :ImageInfo[]) {
-  e.reply(IpcId.UPDATE_IMAGE_INFO_REPLY, JSON.stringify(imageInfoList));
-  e.reply(IpcId.IMAGE_INFO_LIST_UPDATED_REPLY, JSON.stringify(imageInfoList));
+  e.reply(IpcId.ToRenderer.UPDATE_IMAGE_INFO, JSON.stringify(imageInfoList));
+  e.reply(IpcId.ToRenderer.IMAGE_INFO_LIST_UPDATED, JSON.stringify(imageInfoList));
 }

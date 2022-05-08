@@ -56,7 +56,7 @@ export const Tag:React.VFC<TagProps> = (props) => {
       tagName: props.tagName,
       currFavorite: props.favorite
     }
-    window.api.send(TagsIpcId.SHOW_CONTEXT_MENU, JSON.stringify(req))
+    window.api.send(TagsIpcId.ToMainProc.SHOW_CONTEXT_MENU, JSON.stringify(req))
   }
 
   return (

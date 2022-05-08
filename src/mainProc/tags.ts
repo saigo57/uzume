@@ -14,12 +14,12 @@ import {
 import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
 
-ipcMain.on(IpcId.GET_ALL_TAGS, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.GET_ALL_TAGS, (e, arg) => {
   let reqAllTags: GetAllTags = JSON.parse(arg)
   getNewTags(e, reqAllTags.workspaceId)
 });
 
-ipcMain.on(IpcId.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
   let createTag: CreateTagToImage = JSON.parse(arg)
   BackendConnector.workspace(createTag.workspaceId, (ws) => {
     ws.tags.createNewTag(createTag.tagName).then((tagInfo) => {
@@ -33,7 +33,7 @@ ipcMain.on(IpcId.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
   });
 });
 
-ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
   let requestShowContextMenu: ShowContextMenu = JSON.parse(arg)
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
@@ -67,7 +67,7 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
           tagId: requestShowContextMenu.tagId,
           tagName: requestShowContextMenu.tagName,
         }
-        e.reply(IpcId.TO_TAG_RENAME_REPLY, JSON.stringify(req))
+        e.reply(IpcId.ToRenderer.TO_TAG_RENAME, JSON.stringify(req))
       }
     }
   ]
@@ -76,7 +76,7 @@ ipcMain.on(IpcId.SHOW_CONTEXT_MENU, (e, arg) => {
   menu.popup(contents)
 });
 
-ipcMain.on(IpcId.TAG_RENAME, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.TAG_RENAME, (e, arg) => {
   let requestTagRename: TagRename = JSON.parse(arg)
 
   BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {
@@ -102,7 +102,7 @@ export function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
           })
         }
       }
-      e.reply(IpcId.GET_ALL_TAGS_REPLY, JSON.stringify({tags: tags}));
+      e.reply(IpcId.ToRenderer.GET_ALL_TAGS, JSON.stringify({tags: tags}));
     }).catch((err) => {
       showFooterMessage(e, `タグリストの取得に失敗しました。[${err}}]`);
     })

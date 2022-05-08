@@ -30,15 +30,15 @@ export function App() {
       setConfirmMessage(message)
     }
     // 初期処理
-    window.api.on(backendSetupIpcId.UZUME_MAIN_MODE_REPLY, (_e, _arg) => {
+    window.api.on(backendSetupIpcId.ToRenderer.UZUME_MAIN_MODE, (_e, _arg) => {
       setWindowMode(WINDOW_MODE.UZUME_MAIN);
     });
-    window.api.on(backendSetupIpcId.BACKEND_ERROR_REPLY, (_e, arg) => {
+    window.api.on(backendSetupIpcId.ToRenderer.BACKEND_ERROR, (_e, arg) => {
       const state = JSON.parse(arg) as BackendState;
       setBackendState(state);
       setWindowMode(WINDOW_MODE.BACKEND_ERROR);
     });
-    window.api.send(backendSetupIpcId.BACKEND_INIT);
+    window.api.send(backendSetupIpcId.ToMainProc.BACKEND_INIT);
   }, []);
 
   return (

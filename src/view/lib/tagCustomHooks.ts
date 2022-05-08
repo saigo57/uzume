@@ -34,18 +34,18 @@ export const useTags = (workspaceId: string): [TagGroupInfo[], TagInfo[], TagInf
       workspaceId: workspaceId,
     } as GetAllTagGroups
 
-    window.api.send(TagGroupsIpcId.GET_ALL_TAG_GROUPS, JSON.stringify(req));
+    window.api.send(TagGroupsIpcId.ToMainProc.GET_ALL_TAG_GROUPS, JSON.stringify(req));
   }, [workspaceId]);
 
   useEffect(() => {
-    window.api.on(TagsIpcId.GET_ALL_TAGS_REPLY, (_e, arg) => {
+    window.api.on(TagsIpcId.ToRenderer.GET_ALL_TAGS, (_e, arg) => {
       const tagList = JSON.parse(arg) as TagList
       setTagAllList(tagList.tags)
     });
   }, []);
 
   useEffect(() => {
-    window.api.on(TagGroupsIpcId.GET_ALL_TAG_GROUPS_REPLY, (_e, arg) => {
+    window.api.on(TagGroupsIpcId.ToRenderer.GET_ALL_TAG_GROUPS, (_e, arg) => {
       const tagGroupList = JSON.parse(arg) as TagGroupList
       setTagGroupList(tagGroupList.tag_groups)
     });
