@@ -11,7 +11,7 @@ export function Footer() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    window.api.on(FooterListIpcId.FOOTER_MESSAGE_REPLY, (_e, arg) => {
+    window.api.on(FooterListIpcId.ToRenderer.FOOTER_MESSAGE_REPLY, (_e, arg) => {
       const footerMessage = JSON.parse(arg) as FooterMessage
       setMessage(footerMessage.message);
     });

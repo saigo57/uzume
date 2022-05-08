@@ -11,15 +11,15 @@ type BackendSetupProps = {
 
 export const BackendSetup:React.VFC<BackendSetupProps> = (props) => {
   const backendDownload = () => {
-    window.api.send(BackendSetupIpcId.BACKEND_DOWNLOAD);
+    window.api.send(BackendSetupIpcId.ToMainProc.BACKEND_DOWNLOAD);
   }
 
   const backendConfig = () => {
-    window.api.send(BackendSetupIpcId.BACKEND_CONFIG);
+    window.api.send(BackendSetupIpcId.ToMainProc.BACKEND_CONFIG);
   }
 
   const frontEndReload = () => {
-    window.api.send(BackendSetupIpcId.BACKEND_RELOAD);
+    window.api.send(BackendSetupIpcId.ToMainProc.BACKEND_RELOAD);
   }
 
   const setupStyle: React.CSSProperties = {

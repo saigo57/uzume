@@ -16,7 +16,7 @@ export const TagRenameModal = () => {
   const [tagId, setTagId] = useState("");
 
   useEffect(() => {
-    window.api.on(TagsIpcId.TO_TAG_RENAME_REPLY, (_e, arg) => {
+    window.api.on(TagsIpcId.ToRenderer.TO_TAG_RENAME, (_e, arg) => {
       let tagRenameReply = JSON.parse(arg) as TagRenameReply
       setWorkspaceId(tagRenameReply.workspaceId)
       setTagId(tagRenameReply.tagId)
@@ -36,7 +36,7 @@ export const TagRenameModal = () => {
       tagName: tagNameState,
     }
     
-    window.api.send(TagsIpcId.TAG_RENAME, JSON.stringify(req))
+    window.api.send(TagsIpcId.ToMainProc.TAG_RENAME, JSON.stringify(req))
   }
 
   const reactModalStyle: ReactModal.Styles = {

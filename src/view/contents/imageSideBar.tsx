@@ -32,7 +32,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   }, [props.imageIds]);
 
   useEffect(() => {
-    window.api.on(ImageIpcId.GET_IMAGE_INFO_LIST_REPLY, (_e, arg) => {
+    window.api.on(ImageIpcId.ToRenderer.GET_IMAGE_INFO_LIST, (_e, arg) => {
       const imageInfoList = JSON.parse(arg) as ImageInfo[]
       setImageInfoList(imageInfoList)
     });
@@ -43,7 +43,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   }, [props.workspaceId]);
 
   useEffect(() => {
-    window.api.on(ImageIpcId.IMAGE_INFO_LIST_UPDATED_REPLY, (_e, arg) => {
+    window.api.on(ImageIpcId.ToRenderer.IMAGE_INFO_LIST_UPDATED, (_e, arg) => {
       const imageInfoList = JSON.parse(arg) as ImageInfo[]
       setImageInfoList(imageInfoList);
     });
@@ -59,7 +59,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
     } as RequestImageInfo
-    window.api.send(ImageIpcId.GET_IMAGE_INFO_LIST, JSON.stringify(req));
+    window.api.send(ImageIpcId.ToMainProc.GET_IMAGE_INFO_LIST, JSON.stringify(req));
 
     setImageInfoList(imageInfoList)
   }
@@ -99,7 +99,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
       imageIds: props.imageIds,
       tagId: tagId,
     }
-    window.api.send(ImageIpcId.REMOVE_TAG, JSON.stringify(req));
+    window.api.send(ImageIpcId.ToMainProc.REMOVE_TAG, JSON.stringify(req));
   }
 
   let linkedTagList = linkedTag();

@@ -55,7 +55,7 @@ const TagGroupMenu:React.VFC<TagGroupMenuProps> = (props) => {
       tagId: item.tagId,
     } as AddToTagGroup
 
-    window.api.send(TagGroupsIpcId.ADD_TO_TAG_GROUP, JSON.stringify(req));
+    window.api.send(TagGroupsIpcId.ToMainProc.ADD_TO_TAG_GROUP, JSON.stringify(req));
   }
 
   const [{ isOver }, dropRef] = useDrop({
@@ -72,7 +72,7 @@ const TagGroupMenu:React.VFC<TagGroupMenuProps> = (props) => {
       tagGroupId: props.tagGroupId,
       tagGroupName: props.name,
     } as TagGroupContextMenu
-    window.api.send(TagManageIpcId.TAG_GROUP_CONTEXT_MENU, JSON.stringify(req));
+    window.api.send(TagManageIpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, JSON.stringify(req));
   };
 
   return (
@@ -96,7 +96,7 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
   }, [props.workspaceId]);
 
   useEffect(() => {
-    window.api.on(TagManageIpcId.TAG_GROUP_DELETE_REPLY, (_e, _arg) => {
+    window.api.on(TagManageIpcId.ToRenderer.TAG_GROUP_DELETE, (_e, _arg) => {
       selectMenu(MenuItem.ALL_TAG)
     });
   }, []);
@@ -115,7 +115,7 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
       workspaceId: props.workspaceId,
       name: newTagGroupNameState,
     } as CreateTagGroup
-    window.api.send(TagGroupsIpcId.CREATE_NEW_TAG_GROUP, JSON.stringify(req));
+    window.api.send(TagGroupsIpcId.ToMainProc.CREATE_NEW_TAG_GROUP, JSON.stringify(req));
   }
 
   const menuSelected = (menu: string): string => {

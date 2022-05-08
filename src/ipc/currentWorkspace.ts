@@ -1,6 +1,11 @@
-export class IpcId {
+import { IpcIdBase } from './ipcIdBase';
+
+export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = "currentWorkspace";
-  static readonly GET_CURRENT_WORKSPACE_REPLY: string = IpcId.NAME_SPACE + "get-current-workspace-reply";
+
+  public static ToRenderer = class {
+    static readonly GET_CURRENT_WORKSPACE: string = IpcId.generateIpcId();
+  }
 }
 
 export type CurrentWorkspace = {

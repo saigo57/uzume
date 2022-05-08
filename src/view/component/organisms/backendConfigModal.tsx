@@ -14,7 +14,7 @@ export const BackendConfigModal = () => {
   const [portState, setPortState] = useState("");
 
   useEffect(() => {
-    window.api.on(BackendSetupIpcId.SHOW_BACKEND_CONFIG_MODAL_REPLY, (_e, arg) => {
+    window.api.on(BackendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, (_e, arg) => {
       let backendUrlHost = JSON.parse(arg) as BackendUrlHost
       setHostNameState(backendUrlHost.host)
       setPortState(backendUrlHost.port)
@@ -27,7 +27,7 @@ export const BackendConfigModal = () => {
       host: hostNameState,
       port: portState,
     } as BackendUrlHost
-    window.api.send(BackendSetupIpcId.UPDATE_BACKEND_URL_HOST, JSON.stringify(backendUrlHost))
+    window.api.send(BackendSetupIpcId.ToMainProc.UPDATE_BACKEND_URL_HOST, JSON.stringify(backendUrlHost))
   }
 
   const onHostNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,34 +1,43 @@
-export class IpcId {
+import { IpcIdBase } from './ipcIdBase';
+
+export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = "serverList";
-  // ワークスペースdir選択イベント(finder/explorer表示)
-  static readonly SELECT_NEW_WORKSPACE_DIR: string = IpcId.NAME_SPACE + "select-new-workspace-dir";
-  static readonly SELECT_NEW_WORKSPACE_DIR_REPLY: string = IpcId.NAME_SPACE + "select-new-workspace-dir-reply";
-  // ワークスペースdir選択イベント(finder/explorer表示)
-  static readonly SELECT_ADD_WORKSPACE_DIR: string = IpcId.NAME_SPACE + "select-add-workspace-dir";
-  static readonly SELECT_ADD_WORKSPACE_DIR_REPLY: string = IpcId.NAME_SPACE + "select-add-workspace-dir-reply";
-  // ワークスペースアイコン選択イベント(finder/explorer表示)
-  static readonly SELECT_SET_WORKSPACE_ICON: string = IpcId.NAME_SPACE + "select-set-workspace-icon-dir";
-  static readonly SELECT_SET_WORKSPACE_ICON_REPLY: string = IpcId.NAME_SPACE + "select-set-workspace-icon-reply";
-  // ワークスペースを選択
-  static readonly SELECT_WORKSPACE: string = IpcId.NAME_SPACE + "select-workspace";
-  // コンテキストメニュー表示
-  static readonly SHOW_CONTEXT_MENU: string = IpcId.NAME_SPACE + "show-context-menu";
-  // ワークスペース削除モーダル表示
-  static readonly SHOW_DELETE_WORKSPACE_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-delete-workspace-modal-reply";
-  // ワークスペースアイコン設定モーダル表示
-  static readonly SHOW_SET_ICON_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-set-icon-modal-reply";
-  // ワークスペース名更新モーダル表示
-  static readonly SHOW_UPDATE_WORKSPACE_NAME_MODAL_REPLY: string = IpcId.NAME_SPACE + "show-update-workspace-name-modal-reply";
-  // リクエスト系
-  static readonly CREATE_NEW_SERVER: string = IpcId.NAME_SPACE + "create-new-server";
-  static readonly CREATE_ADD_SERVER: string = IpcId.NAME_SPACE + "create-add-server";
-  static readonly DELETE_WORKSPACE: string = IpcId.NAME_SPACE + "delete-workspace";
-  static readonly FETCH_WORKSPACE_LIST: string = IpcId.NAME_SPACE + "fetch-server-list";
-  static readonly FETCH_WORKSPACE_LIST_REPLY: string = IpcId.NAME_SPACE + "fetch-server-list-reply";
-  static readonly FETCH_WORKSPACE_ICON: string = IpcId.NAME_SPACE + "fetch-server-icon";
-  static readonly FETCH_WORKSPACE_ICON_REPLY: string = IpcId.NAME_SPACE + "fetch-server-icon-reply";
-  static readonly SET_WORKSPACE_ICON: string = IpcId.NAME_SPACE + "set-server-icon";
-  static readonly UPDATE_WORKSPACE_NAME: string = IpcId.NAME_SPACE + "update-workspace-name";
+
+  public static ToMainProc = class {
+    // ワークスペースdir選択イベント(finder/explorer表示)
+    static readonly SELECT_NEW_WORKSPACE_DIR: string = IpcId.generateIpcId();
+    // ワークスペースdir選択イベント(finder/explorer表示)
+    static readonly SELECT_ADD_WORKSPACE_DIR: string = IpcId.generateIpcId();
+    // ワークスペースアイコン選択イベント(finder/explorer表示)
+    static readonly SELECT_SET_WORKSPACE_ICON: string = IpcId.generateIpcId();
+    // ワークスペースを選択
+    static readonly SELECT_WORKSPACE: string = IpcId.generateIpcId();
+    // コンテキストメニュー表示
+    static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId();
+    // リクエスト系
+    static readonly CREATE_NEW_SERVER: string = IpcId.generateIpcId();
+    static readonly CREATE_ADD_SERVER: string = IpcId.generateIpcId();
+    static readonly DELETE_WORKSPACE: string = IpcId.generateIpcId();
+    static readonly FETCH_WORKSPACE_LIST: string = IpcId.generateIpcId();
+    static readonly FETCH_WORKSPACE_ICON: string = IpcId.generateIpcId();
+    static readonly SET_WORKSPACE_ICON: string = IpcId.generateIpcId();
+    static readonly UPDATE_WORKSPACE_NAME: string = IpcId.generateIpcId();
+  }
+
+  public static ToRenderer = class {
+    // ToMainProcと対応
+    static readonly SELECT_NEW_WORKSPACE_DIR: string = IpcId.generateIpcId();
+    static readonly SELECT_ADD_WORKSPACE_DIR: string = IpcId.generateIpcId();
+    static readonly SELECT_SET_WORKSPACE_ICON: string = IpcId.generateIpcId();
+    static readonly FETCH_WORKSPACE_LIST: string = IpcId.generateIpcId();
+    static readonly FETCH_WORKSPACE_ICON: string = IpcId.generateIpcId();
+    // ワークスペース削除モーダル表示
+    static readonly SHOW_DELETE_WORKSPACE_MODAL: string = IpcId.generateIpcId();
+    // ワークスペースアイコン設定モーダル表示
+    static readonly SHOW_SET_ICON_MODAL: string = IpcId.generateIpcId();
+    // ワークスペース名更新モーダル表示
+    static readonly SHOW_UPDATE_WORKSPACE_NAME_MODAL: string = IpcId.generateIpcId();
+  }
 }
 
 export type ServerInfo = {

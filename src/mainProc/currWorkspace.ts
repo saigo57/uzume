@@ -11,7 +11,7 @@ export function changeCurrentWorkspace(e: Electron.IpcMainEvent, workspaceId: st
     g_currentWorkspace.workspace_id = workspaceId
     g_currentWorkspace.workspace_name = name
   
-    e.reply(IpcId.GET_CURRENT_WORKSPACE_REPLY, JSON.stringify(g_currentWorkspace));
+    e.reply(IpcId.ToRenderer.GET_CURRENT_WORKSPACE, JSON.stringify(g_currentWorkspace));
   });
 }
 

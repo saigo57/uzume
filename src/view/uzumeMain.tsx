@@ -36,7 +36,7 @@ export function UzumeMain() {
   }, [currentWorkspaceState]);
 
   useEffect(() => {
-    window.api.on(CurrWsIpcId.GET_CURRENT_WORKSPACE_REPLY, (_e, arg) => {
+    window.api.on(CurrWsIpcId.ToRenderer.GET_CURRENT_WORKSPACE, (_e, arg) => {
       const serverList = JSON.parse(arg) as CurrentWorkspace
       setCurrentWorkspace(serverList);
     });

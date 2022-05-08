@@ -17,11 +17,11 @@ export const ImageView:React.VFC<ImageViewProps> = (props) => {
       imageId: props.imageId,
       isThumbnail: false,
     }
-    window.api.send(ImagesIpcId.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
+    window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage));
   }, [props.imageId]);
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.REQUEST_ORIG_IMAGE_REPLY, (_e, arg) => {
+    window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
       let imageData = JSON.parse(arg) as ImageData
       let img: any = document.getElementById(`image-orig-${imageData.imageId}`);
       if ( img ) {

@@ -1,10 +1,17 @@
-export class IpcId {
-  static readonly NAME_SPACE: string = "tag_groups";
-  static readonly TAG_GROUP_CONTEXT_MENU: string = IpcId.NAME_SPACE + "tag-group-context-menu";
-  static readonly TAG_GROUP_DELETE_REPLY: string = IpcId.NAME_SPACE + "tag-group-delete-reply";
-  static readonly TO_TAG_GROUP_RENAME_REPLY: string = IpcId.NAME_SPACE + "to-tag-group-rename-reply";
-  static readonly TAG_GROUP_RENAME_REPLY: string = IpcId.NAME_SPACE + "tag-group-rename-reply";
-  static readonly TAG_GROUP_RENAME: string = IpcId.NAME_SPACE + "tag-group-rename";
+import { IpcIdBase } from './ipcIdBase';
+
+export class IpcId extends IpcIdBase {
+  static readonly NAME_SPACE: string = "tagManage";
+
+  public static ToMainProc = class {
+    static readonly TAG_GROUP_CONTEXT_MENU: string = IpcId.generateIpcId();
+    static readonly TAG_GROUP_RENAME: string = IpcId.generateIpcId();
+  }
+
+  public static ToRenderer = class {
+    static readonly TAG_GROUP_DELETE: string = IpcId.generateIpcId();
+    static readonly TO_TAG_GROUP_RENAME: string = IpcId.generateIpcId();
+  }
 }
 
 export type TagGroupContextMenu = {

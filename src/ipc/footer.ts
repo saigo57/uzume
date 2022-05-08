@@ -1,9 +1,12 @@
-
+import { IpcIdBase } from './ipcIdBase';
 import { BrowserWindow } from 'electron';
 
-export class IpcId {
+export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = "footer";
-  static readonly FOOTER_MESSAGE_REPLY: string = IpcId.NAME_SPACE + "footer-message-reply";
+
+  public static ToRenderer = class {
+    static readonly FOOTER_MESSAGE_REPLY: string = IpcId.generateIpcId();
+  }
 }
 
 export type FooterMessage = {
@@ -27,9 +30,9 @@ function buildMessage(message: string): FooterMessage {
 }
 
 export function showFooterMessage(e: Electron.IpcMainEvent, message: string) {
-  e.reply(IpcId.FOOTER_MESSAGE_REPLY, JSON.stringify(buildMessage(message)))
+  e.reply(IpcId.ToRenderer.FOOTER_MESSAGE_REPLY, JSON.stringify(buildMessage(message)))
 }
 
 export function showFooterMessageByBrowserWindow(win: BrowserWindow, message: string) {
-  win.webContents.send(IpcId.FOOTER_MESSAGE_REPLY, JSON.stringify(buildMessage(message)))
+  win.webContents.send(IpcId.ToRenderer.FOOTER_MESSAGE_REPLY, JSON.stringify(buildMessage(message)))
 }

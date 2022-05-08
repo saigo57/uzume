@@ -17,5 +17,5 @@ export const sendIpcGetAllTags = (workspaceId: string) => {
     workspaceId: workspaceId,
   } as GetAllTags
 
-  window.api.send(TagsIpcId.GET_ALL_TAGS, JSON.stringify(req));
+  window.api.send(TagsIpcId.ToMainProc.GET_ALL_TAGS, JSON.stringify(req));
 };

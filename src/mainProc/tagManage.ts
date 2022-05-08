@@ -10,7 +10,7 @@ import { fetchAllTagGroups } from './tagGroups';
 import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessage } from '../ipc/footer';
 
-ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
   let reqTagGroupContextMenu: TagGroupContextMenu = JSON.parse(arg)
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
@@ -22,7 +22,7 @@ ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
           tagGroupId: reqTagGroupContextMenu.tagGroupId,
           tagGroupName: reqTagGroupContextMenu.tagGroupName,
         }
-        e.reply(IpcId.TO_TAG_GROUP_RENAME_REPLY, JSON.stringify(req))
+        e.reply(IpcId.ToRenderer.TO_TAG_GROUP_RENAME, JSON.stringify(req))
       }
     },
     { type: 'separator' },
@@ -33,7 +33,7 @@ ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
           ws.tag_groups.DeleteTagGroup(reqTagGroupContextMenu.tagGroupId).then(() => {
             getNewTags(e, reqTagGroupContextMenu.workspaceId);
             fetchAllTagGroups(e, reqTagGroupContextMenu.workspaceId);
-            e.reply(IpcId.TAG_GROUP_DELETE_REPLY)
+            e.reply(IpcId.ToRenderer.TAG_GROUP_DELETE)
           }).catch((err) => {
             showFooterMessage(e, `タググループの削除に失敗しました。[${err}}]`);
           })
@@ -46,7 +46,7 @@ ipcMain.on(IpcId.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
   menu.popup(contents)
 });
 
-ipcMain.on(IpcId.TAG_GROUP_RENAME, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.TAG_GROUP_RENAME, (e, arg) => {
   let requestTagRename: TagGroupRename = JSON.parse(arg)
 
   BackendConnector.workspace(requestTagRename.workspaceId, (ws) => {

@@ -65,7 +65,7 @@ export const MainMenu:React.VFC<MainMenuProps> = (props) => {
         tagName: tag.name,
         currFavorite: tag.favorite,
       }
-      window.api.send(TagsIpcId.SHOW_CONTEXT_MENU, JSON.stringify(req))
+      window.api.send(TagsIpcId.ToMainProc.SHOW_CONTEXT_MENU, JSON.stringify(req))
     }
   }
 

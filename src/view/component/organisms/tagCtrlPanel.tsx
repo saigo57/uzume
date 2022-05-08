@@ -44,7 +44,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
       imageIds: props.imageIds,
       tagName: tagName,
     }
-    window.api.send(TagsIpcId.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req));
+    window.api.send(TagsIpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req));
     setSearchTagText('')
   };
 
@@ -54,7 +54,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
       imageIds: props.imageIds,
       tagId: tagId,
     }
-    window.api.send(ImagesIpcId.ADD_TAG, JSON.stringify(req));
+    window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(req));
   }
 
   let alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId);
