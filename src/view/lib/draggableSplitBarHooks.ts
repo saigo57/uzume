@@ -14,10 +14,6 @@ export const useDraggableSplitBar = (
   const [splitBarMemo, setSplitBarMemo] = useState(null as null | DraggalbeSplitBarData);
 
   useEffect(() => {
-    if ( split_bar.current ) split_bar.current.onmousedown = onMouseDown;
-  }, []);
-
-  useEffect(() => {
     window.addEventListener('mouseup', onMouseUp);
 
     return () => {
@@ -75,4 +71,6 @@ export const useDraggableSplitBar = (
     left.current.style.width = (splitBarMemo.startLeftWidth + dx) + 'px';
     return false;
   };
+
+  if ( split_bar.current ) split_bar.current.onmousedown = onMouseDown;
 }
