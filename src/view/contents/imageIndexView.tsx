@@ -404,6 +404,15 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     }
   };
 
+  const lastMarker: React.CSSProperties = {
+    width: '100%',
+    paddingTop: '1em',
+    textAlign: 'center',
+    fontSize: '0.9em',
+    color: '#454545',
+    userSelect: 'none',
+  };
+
   return (
     <div
       id="thumbnail-area"
@@ -439,6 +448,14 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
           return (<div id="infinite-scroll-end-marker" ref={ref} ></div>);
         } else {
           return;
+        }
+      })()}
+
+      {(()=>{
+        if ( imageList.page > 0 && !nextPageRequestableState ) {
+          return <div style={lastMarker}>- last -</div>;
+        } else {
+          return <div style={lastMarker}>loading...</div>;
         }
       })()}
 
