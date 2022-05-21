@@ -2,6 +2,8 @@ import path from 'path';
 import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron';
 import { BackendConnector } from 'uzume-backend-connector';
 import { showFooterMessageByBrowserWindow } from './ipc/footer';
+import { IpcId as backendSetupIpcId } from './ipc/backendSetup';
+import { showBackendConfigModalParam } from './mainProc/backendSetup';
 import './mainProc/backendSetup';
 import './mainProc/serverList';
 import './mainProc/images';
@@ -19,9 +21,8 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
     }
   }
-
+  const win = new BrowserWindow(options);
   const isMac = (process.platform === 'darwin');
-
   const template = Menu.buildFromTemplate([
     ...(isMac ? [{
         label: app.name,
@@ -71,11 +72,11 @@ function createWindow () {
       //       {role:'selectAll', label:'すべてを選択'}
       //     ])
       ]
-    }
-    // {
-    //   label: '表示',
-    //   submenu: [
-    //     {role:'reload',         label:'再読み込み'},
+    },
+    {
+      label: '表示',
+      submenu: [
+        {role:'reload',         label:'再読み込み'},
     //     {role:'forceReload',    label:'強制的に再読み込み'},
     //     {role:'toggleDevTools', label:'開発者ツールを表示'},
     //     {type:'separator'},
@@ -84,8 +85,8 @@ function createWindow () {
     //     {role:'zoomOut',        label:'縮小'},
     //     {type:'separator'},
     //     {role:'togglefullscreen', label:'フルスクリーン'}
-    //   ]
-    // },
+      ]
+    },
     // {
     //   label: 'ウィンドウ',
     //   submenu: [
@@ -111,10 +112,21 @@ function createWindow () {
     //     ])
     //   ]
     // }
+    {
+      label: 'ワークスペース',
+      submenu: [
+        {
+          label:'接続先サーバー変更', click: () => {
+            win.webContents.send(
+              backendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL,
+              showBackendConfigModalParam()
+            )
+          }
+        },
+      ]
+    },
   ]);
   Menu.setApplicationMenu(template);
-
-  const win = new BrowserWindow(options);
 
   // 開発時にはデベロッパーツールを開く
   if ( process.env.NODE_ENV === 'development' && process.env['E2E_TEST'] != 'true' ) {
