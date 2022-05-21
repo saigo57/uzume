@@ -1,7 +1,7 @@
 import { ipcMain, dialog, BrowserWindow, Menu } from 'electron';
 import {
   IpcId,
-  ServerInfo,
+  WorkspaceInfo,
   SelectWorkspace,
   CreateWorkspaceInfo,
   ShowContextMenu,
@@ -10,7 +10,7 @@ import {
   IconImageData,
   SetWorkspaceIcon,
   UpdateWorkspaceName,
-} from '../ipc/serverList';
+} from '../ipc/workspaceList';
 import { BackendConnector } from 'uzume-backend-connector';
 import { changeCurrentWorkspace } from './currWorkspace'
 import { showImagesReply } from './images'
@@ -60,7 +60,7 @@ ipcMain.on(IpcId.ToMainProc.SELECT_SET_WORKSPACE_ICON, (e, _arg) => {
 });
 
 // ワークスペースを新規作成
-ipcMain.on(IpcId.ToMainProc.CREATE_NEW_SERVER, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.CREATE_NEW_WORKSPACE, (e, arg) => {
   let wsInfo: CreateWorkspaceInfo = JSON.parse(arg)
   BackendConnector.Workspace.create(
     wsInfo.dirName, // 一旦ディレクトリ名と同じにする
@@ -73,7 +73,7 @@ ipcMain.on(IpcId.ToMainProc.CREATE_NEW_SERVER, (e, arg) => {
 });
 
 // 既存ワークスペースを追加
-ipcMain.on(IpcId.ToMainProc.CREATE_ADD_SERVER, (e, arg) => {
+ipcMain.on(IpcId.ToMainProc.CREATE_ADD_WORKSPACE, (e, arg) => {
   let wsInfo: AddWorkspaceInfo = JSON.parse(arg)
   BackendConnector.Workspace.add(
     wsInfo.dirPath
@@ -123,14 +123,14 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
             name: w.name,
             isAvailable: w.available,
             isSelected: false
-          } as ServerInfo
+          } as WorkspaceInfo
         });
 
-        let g_ws_target: ServerInfo | null = null;
+        let g_ws_target: WorkspaceInfo | null = null;
         for (let i = 0; i < Globals.workspaceList.length; i++) {
           if ( Globals.workspaceList[i].workspaceId == msg.workspaceId ) g_ws_target = Globals.workspaceList[i];
         }
-        let new_ws_target: ServerInfo | null = null;
+        let new_ws_target: WorkspaceInfo | null = null;
         for (let i = 0; i < newWorkspaceList.length; i++) {
           if ( newWorkspaceList[i].workspaceId == msg.workspaceId ) new_ws_target = newWorkspaceList[i];
         }
@@ -240,7 +240,7 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
         name: w.name,
         isAvailable: w.available,
         isSelected: false
-      } as ServerInfo
+      } as WorkspaceInfo
     });
     if ( Globals.workspaceList.length > 0 ) {
       Globals.workspaceList[0].isSelected = true

@@ -1,11 +1,11 @@
-import { ServerInfo } from '../ipc/serverList';
+import { WorkspaceInfo } from '../ipc/workspaceList';
 import { CurrentWorkspace } from '../ipc/currentWorkspace';
 import { RequestImage, ImageInfo } from '../ipc/images';
 
 type ImageInfoMap = { [key: string]: ImageInfo }
 
 export class Globals {
-  static workspaceList: ServerInfo[] = []
+  static workspaceList: WorkspaceInfo[] = []
   static currentWorkspace: CurrentWorkspace = {
     workspace_name: '',
     workspace_id: '',

@@ -5,7 +5,7 @@ import { showFooterMessageByBrowserWindow } from './ipc/footer';
 import { IpcId as backendSetupIpcId } from './ipc/backendSetup';
 import { showBackendConfigModalParam } from './mainProc/backendSetup';
 import './mainProc/backendSetup';
-import './mainProc/serverList';
+import './mainProc/workspaceList';
 import './mainProc/images';
 import './mainProc/tags';
 import './mainProc/tagGroups';
