@@ -1,7 +1,7 @@
 import { IpcIdBase } from './ipcIdBase';
 
 export class IpcId extends IpcIdBase {
-  static readonly NAME_SPACE: string = "serverList";
+  static readonly NAME_SPACE: string = "workspaceList";
 
   public static ToMainProc = class {
     // ワークスペースdir選択イベント(finder/explorer表示)
@@ -15,8 +15,8 @@ export class IpcId extends IpcIdBase {
     // コンテキストメニュー表示
     static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId();
     // リクエスト系
-    static readonly CREATE_NEW_SERVER: string = IpcId.generateIpcId();
-    static readonly CREATE_ADD_SERVER: string = IpcId.generateIpcId();
+    static readonly CREATE_NEW_WORKSPACE: string = IpcId.generateIpcId();
+    static readonly CREATE_ADD_WORKSPACE: string = IpcId.generateIpcId();
     static readonly DELETE_WORKSPACE: string = IpcId.generateIpcId();
     static readonly FETCH_WORKSPACE_LIST: string = IpcId.generateIpcId();
     static readonly FETCH_WORKSPACE_ICON: string = IpcId.generateIpcId();
@@ -40,7 +40,7 @@ export class IpcId extends IpcIdBase {
   }
 }
 
-export type ServerInfo = {
+export type WorkspaceInfo = {
   workspaceId: string
   name: string
   isAvailable: boolean

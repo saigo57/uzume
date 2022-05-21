@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef} from 'react';
 import { useEvent } from './lib/eventCustomHooks';
 import { useDraggableSplitBar } from './lib/draggableSplitBarHooks';
-import { ServerList } from "./serverList";
+import { WorkspaceList } from "./workspaceList";
 import { MainMenu } from "./mainMenu";
 import { ContentsArea } from "./contentsArea";
 import { Footer } from "./footer";
@@ -37,8 +37,8 @@ export function UzumeMain() {
 
   useEffect(() => {
     window.api.on(CurrWsIpcId.ToRenderer.GET_CURRENT_WORKSPACE, (_e, arg) => {
-      const serverList = JSON.parse(arg) as CurrentWorkspace
-      setCurrentWorkspace(serverList);
+      const workspaceList = JSON.parse(arg) as CurrentWorkspace
+      setCurrentWorkspace(workspaceList);
     });
   }, []);
 
@@ -62,7 +62,7 @@ export function UzumeMain() {
 
   return (
     <>
-      <ServerList />
+      <WorkspaceList />
       <MainMenu
         workspaceId={currentWorkspaceState.workspace_id}
         workspaceName={currentWorkspaceState.workspace_name}

@@ -12,19 +12,19 @@ test('ワークスペース', async () => {
   const page = await electronApp.firstWindow();
 
   page.setViewportSize({width: 1200, height: 800})
-  const serverIconsStr = "#server-list > .server-icon";
+  const workspaceIconsStr = "#workspace-list > .workspace-icon";
 
   //
   // 最初の状態をテスト
   //
   await expect(page.locator('.menu-title.selected').first()).toHaveText('Home');
-  expect((await page.$$(serverIconsStr)).length).toBe(1); // +だけ
+  expect((await page.$$(workspaceIconsStr)).length).toBe(1); // +だけ
 
   //
   // ワークスペース新規追加(1つ目)
   //
   const workspaceName1 = 'workspace-test1';
-  await page.locator('#server-icon-id').click();
+  await page.locator('#workspace-icon-id').click();
   await page.fill('.modal-form .text-box', workspaceName1);
   // フォルダ選択ウィンドウのmock
   await mock(electronApp, [
@@ -37,7 +37,7 @@ test('ワークスペース', async () => {
   await page.locator('button:has-text("作成")').click();
   // ワークスペースが作成され、ワークスペース名が表示されていること
   await expect(page.locator('.menu-title').first()).toHaveText(workspaceName1);
-  expect((await page.$$(serverIconsStr)).length).toBe(2);
+  expect((await page.$$(workspaceIconsStr)).length).toBe(2);
   // ワークスペースがディスク上に作られていること
   const workspaceDirName1 = `${workspaceName1}.uzume`;
   const workspaceJsonPath1 = path.join(testAreaPath, workspaceDirName1, 'workspace.json');
@@ -47,7 +47,7 @@ test('ワークスペース', async () => {
   // ワークスペース新規追加(2つ目)
   //
   const workspaceName2 = 'workspace-test2';
-  await page.locator('#server-icon-id').click();
+  await page.locator('#workspace-icon-id').click();
   await page.fill('.modal-form .text-box', workspaceName2);
   // フォルダ選択ウィンドウのmock
   await mock(electronApp, [
@@ -60,7 +60,7 @@ test('ワークスペース', async () => {
   await page.locator('button:has-text("作成")').click();
   // ワークスペースが作成され、ワークスペース名が表示されていること
   await expect(page.locator('.menu-title').first()).toHaveText(workspaceName2);
-  expect((await page.$$(serverIconsStr)).length).toBe(3);
+  expect((await page.$$(workspaceIconsStr)).length).toBe(3);
   // ワークスペースがディスク上に作られていること
   const workspaceDirName2 = `${workspaceName2}.uzume`;
   const workspaceJsonPath2 = path.join(testAreaPath, workspaceDirName2, 'workspace.json');
@@ -69,9 +69,9 @@ test('ワークスペース', async () => {
   //
   // ワークスペースの切り替え
   //
-  await page.locator(serverIconsStr).first().click();
+  await page.locator(workspaceIconsStr).first().click();
   await expect(page.locator('.menu-title').first()).toHaveText(workspaceName1);
-  await page.locator(serverIconsStr).nth(1).click();
+  await page.locator(workspaceIconsStr).nth(1).click();
   await expect(page.locator('.menu-title').first()).toHaveText(workspaceName2);
 
   //
@@ -82,7 +82,7 @@ test('ワークスペース', async () => {
   //
   // 既存ワークスペースの追加
   //
-  await page.locator('#server-icon-id').click();
+  await page.locator('#workspace-icon-id').click();
   await page.locator('text=既存のワークスペースを追加する場合はこちら').click();
   // フォルダ選択ウィンドウのmock
   await mock(electronApp, [
@@ -95,8 +95,8 @@ test('ワークスペース', async () => {
   await page.locator('button:has-text("追加")').click();
   // TODO: ここで一番上のworkspaceが選択されてしまう
   await expect(page.locator('.menu-title').first()).toHaveText(workspaceName1);
-  expect((await page.$$(serverIconsStr)).length).toBe(4);
-  await page.locator(serverIconsStr).nth(2).click();
+  expect((await page.$$(workspaceIconsStr)).length).toBe(4);
+  await page.locator(workspaceIconsStr).nth(2).click();
   await expect(page.locator('.menu-title').first()).toHaveText('dataset-workspace1');
 
   await electronApp.close()
@@ -108,7 +108,7 @@ test('画像タグ周りの操作', async () => {
 
   page.setViewportSize({width: 1200, height: 800})
 
-  await page.locator('#server-icon-id').click();
+  await page.locator('#workspace-icon-id').click();
   await page.locator('text=既存のワークスペースを追加する場合はこちら').click();
   // フォルダ選択ウィンドウのmock
   await mock(electronApp, [
