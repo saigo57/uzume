@@ -84,7 +84,15 @@ function moveToBackendErrorMode(e: Electron.IpcMainEvent, is_version_ok: boolean
   e.reply(IpcId.ToRenderer.BACKEND_ERROR, JSON.stringify(state))
 }
 
+export function showBackendConfigModalParam(): string {
+  var backendUrlHost = {} as BackendUrlHost
+  backendUrlHost.host = backendHost()
+  backendUrlHost.port = backendPort()
+  return JSON.stringify(backendUrlHost)
+}
+
 ipcMain.on(IpcId.ToMainProc.BACKEND_INIT, (e, _arg) => {
+  BackendConnector.resetStatus();
   BackendConnector.onBackendOk = () => {
     moveToUzumeMainMode(e)
   }
@@ -98,10 +106,7 @@ ipcMain.on(IpcId.ToMainProc.BACKEND_INIT, (e, _arg) => {
 });
 
 ipcMain.on(IpcId.ToMainProc.BACKEND_CONFIG, (e, _arg) => {
-  var backendUrlHost = {} as BackendUrlHost
-  backendUrlHost.host = backendHost()
-  backendUrlHost.port = backendPort()
-  e.reply(IpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, JSON.stringify(backendUrlHost))
+  e.reply(IpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, showBackendConfigModalParam())
 });
 
 ipcMain.on(IpcId.ToMainProc.UPDATE_BACKEND_URL_HOST, (e, arg) => {
@@ -111,6 +116,7 @@ ipcMain.on(IpcId.ToMainProc.UPDATE_BACKEND_URL_HOST, (e, arg) => {
   store.set(BACKEND_PORT_KEY, backendUrlHost.port)
   BackendConnector.resetStatus();
   BackendConnector.setBackendUrl(backendUrl());
+  electron.BrowserWindow.getFocusedWindow()?.reload();
 });
 
 ipcMain.on(IpcId.ToMainProc.BACKEND_RELOAD, (e, _arg) => {
