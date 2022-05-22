@@ -39,7 +39,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
     if ( props.imageIds.length == 0 ) return;
     if ( tagName.length == 0 ) return;
 
-    let req: CreateTagToImage = {
+    const req: CreateTagToImage = {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
       tagName: tagName,
@@ -49,7 +49,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
   };
 
   const addTagToImage = (tagId: string) => {
-    let req: AddTagToImage = {
+    const req: AddTagToImage = {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
       tagId: tagId,
@@ -57,7 +57,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
     window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(req));
   }
 
-  let alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId);
+  const alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId);
 
   const style: React.CSSProperties = {
     position: 'absolute',

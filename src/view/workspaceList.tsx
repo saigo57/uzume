@@ -1,4 +1,4 @@
-import React, { ReactDOM, useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactModal from "react-modal";
 import {
   IpcId as workspaceListIpcId,
@@ -99,7 +99,7 @@ export const WorkspaceList = () => {
 
   useEffect(() => {
     workspaceListState.forEach((workspace) => {
-      let req = { workspaceId: workspace.workspaceId } as FetchWorkspaceIcon
+      const req = { workspaceId: workspace.workspaceId } as FetchWorkspaceIcon
       window.api.send(workspaceListIpcId.ToMainProc.FETCH_WORKSPACE_ICON, JSON.stringify(req));
     })
   }, [workspaceListState]);
@@ -107,7 +107,7 @@ export const WorkspaceList = () => {
   useEffect(() => {
     window.api.on(workspaceListIpcId.ToRenderer.FETCH_WORKSPACE_ICON, (_e, arg) => {
       const iconImageData = JSON.parse(arg) as IconImageData;
-      let img: any = document.getElementById(`icon-image-${iconImageData.workspaceId}`);
+      const img: any = document.getElementById(`icon-image-${iconImageData.workspaceId}`);
 
       if ( img ) {
         if ( iconImageData.iconExists ) {
@@ -121,7 +121,7 @@ export const WorkspaceList = () => {
 
   const showContextMenu = (e:any) => {
     e.preventDefault()
-    let msg = JSON.stringify({
+    const msg = JSON.stringify({
       workspaceId: e.target.dataset.workspace_id,
       is_available: e.target.dataset.is_available === "true",
     } as ShowContextMenu)
@@ -154,7 +154,7 @@ export const WorkspaceList = () => {
   }
 
   const AddExistingWorkspace = () => {
-    let req: AddWorkspaceInfo = {
+    const req: AddWorkspaceInfo = {
       dirPath: addWorkspacePathState
     }
     window.api.send(workspaceListIpcId.ToMainProc.CREATE_ADD_WORKSPACE, JSON.stringify(req));
@@ -162,14 +162,14 @@ export const WorkspaceList = () => {
   }
 
   const deleteWorkspace = (workspaceId: string) => {
-    let msg = JSON.stringify({
+    const msg = JSON.stringify({
       workspaceId: workspaceId
     } as DeleteWorkspace)
     window.api.send(workspaceListIpcId.ToMainProc.DELETE_WORKSPACE, msg)
   }
 
   const setWorkspaceIcon = (workspaceId: string) => {
-    let msg = JSON.stringify({
+    const msg = JSON.stringify({
       workspaceId: workspaceId,
       iconPath: workspaceIconPathState,
     } as SetWorkspaceIcon)
@@ -177,7 +177,7 @@ export const WorkspaceList = () => {
   }
 
   const updateWorkspaceName = () => {
-    let msg = JSON.stringify({
+    const msg = JSON.stringify({
       workspaceId: updateWorkspaceNameState.workspaceId,
       name: updateWorkspaceNameState.name,
     } as UpdateWorkspaceName)
@@ -191,7 +191,7 @@ export const WorkspaceList = () => {
   const workspaceIconClick = (e:any) => {
     if ( e.target.dataset.is_available === "false" ) return;
 
-    let sw: SelectWorkspace = { workspaceId: e.target.dataset.workspace_id }
+    const sw: SelectWorkspace = { workspaceId: e.target.dataset.workspace_id }
     window.api.send(workspaceListIpcId.ToMainProc.SELECT_WORKSPACE, JSON.stringify(sw));
   }
 

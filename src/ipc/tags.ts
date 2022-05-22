@@ -1,18 +1,18 @@
-import { IpcIdBase } from './ipcIdBase';
+import { IpcIdBase } from './ipcIdBase'
 
 export class IpcId extends IpcIdBase {
-  static readonly NAME_SPACE: string = "tags";
+  static readonly NAME_SPACE: string = 'tags'
 
   public static ToMainProc = class {
-    static readonly GET_ALL_TAGS: string = IpcId.generateIpcId();
-    static readonly CREATE_NEW_TAG_TO_IMAGE: string = IpcId.generateIpcId();
-    static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId();
-    static readonly TAG_RENAME: string = IpcId.generateIpcId();
+    static readonly GET_ALL_TAGS: string = IpcId.generateIpcId()
+    static readonly CREATE_NEW_TAG_TO_IMAGE: string = IpcId.generateIpcId()
+    static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId()
+    static readonly TAG_RENAME: string = IpcId.generateIpcId()
   }
 
   public static ToRenderer = class {
-    static readonly GET_ALL_TAGS: string = IpcId.generateIpcId();
-    static readonly TO_TAG_RENAME: string = IpcId.generateIpcId();
+    static readonly GET_ALL_TAGS: string = IpcId.generateIpcId()
+    static readonly TO_TAG_RENAME: string = IpcId.generateIpcId()
   }
 }
 

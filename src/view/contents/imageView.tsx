@@ -22,8 +22,8 @@ export const ImageView:React.VFC<ImageViewProps> = (props) => {
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
-      let imageData = JSON.parse(arg) as ImageData
-      let img: any = document.getElementById(`image-orig-${imageData.imageId}`);
+      const imageData = JSON.parse(arg) as ImageData
+      const img: any = document.getElementById(`image-orig-${imageData.imageId}`);
       if ( img ) {
         img.src = "data:image;base64," + imageData.imageBase64;
       }

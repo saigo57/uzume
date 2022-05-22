@@ -15,7 +15,7 @@ export const BackendConfigModal = () => {
 
   useEffect(() => {
     window.api.on(BackendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, (_e, arg) => {
-      let backendUrlHost = JSON.parse(arg) as BackendUrlHost
+      const backendUrlHost = JSON.parse(arg) as BackendUrlHost
       setHostNameState(backendUrlHost.host)
       setPortState(backendUrlHost.port)
       setIsOpen(true)
@@ -23,7 +23,7 @@ export const BackendConfigModal = () => {
   }, []);
 
   const updateBackendUrlHost = () => {
-    var backendUrlHost = {
+    const backendUrlHost = {
       host: hostNameState,
       port: portState,
     } as BackendUrlHost
