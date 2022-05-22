@@ -1,0 +1,28 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/node:16.4.1
+    working_directory: ~/uzume
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-npm-{{ checksum "package-lock.json" }}
+            - v1-npm-
+      - run:
+          name: npm ci
+          command: npm ci
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-npm-{{ checksum "package-lock.json" }}
+      - run:
+          name: lint
+          command: npm run lint
+
+workflows:
+  test:
+    jobs:
+      - test
