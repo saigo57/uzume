@@ -72,7 +72,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, [props.workspaceId, props.uncategorized]);
 
   useEffect(() => {
-    let imgs: any = document.getElementsByClassName("thumbnail-img");
+    const imgs: any = document.getElementsByClassName("thumbnail-img");
     if ( !imgs ) return;
 
     for (let i = 0; i < imgs.length; i++) {
@@ -90,7 +90,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.SHOW_IMAGES, (_e, arg) => {
-      let rcvImageInfos = JSON.parse(arg) as ImageInfos
+      const rcvImageInfos = JSON.parse(arg) as ImageInfos
       setSelectedImageId([])
 
       if ( rcvImageInfos.images.length == 0 ) {
@@ -102,7 +102,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       setImageList(prevState => {
         const requestImage = (newImages: ImageInfo[]) =>{
           newImages.forEach((image) => {
-            let reqImage: RequestImage = {
+            const reqImage: RequestImage = {
               workspaceId: rcvImageInfos.workspaceId,
               imageId: image.image_id,
               isThumbnail: true,
@@ -120,8 +120,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
           }
         }
 
-        let addImages: ImageInfo[] = []
-        var currImages: { [image_id: string]: boolean; } = {};
+        const addImages: ImageInfo[] = []
+        const currImages: { [image_id: string]: boolean; } = {};
         for (let i = 0; i < prevState.images.length; i++) {
           currImages[prevState.images[i].image_id] = true
         }
@@ -141,14 +141,14 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
-      let reflect = JSON.parse(arg) as Reflect
+      const reflect = JSON.parse(arg) as Reflect
       window.api.send(reflect.replyId)
     });
 
     window.api.on(ImagesIpcId.ToRenderer.REQUEST_THUMB_IMAGE, (_e, arg) => {
-      let imageData = JSON.parse(arg) as ImageData
+      const imageData = JSON.parse(arg) as ImageData
 
-      let img: any = document.getElementById(`image-${imageData.imageId}`);
+      const img: any = document.getElementById(`image-${imageData.imageId}`);
       if ( img ) {
         img.src = "data:image;base64," + imageData.imageBase64;
       }
@@ -170,8 +170,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
-      let imageData = JSON.parse(arg) as ImageData
-      let imgPreview: any = document.getElementById("image-preview");
+      const imageData = JSON.parse(arg) as ImageData
+      const imgPreview: any = document.getElementById("image-preview");
       if ( imgPreview ) {
         imgPreview.src = "data:image;base64," + imageData.imageBase64;
       }
@@ -180,7 +180,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, (_e, arg) => {
-      let progress = JSON.parse(arg) as ImageUploadProgress
+      const progress = JSON.parse(arg) as ImageUploadProgress
       if ( progress.completeCnt < progress.allImagesCnt ) {
         setUploadModalInfo({completeCnt: progress.completeCnt, allImagesCnt: progress.allImagesCnt })
       } else {
@@ -191,7 +191,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
   }, []);
 
   useEffect(() => {
-    let thumbnailArea: any = document.getElementById('thumbnail-area');
+    const thumbnailArea: any = document.getElementById('thumbnail-area');
     thumbnailArea.addEventListener('mousemove', onMousemove);
 
     return () => {
@@ -232,15 +232,15 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     setIsDragOver(false);
     if ( e.dataTransfer.files.length == 0 ) return;
 
-    let imageFiles: ImageFiles = {
+    const imageFiles: ImageFiles = {
       workspaceId: props.workspaceId,
       imageFileList: [],
       tagIds: props.tagIds,
       searchType: props.searchType,
     }
     for (let i = 0; i < e.dataTransfer.files.length; i++) {
-      let filePath = e.dataTransfer.files[i].path;
-      let ext = filePath.split('.').pop();
+      const filePath = e.dataTransfer.files[i].path;
+      const ext = filePath.split('.').pop();
       if ( !supportedExts.includes(ext.toLowerCase()) ) {
         window.showConfirmModal(`未対応のファイル形式です。\n一括登録の場合すべてキャンセルされます。\n${filePath}`)
         return
@@ -262,8 +262,8 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       let y = e.screenY;
 
       if ( state.isDisplay ) {
-        let dx = Math.abs(state.startingPos.x - e.screenX);
-        let dy = Math.abs(state.startingPos.y - e.screenY);
+        const dx = Math.abs(state.startingPos.x - e.screenX);
+        const dy = Math.abs(state.startingPos.y - e.screenY);
         x = state.startingPos.x;
         y = state.startingPos.y;
 
@@ -296,11 +296,11 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       setSelectedImageId(state => [...state, imageId])
     } else if ( e.shiftKey ) {
       // 前回クリックした画像と今回の間の画像を選択状態にする
-      var shiftRange = false;
-      var selectImageIds: string[] = [];
+      let shiftRange = false;
+      const selectImageIds: string[] = [];
       imageList.images.forEach((img) => {
-        let isEdge = img.image_id == imageId || img.image_id == lastClickImageId;
-        let prevShiftRange = shiftRange;
+        const isEdge = img.image_id == imageId || img.image_id == lastClickImageId;
+        const prevShiftRange = shiftRange;
         if ( isEdge && !shiftRange ) shiftRange = true;
         if ( shiftRange ) selectImageIds.push(img.image_id);
         if ( isEdge && prevShiftRange && shiftRange ) shiftRange = false;
@@ -331,10 +331,10 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
       return {isDisplay: true, isFlagBreak: false, startingPos: state.startingPos};
     });
 
-    let imageId = e.target.dataset.image_id;
-    let img: any = document.getElementById(`image-${imageId}`);
+    const imageId = e.target.dataset.image_id;
+    const img: any = document.getElementById(`image-${imageId}`);
     if ( img ) {
-      let imgPreview: any = document.getElementById("image-preview");
+      const imgPreview: any = document.getElementById("image-preview");
       imgPreview.src = img.src;
       imgPreview.style.width = `${e.target.dataset.width}px`;
       imgPreview.style.height = `${e.target.dataset.height}px`;
@@ -372,7 +372,7 @@ export const ImageIndexView:React.VFC<ImageIndexViewProps> = (props) => {
     }
   });
 
-  let thumbnailArea: HTMLElement | null = document.getElementById('thumbnail-area');
+  const thumbnailArea: HTMLElement | null = document.getElementById('thumbnail-area');
 
   const previewStyle: React.CSSProperties = {
     position: 'absolute',

@@ -1,6 +1,6 @@
-import { WorkspaceInfo } from '../ipc/workspaceList';
-import { CurrentWorkspace } from '../ipc/currentWorkspace';
-import { RequestImage, ImageInfo } from '../ipc/images';
+import { WorkspaceInfo } from '../ipc/workspaceList'
+import { CurrentWorkspace } from '../ipc/currentWorkspace'
+import { RequestImage, ImageInfo } from '../ipc/images'
 
 type ImageInfoMap = { [key: string]: ImageInfo }
 

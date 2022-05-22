@@ -1,30 +1,30 @@
-import { IpcIdBase } from './ipcIdBase';
+import { IpcIdBase } from './ipcIdBase'
 
 export class IpcId extends IpcIdBase {
-  static readonly NAME_SPACE: string = "images";
+  static readonly NAME_SPACE: string = 'images'
 
   public static ToMainProc = class {
-    static readonly UPLOAD_IMAGES: string = IpcId.generateIpcId();
-    static readonly SHOW_IMAGES: string = IpcId.generateIpcId();
-    static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId();
-    static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId();
-    static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId();
-    static readonly ADD_TAG: string = IpcId.generateIpcId();
-    static readonly REMOVE_TAG: string = IpcId.generateIpcId();
+    static readonly UPLOAD_IMAGES: string = IpcId.generateIpcId()
+    static readonly SHOW_IMAGES: string = IpcId.generateIpcId()
+    static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
+    static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId()
+    static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId()
+    static readonly ADD_TAG: string = IpcId.generateIpcId()
+    static readonly REMOVE_TAG: string = IpcId.generateIpcId()
   }
 
   public static ToRenderer = class {
-    static readonly REPLY_REFLECT: string = IpcId.generateIpcId();
-    static readonly SHOW_IMAGES: string = IpcId.generateIpcId();
-    static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId();
-    static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId();
-    static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId();
-    static readonly UPDATE_IMAGE_INFO: string = IpcId.generateIpcId();
-    static readonly IMAGE_INFO_LIST_UPDATED: string = IpcId.generateIpcId();
-    static readonly IMAGE_UPLOAD_PROGRESS: string = IpcId.generateIpcId();
+    static readonly REPLY_REFLECT: string = IpcId.generateIpcId()
+    static readonly SHOW_IMAGES: string = IpcId.generateIpcId()
+    static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
+    static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId()
+    static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId()
+    static readonly UPDATE_IMAGE_INFO: string = IpcId.generateIpcId()
+    static readonly IMAGE_INFO_LIST_UPDATED: string = IpcId.generateIpcId()
+    static readonly IMAGE_UPLOAD_PROGRESS: string = IpcId.generateIpcId()
   }
 
-  static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId();
+  static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
 }
 
 export type Reflect = {

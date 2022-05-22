@@ -49,13 +49,13 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   }, [props.uncategorized]);
 
   useEffect(() => {
-    let tagId = props.singleTagClickEvent.data;
+    const tagId = props.singleTagClickEvent.data;
     setSingleClickTagId(tagId)
   }, [props.singleTagClickEvent]);
 
   useEffect(() => {
     setSearchTags((state) => {
-      let tagId = singleClickTagId;
+      const tagId = singleClickTagId;
       if ( !tagId ) return state;
       return tagAllListState.filter((tag:any) => tagId == tag.tagId);
     });
@@ -81,7 +81,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
 
   useEffect(() => {
     setSearchTags((state) => {
-      let tagIds = state.map(s => s.tagId);
+      const tagIds = state.map(s => s.tagId);
       return tagAllListState.filter((tag:any) => tagIds.includes(tag.tagId));
     });
   }, [tagAllListState]);
@@ -115,9 +115,9 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
   const onSearchPanelTagAddClick = (tagId: string | null, _tagName: string) => {
     if ( !tagId  ) return;
 
-    var clickTags = tagAllListState.filter((tag: any) => tag.tagId == tagId);
+    const clickTags = tagAllListState.filter((tag: any) => tag.tagId == tagId);
     if ( clickTags.length == 0 ) return;
-    var clickTag = clickTags[0];
+    const clickTag = clickTags[0];
     setSearchTags((state) => [...state, clickTag])
   };
 

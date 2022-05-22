@@ -22,7 +22,7 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     resetTagList()
   }, [props.workspaceId]);
 
-  let selectedTagIds = props.selectedTag.map(t => t.tagId);
+  const selectedTagIds = props.selectedTag.map(t => t.tagId);
 
   const style: React.CSSProperties = {
     position: 'absolute',

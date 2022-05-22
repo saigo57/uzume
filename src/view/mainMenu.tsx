@@ -49,7 +49,7 @@ export const MainMenu:React.VFC<MainMenuProps> = (props) => {
 
   const onTagGroupClick = (tagGroupId: string) => {
     setIsTagGroupOpen((state) => {
-      var next_state = {...state}
+      const next_state = {...state}
       next_state[tagGroupId] = !next_state[tagGroupId]
       return next_state
     })

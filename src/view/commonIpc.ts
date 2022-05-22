@@ -1,21 +1,18 @@
-import {
-  IpcId as TagsIpcId,
-  GetAllTags,
-} from '../ipc/tags';
+import { IpcId as TagsIpcId, GetAllTags } from '../ipc/tags'
 
-var prevWorkspaceId: string = "";
+let prevWorkspaceId = ''
 
 export const resetWorkspaceId = () => {
-  prevWorkspaceId = "";
-};
+  prevWorkspaceId = ''
+}
 
 export const sendIpcGetAllTags = (workspaceId: string) => {
-  if ( prevWorkspaceId == workspaceId ) return;
-  prevWorkspaceId = workspaceId;
+  if (prevWorkspaceId == workspaceId) return
+  prevWorkspaceId = workspaceId
 
-  let req = {
+  const req = {
     workspaceId: workspaceId,
   } as GetAllTags
 
-  window.api.send(TagsIpcId.ToMainProc.GET_ALL_TAGS, JSON.stringify(req));
-};
+  window.api.send(TagsIpcId.ToMainProc.GET_ALL_TAGS, JSON.stringify(req))
+}

@@ -1,17 +1,17 @@
-import path from 'path';
-import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron';
-import { BackendConnector } from 'uzume-backend-connector';
-import { showFooterMessageByBrowserWindow } from './ipc/footer';
-import { IpcId as backendSetupIpcId } from './ipc/backendSetup';
-import { showBackendConfigModalParam } from './mainProc/backendSetup';
-import './mainProc/backendSetup';
-import './mainProc/workspaceList';
-import './mainProc/images';
-import './mainProc/tags';
-import './mainProc/tagGroups';
-import './mainProc/tagManage';
+import path from 'path'
+import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron'
+import { BackendConnector } from 'uzume-backend-connector'
+import { showFooterMessageByBrowserWindow } from './ipc/footer'
+import { IpcId as backendSetupIpcId } from './ipc/backendSetup'
+import { showBackendConfigModalParam } from './mainProc/backendSetup'
+import './mainProc/backendSetup'
+import './mainProc/workspaceList'
+import './mainProc/images'
+import './mainProc/tags'
+import './mainProc/tagGroups'
+import './mainProc/tagManage'
 
-function createWindow () {
+function createWindow() {
   const options: Electron.BrowserWindowConstructorOptions = {
     width: 1200,
     height: 800,
@@ -19,26 +19,35 @@ function createWindow () {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
-    }
+    },
   }
-  const win = new BrowserWindow(options);
-  const isMac = (process.platform === 'darwin');
+  const win = new BrowserWindow(options)
+  const isMac = process.platform === 'darwin'
   const template = Menu.buildFromTemplate([
-    ...(isMac ? [{
-        label: app.name,
-        submenu: [
-          {role:'about',      label:`${app.name}について` },
-          {label:`アップデートを確認`, click: () => { autoUpdater.checkForUpdates() }},
-          {type:'separator'},
-          // {role:'services',   label:'サービス'},
-          // {type:'separator'},
-          {role:'hide',       label:`${app.name}を隠す`},
-          {role:'hideothers', label:'ほかを隠す'},
-          {role:'unhide',     label:'すべて表示'},
-          {type:'separator'},
-          {role:'quit',       label:`${app.name}を終了`}
-        ]
-      }] as any : []),
+    ...(isMac
+      ? ([
+          {
+            label: app.name,
+            submenu: [
+              { role: 'about', label: `${app.name}について` },
+              {
+                label: `アップデートを確認`,
+                click: () => {
+                  autoUpdater.checkForUpdates()
+                },
+              },
+              { type: 'separator' },
+              // {role:'services',   label:'サービス'},
+              // {type:'separator'},
+              { role: 'hide', label: `${app.name}を隠す` },
+              { role: 'hideothers', label: 'ほかを隠す' },
+              { role: 'unhide', label: 'すべて表示' },
+              { type: 'separator' },
+              { role: 'quit', label: `${app.name}を終了` },
+            ],
+          },
+        ] as any)
+      : []),
     // {
     //   label: 'ファイル',
     //   submenu: [
@@ -48,44 +57,44 @@ function createWindow () {
     {
       label: '編集',
       submenu: [
-        {role:'undo',  label:'元に戻す'},
-        {role:'redo',  label:'やり直す'},
-        {type:'separator'},
-        {role:'cut',   label:'切り取り'},
-        {role:'copy',  label:'コピー'},
-        {role:'paste', label:'貼り付け'},
-      //   ...(isMac ? [
-      //       {role:'pasteAndMatchStyle', label:'ペーストしてスタイルを合わせる'},
-      //       {role:'delete',    label:'削除'},
-      //       {role:'selectAll', label:'すべてを選択'},
-      //       {type:'separator' },
-      //       {
-      //         label: 'スピーチ',
-      //         submenu: [
-      //           {role:'startSpeaking', label:'読み上げを開始'},
-      //           {role:'stopSpeaking',  label:'読み上げを停止'}
-      //         ]
-      //       }
-      //     ] : [
-      //       {role:'delete',    label:'削除'},
-      //       {type:'separator'},
-      //       {role:'selectAll', label:'すべてを選択'}
-      //     ])
-      ]
+        { role: 'undo', label: '元に戻す' },
+        { role: 'redo', label: 'やり直す' },
+        { type: 'separator' },
+        { role: 'cut', label: '切り取り' },
+        { role: 'copy', label: 'コピー' },
+        { role: 'paste', label: '貼り付け' },
+        //   ...(isMac ? [
+        //       {role:'pasteAndMatchStyle', label:'ペーストしてスタイルを合わせる'},
+        //       {role:'delete',    label:'削除'},
+        //       {role:'selectAll', label:'すべてを選択'},
+        //       {type:'separator' },
+        //       {
+        //         label: 'スピーチ',
+        //         submenu: [
+        //           {role:'startSpeaking', label:'読み上げを開始'},
+        //           {role:'stopSpeaking',  label:'読み上げを停止'}
+        //         ]
+        //       }
+        //     ] : [
+        //       {role:'delete',    label:'削除'},
+        //       {type:'separator'},
+        //       {role:'selectAll', label:'すべてを選択'}
+        //     ])
+      ],
     },
     {
       label: '表示',
       submenu: [
-        {role:'reload',         label:'再読み込み'},
-    //     {role:'forceReload',    label:'強制的に再読み込み'},
-    //     {role:'toggleDevTools', label:'開発者ツールを表示'},
-    //     {type:'separator'},
-    //     {role:'resetZoom',      label:'実際のサイズ'},
-    //     {role:'zoomIn',         label:'拡大'},
-    //     {role:'zoomOut',        label:'縮小'},
-    //     {type:'separator'},
-    //     {role:'togglefullscreen', label:'フルスクリーン'}
-      ]
+        { role: 'reload', label: '再読み込み' },
+        //     {role:'forceReload',    label:'強制的に再読み込み'},
+        //     {role:'toggleDevTools', label:'開発者ツールを表示'},
+        //     {type:'separator'},
+        //     {role:'resetZoom',      label:'実際のサイズ'},
+        //     {role:'zoomIn',         label:'拡大'},
+        //     {role:'zoomOut',        label:'縮小'},
+        //     {type:'separator'},
+        //     {role:'togglefullscreen', label:'フルスクリーン'}
+      ],
     },
     // {
     //   label: 'ウィンドウ',
@@ -116,35 +125,33 @@ function createWindow () {
       label: 'ワークスペース',
       submenu: [
         {
-          label:'接続先サーバー変更', click: () => {
-            win.webContents.send(
-              backendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL,
-              showBackendConfigModalParam()
-            )
-          }
+          label: '接続先サーバー変更',
+          click: () => {
+            win.webContents.send(backendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, showBackendConfigModalParam())
+          },
         },
-      ]
+      ],
     },
-  ]);
-  Menu.setApplicationMenu(template);
+  ])
+  Menu.setApplicationMenu(template)
 
   // 開発時にはデベロッパーツールを開く
-  if ( process.env.NODE_ENV === 'development' && process.env['E2E_TEST'] != 'true' ) {
-    win.webContents.openDevTools({ mode: 'detach' });
+  if (process.env.NODE_ENV === 'development' && process.env['E2E_TEST'] != 'true') {
+    win.webContents.openDevTools({ mode: 'detach' })
   }
 
   // 外部リンククリック時にデフォルトブラウザで開くように
   win.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-    electron.shell.openExternal(url);
-  });
+    event.preventDefault()
+    electron.shell.openExternal(url)
+  })
 
-  win.loadFile(path.join(__dirname, 'app.html'));
+  win.loadFile(path.join(__dirname, 'app.html'))
 
-  BackendConnector.onFailAuthorization = (err) => {
+  BackendConnector.onFailAuthorization = err => {
     showFooterMessageByBrowserWindow(win, `バックエンドに接続できませんでした。[${err}]`)
   }
 }
 
 // Electron の初期化が完了したらウィンドウを作成
-app.whenReady().then(createWindow);
+app.whenReady().then(createWindow)

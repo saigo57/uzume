@@ -49,7 +49,7 @@ const reactModalStyle: ReactModal.Styles = {
 
 const TagGroupMenu:React.VFC<TagGroupMenuProps> = (props) => {
   const onDrop = (item: any) => {
-    let req = {
+    const req = {
       workspaceId: props.workspaceId,
       tagGroupId: props.tagGroupId,
       tagId: item.tagId,
@@ -67,7 +67,7 @@ const TagGroupMenu:React.VFC<TagGroupMenuProps> = (props) => {
   });
 
   const showContextMenu = () => {
-    let req = {
+    const req = {
       workspaceId: props.workspaceId,
       tagGroupId: props.tagGroupId,
       tagGroupName: props.name,
@@ -111,7 +111,7 @@ export const TagManage:React.VFC<TagManageProps> = (props) => {
   }
 
   const createTagGroup = () => {
-    let req = {
+    const req = {
       workspaceId: props.workspaceId,
       name: newTagGroupNameState,
     } as CreateTagGroup

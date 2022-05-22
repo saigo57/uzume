@@ -50,12 +50,12 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   }, []);
 
   const updateImageInfo = () => {
-    let imageInfoList = props.imageIds.map(image_id => ({
+    const imageInfoList = props.imageIds.map(image_id => ({
       image_id: image_id,
       file_name: '', ext: '', memo: '', author: '', created_at: '',
     } as ImageInfo));
 
-    let req = {
+    const req = {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
     } as RequestImageInfo
@@ -70,8 +70,8 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
 
   const linkedTag = () => {
     // 複数の画像を選択しているときは、共通しているタグのみ表示する
-    var tagCount: { [key: string]: number } = {}
-    var allImageCount: number = 0;
+    const tagCount: { [key: string]: number } = {}
+    let allImageCount = 0;
     if ( !imageInfoList ) return [];
 
     // タグが何枚の画像に付与されているかをカウントする
@@ -85,7 +85,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
       }
     });
 
-    let linkedTags: TagInfo[] = []
+    const linkedTags: TagInfo[] = []
     tagListState.forEach((t) => {
       // タグのカウントと画像の枚数と同じ = すべての画像に付与されている
       if ( tagCount[t.tagId] == allImageCount ) linkedTags.push(t);
@@ -94,7 +94,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   }
 
   const removeTag = (tagId: string) => {
-    let req: RemoveTagFromImage = {
+    const req: RemoveTagFromImage = {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
       tagId: tagId,
@@ -102,7 +102,7 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
     window.api.send(ImageIpcId.ToMainProc.REMOVE_TAG, JSON.stringify(req));
   }
 
-  let linkedTagList = linkedTag();
+  const linkedTagList = linkedTag();
   let showImageInfo = {
     image_id: '',
     file_name: '', ext: '', memo: '', author: '', created_at: '',
@@ -111,8 +111,8 @@ export const ImageSideBar:React.VFC<ImageSideBarProps> = (props) => {
   
   const formatDate = (dateStr: string)=>{
     if ( !dateStr ) return '';
-    let d = new Date(Date.parse(dateStr));
-    let formatted_date = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + "." + d.getSeconds();
+    const d = new Date(Date.parse(dateStr));
+    const formatted_date = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + "." + d.getSeconds();
     return formatted_date;
   }
 
