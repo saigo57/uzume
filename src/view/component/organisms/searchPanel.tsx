@@ -16,6 +16,7 @@ type SearchPanelProps = {
 }
 
 export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
+  const [searchTagText, setSearchTagText] = useState('');
   const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
 
   useEffect(() => {
@@ -44,10 +45,31 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     overflowY: 'scroll',
   };
 
-  const tagArea: React.CSSProperties = {
+  const tagSearchArea: React.CSSProperties = {
     float: 'right',
     width: `calc(100% - ${tagGroupAreaWidth})`,
     height: '100%',
+  };
+
+  const inputHeight = '18px';
+  const inputMarginTopBot = '5px';
+  const inputStyle: React.CSSProperties = {
+    width: 'calc(100% - 30px)',
+    height: inputHeight,
+    marginTop: inputMarginTopBot,
+    marginBottom: inputMarginTopBot,
+    marginLeft: `5px`,
+    borderRadius: '2px',
+    backgroundColor: CssConst.VERY_LIGHT_BACKGROUND_COLOR,
+    border: `1px solid white`,
+    color: CssConst.MAIN_FONT_COLOR,
+  };
+
+  const tagsArea: React.CSSProperties = {
+    width: '100%',
+    height: `calc(100% - ${inputHeight} - ${inputMarginTopBot} * 2 - 4px)`,
+    marginTop: 0,
+    marginBottom: 0,
     overflowY: 'scroll',
   };
 
@@ -58,6 +80,10 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
   const onMenuClick = (menu: string) => {
     selectMenu(menu)
   }
+
+  const onSearchTagTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTagText(e.target.value)
+  };
 
   return (
     <div id={props.id} className="search-panel" style={style}>
@@ -74,21 +100,34 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
           );
         }) }
       </div>
-      <div style={tagArea}>
-        { showingTagAllListState.map((t:any) => {
-            return (
-              <Tag
-                workspaceId={props.workspaceId}
-                tagId={t.tagId}
-                tagName={t.name}
-                favorite={t.favorite}
-                delete={false}
-                alreadyAdded={selectedTagIds.includes(t.tagId)}
-                onClick={props.onTagAddClick}
-                onDeleteClick={props.onTagDeleteClick}
-              />
-            );
-        }) }
+
+      <div style={tagSearchArea}>
+        <input
+          style={inputStyle}
+          type="text"
+          name="tag-search"
+          value={searchTagText}
+          placeholder={"検索"}
+          onChange={onSearchTagTextChange} />
+
+        <div style={tagsArea}>
+          { showingTagAllListState.map((t:any) => {
+            if ( searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1 ) {
+              return (
+                <Tag
+                  workspaceId={props.workspaceId}
+                  tagId={t.tagId}
+                  tagName={t.name}
+                  favorite={t.favorite}
+                  delete={false}
+                  alreadyAdded={selectedTagIds.includes(t.tagId)}
+                  onClick={props.onTagAddClick}
+                  onDeleteClick={props.onTagDeleteClick}
+                />
+              );
+            }
+          }) }
+        </div>
       </div>
     </div>
   );
