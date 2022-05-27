@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { useTags } from '../lib/tagCustomHooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faRotateRight } from '@fortawesome/free-solid-svg-icons'
 import { Tag } from './../component/atmos/tag'
 import { SearchPanel } from './../component/organisms/searchPanel'
 import { ImageIndexView } from './imageIndexView'
@@ -107,6 +107,15 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
     setSelectedImageIds(imageIds)
   }
 
+  const onReloadClick = () => {
+    if (props.imageId) {
+      // TODO: 画像表示のリロード
+    } else {
+      // 一覧表示のリロード
+      showImages()
+    }
+  }
+
   const searchBarClick = () => {
     setShowSearchPanel(true)
   }
@@ -144,6 +153,9 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
         <div className="main-header-area">
           <div className="prev" onClick={props.onPrevClick}>
             <FontAwesomeIcon icon={faArrowLeft} />
+          </div>
+          <div className="reload" onClick={onReloadClick}>
+            <FontAwesomeIcon icon={faRotateRight} />
           </div>
           <div id="search-bar-id" className="search-bar" onClick={searchBarClick}>
             <Tag

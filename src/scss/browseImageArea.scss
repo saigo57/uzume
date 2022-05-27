@@ -8,13 +8,15 @@
     border-bottom: solid 2px $light-background-color;
     background-color: $main-background-color;
   }
-  .prev {
+  $search-bar-icons-width: 24px;
+  $search-bar-icons-padding: 4px;
+  @mixin search-bar-icons {
     float: left;
     height: 25px;
-    width: 24px;
+    width: $search-bar-icons-width;
     padding-top: 12px;
-    padding-right: 4px;
-    padding-left: 10px;
+    padding-right: $search-bar-icons-padding;
+    padding-left: $search-bar-icons-padding;
     cursor: pointer;
     & > svg {
       display: block;
@@ -23,14 +25,22 @@
       color: $main-font-color;
     }
   }
+  .prev {
+    @include search-bar-icons;
+    padding-left: 10px;
+  }
+  .reload {
+    @include search-bar-icons;
+  }
+  $search-bar-icnos-total-width: $search-bar-icons-width + $search-bar-icons-padding * 2;
   .search-bar {
     position: absolute;
     top: 5px;
-    left: 35px;
+    left: calc(10px + $search-bar-icnos-total-width * 2);
     display: flex;
     flex-wrap: nowrap;
     height: 25px;
-    width: calc(100% - 180px);
+    width: calc(100% - (140px + $search-bar-icnos-total-width * 2) - 20px); // -20pxは微調整
     background-color: $light-background-color;
     border-radius: 8px;
     border: solid 1px $main-font-color;
