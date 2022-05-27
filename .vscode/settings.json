@@ -1,6 +1,15 @@
 {
-  "eslint.alwaysShowStatus": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.options": {
+    "overrideConfigFile": "./.eslintrc.json"
   },
+  "eslint.alwaysShowStatus": true,
+  "eslint.lintTask.enable": true,
+  "prettier.configPath": "./.prettierrc.json",
+  "[typescript]": {
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true
+  }
 }

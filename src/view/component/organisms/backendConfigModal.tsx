@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import ReactModal from "react-modal";
-import CssConst from "./../../cssConst";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import {
-  IpcId as BackendSetupIpcId,
-  BackendUrlHost,
-} from '../../../ipc/backendSetup';
+import React, { useState, useEffect } from 'react'
+import ReactModal from 'react-modal'
+import CssConst from './../../cssConst'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { IpcId as BackendSetupIpcId, BackendUrlHost } from '../../../ipc/backendSetup'
 
 export const BackendConfigModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [hostNameState, setHostNameState] = useState("");
-  const [portState, setPortState] = useState("");
+  const [isOpen, setIsOpen] = useState(false)
+  const [hostNameState, setHostNameState] = useState('')
+  const [portState, setPortState] = useState('')
 
   useEffect(() => {
     window.api.on(BackendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, (_e, arg) => {
@@ -19,8 +16,8 @@ export const BackendConfigModal = () => {
       setHostNameState(backendUrlHost.host)
       setPortState(backendUrlHost.port)
       setIsOpen(true)
-    });
-  }, []);
+    })
+  }, [])
 
   const updateBackendUrlHost = () => {
     const backendUrlHost = {
@@ -51,19 +48,32 @@ export const BackendConfigModal = () => {
       color: CssConst.MAIN_FONT_COLOR,
     },
     overlay: {
-      background: 'rgba(0, 0, 0, 0.5)'
-    }
+      background: 'rgba(0, 0, 0, 0.5)',
+    },
   }
 
   return (
     <ReactModal
       isOpen={isOpen}
-      onRequestClose={ () => { setIsOpen(false) } }
+      onRequestClose={() => {
+        setIsOpen(false)
+      }}
       style={reactModalStyle}
       ariaHideApp={false}
     >
-      <form className="modal-form" onSubmit={ ()=>{setIsOpen(false)} }>
-        <FontAwesomeIcon icon={faTimes} className="close-button" onClick={ () => { setIsOpen(false) } } />
+      <form
+        className="modal-form"
+        onSubmit={() => {
+          setIsOpen(false)
+        }}
+      >
+        <FontAwesomeIcon
+          icon={faTimes}
+          className="close-button"
+          onClick={() => {
+            setIsOpen(false)
+          }}
+        />
         <div className="title">接続先設定</div>
         <div className="show-block">
           <label className="label-name">host</label>
@@ -74,10 +84,20 @@ export const BackendConfigModal = () => {
           <input type="text" className="text-box" value={portState} onChange={onPortChange}></input>
         </div>
         <div className="form-buttons">
-          <button type="submit" className="button" onClick={updateBackendUrlHost}>接続</button>
-          <button type="submit" className="button" onClick={ () => { setIsOpen(false) } }>キャンセル</button>
+          <button type="submit" className="button" onClick={updateBackendUrlHost}>
+            接続
+          </button>
+          <button
+            type="submit"
+            className="button"
+            onClick={() => {
+              setIsOpen(false)
+            }}
+          >
+            キャンセル
+          </button>
         </div>
       </form>
     </ReactModal>
-  );
+  )
 }

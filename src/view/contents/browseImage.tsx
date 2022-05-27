@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks';
-import { useTags } from '../lib/tagCustomHooks';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { faStepForward } from "@fortawesome/free-solid-svg-icons";
-import { faStepBackward } from "@fortawesome/free-solid-svg-icons";
-import { Tag } from "./../component/atmos/tag";
-import { SearchPanel } from "./../component/organisms/searchPanel";
-import { ImageIndexView } from "./imageIndexView";
-import { ImageView } from "./imageView";
-import { ImageSideBar } from "./imageSideBar";
-import { TagInfo } from '../../ipc/tags';
-import { sendIpcGetAllTags } from '../commonIpc';
-import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images';
-import { useEvent, Event } from './../lib/eventCustomHooks';
+import React, { useState, useEffect, useRef } from 'react'
+import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
+import { useTags } from '../lib/tagCustomHooks'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { Tag } from './../component/atmos/tag'
+import { SearchPanel } from './../component/organisms/searchPanel'
+import { ImageIndexView } from './imageIndexView'
+import { ImageView } from './imageView'
+import { ImageSideBar } from './imageSideBar'
+import { TagInfo } from '../../ipc/tags'
+import { sendIpcGetAllTags } from '../commonIpc'
+import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images'
+import { useEvent, Event } from './../lib/eventCustomHooks'
 
 type BrowseImageProps = {
   display: boolean
@@ -24,16 +22,17 @@ type BrowseImageProps = {
   onModeChange: (imageId: string | null) => void
   onPrevClick: () => void
   dsb_ref: React.RefObject<HTMLDivElement>
-};
+}
 
-export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
-  const [selectedImageIds, setSelectedImageIds] = useState([] as string[]);
-  const [searchTags, setSearchTags] = useState([] as TagInfo[]);
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
-  const [searchType, setSearchType] = useState('and');
-  const [tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
-  const [singleClickTagId, setSingleClickTagId] = useState(null as string | null);
-  const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null);
+export const BrowseImage: React.VFC<BrowseImageProps> = props => {
+  const [selectedImageIds, setSelectedImageIds] = useState([] as string[])
+  const [searchTags, setSearchTags] = useState([] as TagInfo[])
+  const [showSearchPanel, setShowSearchPanel] = useState(false)
+  const [searchType, setSearchType] = useState('and')
+  const [_tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, _selectingMenu, _selectMenu] =
+    useTags(props.workspaceId)
+  const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
+  const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null)
 
   useEffect(() => {
     setSelectedImageIds([])
@@ -42,52 +41,52 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
     sendIpcGetAllTags(props.workspaceId)
 
     showImages()
-  }, [props.workspaceId]);
+  }, [props.workspaceId])
 
   useEffect(() => {
     setSearchTags([])
-  }, [props.uncategorized]);
+  }, [props.uncategorized])
 
   useEffect(() => {
-    const tagId = props.singleTagClickEvent.data;
+    const tagId = props.singleTagClickEvent.data
     setSingleClickTagId(tagId)
-  }, [props.singleTagClickEvent]);
+  }, [props.singleTagClickEvent])
 
   useEffect(() => {
-    setSearchTags((state) => {
-      const tagId = singleClickTagId;
-      if ( !tagId ) return state;
-      return tagAllListState.filter((tag:any) => tagId == tag.tagId);
-    });
+    setSearchTags(state => {
+      const tagId = singleClickTagId
+      if (!tagId) return state
+      return tagAllListState.filter((tag: any) => tagId == tag.tagId)
+    })
 
     setSingleClickTagId(null)
     showImages()
-  }, [singleClickTagId]);
+  }, [singleClickTagId])
 
   useEffect(() => {
     showImages()
-  }, [searchTags.length, searchType, singleClickTagId]); // renameのときは発火させない
+  }, [searchTags.length, searchType, singleClickTagId]) // renameのときは発火させない
 
   useEffect(() => {
-    if ( showSearchPanel ) {
-      document.addEventListener('click', (e) => {
-        const elm = e.target as HTMLElement | null;
-        if ( !elm?.closest('#search-panel-id') && !elm?.closest('#search-bar-id') ) {
+    if (showSearchPanel) {
+      document.addEventListener('click', e => {
+        const elm = e.target as HTMLElement | null
+        if (!elm?.closest('#search-panel-id') && !elm?.closest('#search-bar-id')) {
           setShowSearchPanel(false)
         }
-      });
+      })
     }
-  }, [showSearchPanel]);
+  }, [showSearchPanel])
 
   useEffect(() => {
-    setSearchTags((state) => {
-      const tagIds = state.map(s => s.tagId);
-      return tagAllListState.filter((tag:any) => tagIds.includes(tag.tagId));
-    });
-  }, [tagAllListState]);
+    setSearchTags(state => {
+      const tagIds = state.map(s => s.tagId)
+      return tagAllListState.filter((tag: any) => tagIds.includes(tag.tagId))
+    })
+  }, [tagAllListState])
 
   const showImages = () => {
-    if ( props.workspaceId == "" ) return;
+    if (props.workspaceId == '') return
 
     const showImages: ShowImages = {
       workspaceId: props.workspaceId,
@@ -97,47 +96,47 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
       uncategorized: props.uncategorized,
     }
     raiseOnShowImagesEvent(null)
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages));
+    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
   }
 
   const onImageDoubleClick = (imageId: string) => {
     props.onModeChange(imageId)
-  };
+  }
 
   const onChangeSelectedImages = (imageIds: string[]) => {
     setSelectedImageIds(imageIds)
-  };
+  }
 
   const searchBarClick = () => {
-    setShowSearchPanel(true);
-  };
+    setShowSearchPanel(true)
+  }
 
   const onSearchPanelTagAddClick = (tagId: string | null, _tagName: string) => {
-    if ( !tagId  ) return;
+    if (!tagId) return
 
-    const clickTags = tagAllListState.filter((tag: any) => tag.tagId == tagId);
-    if ( clickTags.length == 0 ) return;
-    const clickTag = clickTags[0];
-    setSearchTags((state) => [...state, clickTag])
-  };
+    const clickTags = tagAllListState.filter((tag: any) => tag.tagId == tagId)
+    if (clickTags.length == 0) return
+    const clickTag = clickTags[0]
+    setSearchTags(state => [...state, clickTag])
+  }
 
   const onSearchPanelTagDeleteClick = (tagId: string) => {
-    setSearchTags(state => state.filter((tag) => tag.tagId != tagId))
-  };
+    setSearchTags(state => state.filter(tag => tag.tagId != tagId))
+  }
 
-  const toggleSearchType = (_tagId: string|null, _tagName: string) => {
-    setSearchType(type => type == 'and' ? 'or' : 'and')
-  };
+  const toggleSearchType = (_tagId: string | null, _tagName: string) => {
+    setSearchType(type => (type == 'and' ? 'or' : 'and'))
+  }
 
   const clearSearchTags = () => {
     setSearchTags([])
-  };
+  }
 
-  const dsb_split_bar = useRef<HTMLDivElement>(null);
-  const dsb_right = useRef<HTMLDivElement>(null);
+  const dsb_split_bar = useRef<HTMLDivElement>(null)
+  const dsb_right = useRef<HTMLDivElement>(null)
   useDraggableSplitBar(props.dsb_ref, dsb_split_bar, dsb_right)
-  
-  if ( !props.display ) return <></>;
+
+  if (!props.display) return <></>
 
   return (
     <>
@@ -157,7 +156,7 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
               onClick={toggleSearchType}
               onDeleteClick={null}
             />
-            { searchTags.map((t) => {
+            {searchTags.map(t => {
               return (
                 <Tag
                   workspaceId={props.workspaceId}
@@ -169,8 +168,8 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
                   onClick={searchBarClick}
                   onDeleteClick={onSearchPanelTagDeleteClick}
                 />
-              );
-            }) }
+              )
+            })}
           </div>
           {/* <div className="control-panel">
             <div className="back-foward">
@@ -202,8 +201,8 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
         />
 
         {(() => {
-          if ( props.imageId ) {
-            return <ImageView workspaceId={props.workspaceId} imageId={props.imageId}/>;
+          if (props.imageId) {
+            return <ImageView workspaceId={props.workspaceId} imageId={props.imageId} />
           }
         })()}
       </section>
@@ -212,5 +211,5 @@ export const BrowseImage:React.VFC<BrowseImageProps> = (props) => {
 
       <ImageSideBar workspaceId={props.workspaceId} imageIds={selectedImageIds} dsb_ref={dsb_right} />
     </>
-  );
+  )
 }
