@@ -1,10 +1,10 @@
-import React, { useState, useEffect} from 'react';
-import { Tag } from "../atmos/tag";
-import { MenuItem, useTags } from '../../lib/tagCustomHooks';
-import CssConst from "./../../cssConst";
-import { TagInfo } from '../../../ipc/tags';
+import React, { useState, useEffect } from 'react'
+import { Tag } from '../atmos/tag'
+import { MenuItem, useTags } from '../../lib/tagCustomHooks'
+import CssConst from './../../cssConst'
+import { TagInfo } from '../../../ipc/tags'
 
-import './tagGroupMenu.scss';
+import './tagGroupMenu.scss'
 
 type SearchPanelProps = {
   id: string
@@ -15,15 +15,16 @@ type SearchPanelProps = {
   onTagDeleteClick: (tagId: string) => void
 }
 
-export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
-  const [searchTagText, setSearchTagText] = useState('');
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
+export const SearchPanel: React.VFC<SearchPanelProps> = props => {
+  const [searchTagText, setSearchTagText] = useState('')
+  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] =
+    useTags(props.workspaceId)
 
   useEffect(() => {
     resetTagList()
-  }, [props.workspaceId]);
+  }, [props.workspaceId])
 
-  const selectedTagIds = props.selectedTag.map(t => t.tagId);
+  const selectedTagIds = props.selectedTag.map(t => t.tagId)
 
   const style: React.CSSProperties = {
     position: 'absolute',
@@ -36,23 +37,23 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     zIndex: 10,
   }
 
-  const tagGroupAreaWidth = '150px';
+  const tagGroupAreaWidth = '150px'
 
   const tagGroupArea: React.CSSProperties = {
     float: 'left',
     width: `${tagGroupAreaWidth}`,
     height: '100%',
     overflowY: 'scroll',
-  };
+  }
 
   const tagSearchArea: React.CSSProperties = {
     float: 'right',
     width: `calc(100% - ${tagGroupAreaWidth})`,
     height: '100%',
-  };
+  }
 
-  const inputHeight = '18px';
-  const inputMarginTopBot = '5px';
+  const inputHeight = '18px'
+  const inputMarginTopBot = '5px'
   const inputStyle: React.CSSProperties = {
     width: 'calc(100% - 30px)',
     height: inputHeight,
@@ -63,7 +64,7 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     backgroundColor: CssConst.VERY_LIGHT_BACKGROUND_COLOR,
     border: `1px solid white`,
     color: CssConst.MAIN_FONT_COLOR,
-  };
+  }
 
   const tagsArea: React.CSSProperties = {
     width: '100%',
@@ -71,10 +72,10 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
     marginTop: 0,
     marginBottom: 0,
     overflowY: 'scroll',
-  };
+  }
 
   const menuSelected = (menu: string): string => {
-    return selectingMenu == menu ? "selected" : "";
+    return selectingMenu == menu ? 'selected' : ''
   }
 
   const onMenuClick = (menu: string) => {
@@ -83,22 +84,27 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
 
   const onSearchTagTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTagText(e.target.value)
-  };
+  }
 
   return (
     <div id={props.id} className="search-panel" style={style}>
       <div style={tagGroupArea}>
-        <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>すべてのタグ</div>
-        <div className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`} onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}>未分類のタグ</div>
-        { tagGroupListState.map((tg:any) => {
+        <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>
+          すべてのタグ
+        </div>
+        <div
+          className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`}
+          onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}
+        >
+          未分類のタグ
+        </div>
+        {tagGroupListState.map((tg: any) => {
           return (
-            <div
-              className={`menu-item ${menuSelected(tg.tagGroupId)}`}
-              onClick={() => onMenuClick(tg.tagGroupId)} >
-                {tg.name}
-              </div>
-          );
-        }) }
+            <div className={`menu-item ${menuSelected(tg.tagGroupId)}`} onClick={() => onMenuClick(tg.tagGroupId)}>
+              {tg.name}
+            </div>
+          )
+        })}
       </div>
 
       <div style={tagSearchArea}>
@@ -107,12 +113,13 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
           type="text"
           name="tag-search"
           value={searchTagText}
-          placeholder={"検索"}
-          onChange={onSearchTagTextChange} />
+          placeholder={'検索'}
+          onChange={onSearchTagTextChange}
+        />
 
         <div style={tagsArea}>
-          { showingTagAllListState.map((t:any) => {
-            if ( searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1 ) {
+          {showingTagAllListState.map((t: any) => {
+            if (searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1) {
               return (
                 <Tag
                   workspaceId={props.workspaceId}
@@ -124,11 +131,11 @@ export const SearchPanel:React.VFC<SearchPanelProps> = (props) => {
                   onClick={props.onTagAddClick}
                   onDeleteClick={props.onTagDeleteClick}
                 />
-              );
+              )
             }
-          }) }
+          })}
         </div>
       </div>
     </div>
-  );
+  )
 }

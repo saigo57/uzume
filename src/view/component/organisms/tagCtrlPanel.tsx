@@ -1,52 +1,46 @@
-import React, { useState, useEffect} from 'react';
-import { MenuItem, useTags } from '../../lib/tagCustomHooks';
-import { Tag } from "../atmos/tag";
-import {
-  IpcId as TagsIpcId,
-  TagInfo,
-  CreateTagToImage,
-} from '../../../ipc/tags'
-import {
-  IpcId as ImagesIpcId,
-  AddTagToImage,
-} from '../../../ipc/images'
-import CssConst from "./../../cssConst";
+import React, { useState, useEffect } from 'react'
+import { MenuItem, useTags } from '../../lib/tagCustomHooks'
+import { Tag } from '../atmos/tag'
+import { IpcId as TagsIpcId, TagInfo, CreateTagToImage } from '../../../ipc/tags'
+import { IpcId as ImagesIpcId, AddTagToImage } from '../../../ipc/images'
+import CssConst from './../../cssConst'
 
-import './tagGroupMenu.scss';
+import './tagGroupMenu.scss'
 
 type TagCtrlPanelProps = {
   display: boolean
   workspaceId: string
   imageIds: string[]
   alreadyLinkedTag: TagInfo[]
-  onClose: ()=>void
+  onClose: () => void
   onRemoveTag: ((tagId: string) => void) | null
 }
 
-export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
-  const [searchTagText, setSearchTagText] = useState('');
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId);
+export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
+  const [searchTagText, setSearchTagText] = useState('')
+  const [tagGroupListState, _tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] =
+    useTags(props.workspaceId)
 
   useEffect(() => {
-    if ( !props.display ) setSearchTagText('');
-  }, [props.display]);
+    if (!props.display) setSearchTagText('')
+  }, [props.display])
 
   const onSearchTagTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTagText(e.target.value)
-  };
+  }
 
   const createNewTag = (tagName: string) => {
-    if ( props.imageIds.length == 0 ) return;
-    if ( tagName.length == 0 ) return;
+    if (props.imageIds.length == 0) return
+    if (tagName.length == 0) return
 
     const req: CreateTagToImage = {
       workspaceId: props.workspaceId,
       imageIds: props.imageIds,
       tagName: tagName,
     }
-    window.api.send(TagsIpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req));
+    window.api.send(TagsIpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req))
     setSearchTagText('')
-  };
+  }
 
   const addTagToImage = (tagId: string) => {
     const req: AddTagToImage = {
@@ -54,10 +48,10 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
       imageIds: props.imageIds,
       tagId: tagId,
     }
-    window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(req));
+    window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(req))
   }
 
-  const alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId);
+  const alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId)
 
   const style: React.CSSProperties = {
     position: 'absolute',
@@ -72,7 +66,7 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
     zIndex: 100,
   }
 
-  const tagGroupAreaWidth = '150px';
+  const tagGroupAreaWidth = '150px'
 
   const inputStyle: React.CSSProperties = {
     width: '250px',
@@ -84,24 +78,24 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
     backgroundColor: CssConst.VERY_LIGHT_BACKGROUND_COLOR,
     border: `1px solid white`,
     color: CssConst.MAIN_FONT_COLOR,
-  };
+  }
 
   const tagGroupAreaStyle: React.CSSProperties = {
     float: 'left',
     width: `${tagGroupAreaWidth}`,
     height: '100%',
     overflowY: 'scroll',
-  };
+  }
 
   const tagAreaStyle: React.CSSProperties = {
     float: 'right',
     width: `calc(100% - ${tagGroupAreaWidth})`,
     height: 'calc(100% - 35px)',
     overflowY: 'scroll',
-  };
+  }
 
   const menuSelected = (menu: string): string => {
-    return selectingMenu == menu ? "selected" : "";
+    return selectingMenu == menu ? 'selected' : ''
   }
 
   const onMenuClick = (menu: string) => {
@@ -115,28 +109,34 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
         type="text"
         name="tag-search"
         value={searchTagText}
-        placeholder={"検索 or 新規作成"}
-        onChange={onSearchTagTextChange} />
+        placeholder={'検索 or 新規作成'}
+        onChange={onSearchTagTextChange}
+      />
 
       <div className="tag-ctrl-panel" style={tagGroupAreaStyle}>
-        <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>すべてのタグ</div>
-        <div className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`} onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}>未分類のタグ</div>
-        { tagGroupListState.map((tg:any) => {
+        <div className={`menu-item ${menuSelected(MenuItem.ALL_TAG)}`} onClick={() => onMenuClick(MenuItem.ALL_TAG)}>
+          すべてのタグ
+        </div>
+        <div
+          className={`menu-item ${menuSelected(MenuItem.UNCATEGORIZED_TAG)}`}
+          onClick={() => onMenuClick(MenuItem.UNCATEGORIZED_TAG)}
+        >
+          未分類のタグ
+        </div>
+        {tagGroupListState.map((tg: any) => {
           return (
-            <div
-              className={`menu-item ${menuSelected(tg.tagGroupId)}`}
-              onClick={() => onMenuClick(tg.tagGroupId)} >
-                {tg.name}
-              </div>
-          );
-        }) }
+            <div className={`menu-item ${menuSelected(tg.tagGroupId)}`} onClick={() => onMenuClick(tg.tagGroupId)}>
+              {tg.name}
+            </div>
+          )
+        })}
       </div>
 
       <div style={tagAreaStyle}>
         <div id="tag-ctrl-panel-tagsarea-id">
           {(() => {
             // 入力したタグ名が登録されていないとき、新規追加UIを表示する
-            if ( !showingTagAllListState.map(t=>t.name).includes(searchTagText) ) {
+            if (!showingTagAllListState.map(t => t.name).includes(searchTagText)) {
               return (
                 <div>
                   <Tag
@@ -146,16 +146,18 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
                     favorite={false}
                     delete={false}
                     alreadyAdded={false}
-                    onClick={()=>{createNewTag(searchTagText)}}
+                    onClick={() => {
+                      createNewTag(searchTagText)
+                    }}
                     onDeleteClick={null}
                   />
                 </div>
-              );
+              )
             }
           })()}
 
-          { showingTagAllListState.map((t) => {
-            if ( searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1 ) {
+          {showingTagAllListState.map(t => {
+            if (searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1) {
               return (
                 <Tag
                   workspaceId={props.workspaceId}
@@ -164,14 +166,16 @@ export const TagCtrlPanel:React.VFC<TagCtrlPanelProps> = (props) => {
                   favorite={t.favorite}
                   delete={false}
                   alreadyAdded={alreadyLinkedTagId.includes(t.tagId)}
-                  onClick={()=>{addTagToImage(t.tagId)}}
+                  onClick={() => {
+                    addTagToImage(t.tagId)
+                  }}
                   onDeleteClick={props.onRemoveTag}
                 />
-              );
+              )
             }
-          }) }
+          })}
         </div>
       </div>
     </div>
-  );
+  )
 }

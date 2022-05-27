@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  IpcId as FooterListIpcId,
-  FooterMessage,
-} from "../ipc/footer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import CssConst from "./cssConst";
+import React, { useState, useEffect } from 'react'
+import { IpcId as FooterListIpcId, FooterMessage } from '../ipc/footer'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import CssConst from './cssConst'
 
 export function Footer() {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     window.api.on(FooterListIpcId.ToRenderer.FOOTER_MESSAGE_REPLY, (_e, arg) => {
       const footerMessage = JSON.parse(arg) as FooterMessage
-      setMessage(footerMessage.message);
-    });
-  }, []);
+      setMessage(footerMessage.message)
+    })
+  }, [])
 
   const messageStyle: React.CSSProperties = {
     marginLeft: '10px',
@@ -33,17 +30,22 @@ export function Footer() {
   return (
     <section id="footer">
       <div style={messageStyle}>
-        {
-          (() => {
-            if ( message == '' ) return;
-            return (
-              <>
-                <FontAwesomeIcon icon={faTimes} style={resetIconStyle} onClick={ () => { setMessage("") } } />{message}
-              </>
-            );
-          })()
-        }
+        {(() => {
+          if (message == '') return
+          return (
+            <>
+              <FontAwesomeIcon
+                icon={faTimes}
+                style={resetIconStyle}
+                onClick={() => {
+                  setMessage('')
+                }}
+              />
+              {message}
+            </>
+          )
+        })()}
       </div>
     </section>
-  );
+  )
 }

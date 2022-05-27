@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "lint": "eslint --fix './src/**/*.ts'",
-    "lint-fix": "eslint --fix './src/**/*.ts' && prettier --write './src/**/*.ts'",
+    "lint": "eslint --fix './src/**/*.{ts,tsx}'",
+    "lint-fix": "eslint --fix './src/**/*.{ts,tsx}' && prettier --write './src/**/*.{ts,tsx}'",
     "start": "run-s clean transpile-dev serve",
     "deploy-mac": "run-s clean transpile-prd build-mac-publish",
     "deploy-win": "run-s clean transpile-prd build-win-publish",
