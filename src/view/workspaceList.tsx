@@ -288,6 +288,9 @@ export const WorkspaceList = () => {
             }}
           />
           <div className="title">ワークスペース新規作成</div>
+          <div className="content">
+            ※接続先サーバーがこのPCでないときは作成できません。サーバーを動作させているPCで設定をしてください。
+          </div>
           <div className="input-block">
             <label className="label-name">ワークスペース名</label>
             <input
