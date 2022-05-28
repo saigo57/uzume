@@ -87,7 +87,7 @@ html {
 
 #tag-manage-list-area {
   display: block;
-  height: calc(100% - $footer-height);
+  height: calc(100% - $footer-height - 14px); // -14pxは調整
   flex: 1;
   right: 0;
   left: 0;
