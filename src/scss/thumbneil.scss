@@ -51,6 +51,23 @@
         margin-top: 4px;
       }
     }
+    & > .grouped-image-icon {
+      position: absolute;
+      background-color: grey;
+      right: 0;
+      top: 0;
+      padding-right: 5px;
+      padding-top: 5px;
+      width: 16px;
+      height: 16px;
+      transition: 0.15s;
+      opacity: 0.8;
+      & > svg {
+        color: $main-font-color;
+        margin-left: 4px;
+        margin-bottom: 4px;
+      }
+    }
   }
   &.drag-over {
     opacity: 0.3;

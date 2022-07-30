@@ -71,18 +71,44 @@
       }
     }
   }
-  .image-frame {
+
+  .image-view-area {
     position: absolute;
     background-color: $main-background-color;
     z-index: 2;
     top: 40px;
     width: calc(100% - 10px);
-    height: calc(100% - 10px - 40px);
-    padding: 5px;
+    height: calc(100% - 40px);
+    padding: 0 5px;
+    overflow-y: auto;
+  }
+  $side-panel-width: 120px;
+  .images-side-panel {
+    float: left;
+    background-color: $main-background-color;
+    width: calc($side-panel-width - 5px);
+    margin-right: 5px;
+    height: 100%;
     overflow-y: auto;
     img {
       width: 100%;
       height: auto;
+    }
+  }
+  .images-area {
+    background-color: $main-background-color;
+    z-index: 2;
+    top: 40px;
+    width: calc(100% - $side-panel-width);
+    height: 100%;
+    overflow-y: auto;
+    img {
+      width: 100%;
+      height: auto;
+    }
+
+    &.show-side-panel {
+      float: right;
     }
   }
 }

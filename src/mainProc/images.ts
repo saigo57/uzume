@@ -1,7 +1,8 @@
-import Electron, { ipcMain } from 'electron'
+import Electron, { ipcMain, BrowserWindow, Menu } from 'electron'
 import { isCurrentWorkspace } from './currWorkspace'
 import {
   IpcId,
+  ShowContextMenu,
   Reflect,
   ImageFiles,
   ImageInfos,
@@ -13,8 +14,9 @@ import {
   AddTagToImage,
   RemoveTagFromImage,
   ImageUploadProgress,
+  SortGroupImages,
 } from '../ipc/images'
-import { BackendConnector, Image as BackendConnectorImage } from 'uzume-backend-connector'
+import { BackendConnector, Image as BackendConnectorImage, ResImage } from 'uzume-backend-connector'
 import { showFooterMessage } from '../ipc/footer'
 import { Globals } from './globals'
 
@@ -105,6 +107,31 @@ ipcMain.on(IpcId.ToMainProc.REQUEST_ORIG_IMAGE, (e, arg) => {
   getImage(e, reqImage, IpcId.ToRenderer.REQUEST_ORIG_IMAGE)
 })
 
+ipcMain.on(IpcId.ToMainProc.REQUEST_ORIG_IMAGES, (e, arg) => {
+  const reqImage: RequestImage = JSON.parse(arg)
+  if (!reqImage.imageId) return
+
+  const image = Globals.imageInfoList[reqImage.workspaceId][reqImage.imageId]
+  if (image.is_group_thumb_nail) {
+    BackendConnector.workspace(reqImage.workspaceId, ws => {
+      ws.image.getGroupedImages(image.group_id).then(resImages => {
+        if (!resImages.images) return
+
+        const requestImages = resImages.images.map(image => {
+          return {
+            workspaceId: reqImage.workspaceId,
+            imageId: image.image_id,
+            isThumbnail: false,
+          } as RequestImage
+        })
+        getImages(e, requestImages, IpcId.ToRenderer.REQUEST_ORIG_IMAGES)
+      })
+    })
+  } else {
+    getImages(e, [reqImage], IpcId.ToRenderer.REQUEST_ORIG_IMAGES)
+  }
+})
+
 ipcMain.on(IpcId.ToMainProc.ADD_TAG, (e, arg) => {
   const addTagToImage: AddTagToImage = JSON.parse(arg)
   addTagToImages(e, addTagToImage.workspaceId, addTagToImage.imageIds, addTagToImage.tagId)
@@ -132,6 +159,58 @@ ipcMain.on(IpcId.ToMainProc.REMOVE_TAG, (e, arg) => {
   })
 })
 
+ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
+  const msg: ShowContextMenu = JSON.parse(arg)
+  const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = []
+
+  if (msg.imageIds.length == 1) {
+    const image = Globals.imageInfoList[msg.workspaceId][msg.imageIds[0]]
+    if (image.is_group_thumb_nail) {
+      template.push({
+        label: 'グループ解除',
+        click: () => {
+          BackendConnector.workspace(msg.workspaceId, ws => {
+            ws.image.deleteImagesFromGroup(image.group_id).then(() => {
+              e.reply(IpcId.ToRenderer.RELOAD_IMAGES)
+            })
+          })
+        },
+      })
+    }
+  }
+
+  if (msg.imageIds.length >= 2) {
+    template.push({
+      label: 'グループ化',
+      click: () => {
+        BackendConnector.workspace(msg.workspaceId, ws => {
+          ws.image.addImagesToGroup(msg.imageIds).then(_imgList => {
+            e.reply(IpcId.ToRenderer.RELOAD_IMAGES)
+          })
+        })
+      },
+    })
+  }
+
+  template.push({
+    label: 'ダウンロード(未実装)',
+    click: () => {
+      console.log('ダウンロード')
+    },
+  })
+
+  const menu = Menu.buildFromTemplate(template)
+  const contents: any = BrowserWindow.fromWebContents(e.sender)
+  menu.popup(contents)
+})
+
+ipcMain.on(IpcId.ToMainProc.SORT_GROUP_IMAGES, (e, arg) => {
+  const sortGroupImages: SortGroupImages = JSON.parse(arg)
+  BackendConnector.workspace(sortGroupImages.workspaceId, ws => {
+    ws.image.patchImagesGroupSort(sortGroupImages.imageIds)
+  })
+})
+
 function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: string) {
   BackendConnector.workspace(reqImage.workspaceId, ws => {
     ws.image
@@ -148,10 +227,50 @@ function getImage(e: Electron.IpcMainEvent, reqImage: RequestImage, replyId: str
       })
       .catch(_err => {
         // TODO: 現状機能的には問題なくてもエラーになってしまうため、エラーメッセージは出さない
-        // 複数回同じ画像をリクエストしているのが関係指定層
+        // 複数回同じ画像をリクエストしているのが影響していそう
         // showFooterMessage(e, `画像の取得に失敗しました。[${err}}]`);
       })
   })
+}
+
+function getImages(e: Electron.IpcMainEvent, reqImages: RequestImage[], replyId: string) {
+  if (reqImages.length < 1) return
+
+  BackendConnector.workspace(reqImages[0].workspaceId, async ws => {
+    const imageDataList: ImageData[] = []
+
+    for (let i = 0; i < reqImages.length; i++) {
+      const imageBase64: string = await ws.image.getImage(
+        reqImages[i].imageId,
+        reqImages[i].isThumbnail
+          ? BackendConnectorImage.IMAGE_SIZE_THUMBNAIL
+          : BackendConnectorImage.IMAGE_SIZE_ORIGINAL
+      )
+
+      imageDataList.push({
+        imageId: reqImages[i].imageId,
+        imageBase64: imageBase64,
+      } as ImageData)
+    }
+
+    e.reply(replyId, JSON.stringify(imageDataList))
+  })
+}
+
+function resImageToImageInfo(res_img: ResImage): ImageInfo {
+  return {
+    image_id: res_img.image_id,
+    file_name: res_img.file_name,
+    ext: res_img.ext,
+    width: res_img.width,
+    height: res_img.height,
+    memo: res_img.memo,
+    author: res_img.author,
+    created_at: res_img.created_at,
+    tags: res_img.tags,
+    is_group_thumb_nail: res_img.is_group_thumb_nail,
+    group_id: res_img.group_id,
+  } as ImageInfo
 }
 
 export function showImagesReply(
@@ -173,18 +292,7 @@ export function showImagesReply(
 
         if (imgList.images != null) {
           for (let i = 0; i < imgList.images.length; i++) {
-            const imageInfo: ImageInfo = {
-              image_id: imgList.images[i].image_id,
-              file_name: imgList.images[i].file_name,
-              ext: imgList.images[i].ext,
-              width: imgList.images[i].width,
-              height: imgList.images[i].height,
-              memo: imgList.images[i].memo,
-              author: imgList.images[i].author,
-              created_at: imgList.images[i].created_at,
-              tags: imgList.images[i].tags,
-            }
-
+            const imageInfo: ImageInfo = resImageToImageInfo(imgList.images[i])
             imageInfos.images.push(imageInfo)
 
             if (!(workspaceId in Globals.imageInfoList)) Globals.imageInfoList[workspaceId] = {}

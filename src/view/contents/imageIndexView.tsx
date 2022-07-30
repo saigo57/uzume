@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import ReactModal from 'react-modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
 import {
   IpcId as ImagesIpcId,
+  ShowContextMenu,
   Reflect,
   ImageFiles,
   ImageInfo,
@@ -201,6 +202,27 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
     return () => {
       thumbnailArea.removeEventListener('mousemove', onMousemove)
+    }
+  })
+
+  const showContextMenu = (e: any) => {
+    e.preventDefault()
+    const msg = JSON.stringify({
+      workspaceId: props.workspaceId,
+      imageIds: selectedImageId,
+    } as ShowContextMenu)
+    window.api.send(ImagesIpcId.ToMainProc.SHOW_CONTEXT_MENU, msg)
+  }
+
+  useEffect(() => {
+    Array.from(document.getElementsByClassName('thumbnail')).forEach(target => {
+      target.addEventListener('contextmenu', showContextMenu)
+    })
+
+    return () => {
+      Array.from(document.getElementsByClassName('thumbnail')).forEach(target => {
+        target.removeEventListener('contextmenu', showContextMenu)
+      })
     }
   })
 
@@ -432,6 +454,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
       {imageList.images.map(image => {
         return (
           <div
+            id={`thumbnail-${image.image_id}`}
             className={`thumbnail ${selectedImageId.includes(image.image_id) ? 'selected' : ''}`}
             onClick={e => {
               onImageClick(e, image.image_id)
@@ -454,6 +477,16 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
             >
               <FontAwesomeIcon icon={faBars} />
             </div>
+
+            {(() => {
+              if (image.is_group_thumb_nail) {
+                return (
+                  <div className="grouped-image-icon">
+                    <FontAwesomeIcon icon={faLayerGroup} />
+                  </div>
+                )
+              }
+            })()}
           </div>
         )
       })}
