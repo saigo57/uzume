@@ -34,6 +34,20 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
   const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null)
 
+  const showImages = () => {
+    if (props.workspaceId == '') return
+
+    const showImages: ShowImages = {
+      workspaceId: props.workspaceId,
+      page: 1,
+      tagIds: searchTags.map(tag => tag.tagId),
+      searchType: searchType,
+      uncategorized: props.uncategorized,
+    }
+    raiseOnShowImagesEvent(null)
+    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
+  }
+
   useEffect(() => {
     setSelectedImageIds([])
     setSearchTags([])
@@ -85,19 +99,12 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
     })
   }, [tagAllListState])
 
-  const showImages = () => {
-    if (props.workspaceId == '') return
-
-    const showImages: ShowImages = {
-      workspaceId: props.workspaceId,
-      page: 1,
-      tagIds: searchTags.map(tag => tag.tagId),
-      searchType: searchType,
-      uncategorized: props.uncategorized,
-    }
-    raiseOnShowImagesEvent(null)
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
-  }
+  useEffect(() => {
+    window.api.on(ImagesIpcId.ToRenderer.RELOAD_IMAGES, (_e, _arg) => {
+      const reload = document.getElementById('browse-image-area-reload')
+      if (reload) reload.click()
+    })
+  }, [])
 
   const onImageDoubleClick = (imageId: string) => {
     props.onModeChange(imageId)
@@ -154,7 +161,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
           <div className="prev" onClick={props.onPrevClick}>
             <FontAwesomeIcon icon={faArrowLeft} />
           </div>
-          <div className="reload" onClick={onReloadClick}>
+          <div id="browse-image-area-reload" className="reload" onClick={onReloadClick}>
             <FontAwesomeIcon icon={faRotateRight} />
           </div>
           <div id="search-bar-id" className="search-bar" onClick={searchBarClick}>

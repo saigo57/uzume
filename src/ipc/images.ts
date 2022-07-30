@@ -8,9 +8,12 @@ export class IpcId extends IpcIdBase {
     static readonly SHOW_IMAGES: string = IpcId.generateIpcId()
     static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
     static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId()
+    static readonly REQUEST_ORIG_IMAGES: string = IpcId.generateIpcId()
     static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId()
     static readonly ADD_TAG: string = IpcId.generateIpcId()
     static readonly REMOVE_TAG: string = IpcId.generateIpcId()
+    static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId()
+    static readonly SORT_GROUP_IMAGES: string = IpcId.generateIpcId()
   }
 
   public static ToRenderer = class {
@@ -18,10 +21,12 @@ export class IpcId extends IpcIdBase {
     static readonly SHOW_IMAGES: string = IpcId.generateIpcId()
     static readonly REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
     static readonly REQUEST_ORIG_IMAGE: string = IpcId.generateIpcId()
+    static readonly REQUEST_ORIG_IMAGES: string = IpcId.generateIpcId()
     static readonly GET_IMAGE_INFO_LIST: string = IpcId.generateIpcId()
     static readonly UPDATE_IMAGE_INFO: string = IpcId.generateIpcId()
     static readonly IMAGE_INFO_LIST_UPDATED: string = IpcId.generateIpcId()
     static readonly IMAGE_UPLOAD_PROGRESS: string = IpcId.generateIpcId()
+    static readonly RELOAD_IMAGES: string = IpcId.generateIpcId()
   }
 
   static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
@@ -29,6 +34,11 @@ export class IpcId extends IpcIdBase {
 
 export type Reflect = {
   replyId: string
+}
+
+export type ShowContextMenu = {
+  workspaceId: string
+  imageIds: string[]
 }
 
 export type ImageFiles = {
@@ -72,6 +82,8 @@ export type ImageInfo = {
   author: string
   created_at: string
   tags: string[]
+  is_group_thumb_nail: boolean
+  group_id: string
 }
 
 export type ImageInfos = {
@@ -95,4 +107,9 @@ export type RemoveTagFromImage = {
 export type ImageUploadProgress = {
   completeCnt: number
   allImagesCnt: number
+}
+
+export type SortGroupImages = {
+  workspaceId: string
+  imageIds: string[]
 }
