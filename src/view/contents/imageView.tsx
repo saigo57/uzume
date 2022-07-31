@@ -28,6 +28,8 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
   }, [])
 
   useEffect(() => {
+    if (origImages.length < 2) return
+
     const imageIds: string[] = []
     for (let i = 0; i < origImages.length; i++) {
       imageIds.push(origImages[i].imageId)
