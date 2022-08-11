@@ -3,8 +3,12 @@ const fse = require('fs-extra');
 const path = require('path');
 const axiosBase = require('axios');
 
-exports.testDir = () => {
+function _testDir() {
   return path.join(__dirname, 'testarea')
+}
+
+exports.testDir = () => {
+  return _testDir()
 }
 
 exports.initApp = async () => {
@@ -30,12 +34,12 @@ exports.initApp = async () => {
   fse.removeSync(path.join(userHome, '.uzume/e2e-test'));
 
   // testDirリセット
-  fse.removeSync(this.testDir());
-  fse.mkdirSync(this.testDir());
+  fse.removeSync(_testDir());
+  fse.mkdirSync(_testDir());
 
   // テストデータをコピー
   const datasetPath = path.join(__dirname, 'dataset');
-  fse.copySync(datasetPath, path.join(this.testDir(), 'dataset'))
+  fse.copySync(datasetPath, path.join(_testDir(), 'dataset'))
 
   return electronApp
 }
