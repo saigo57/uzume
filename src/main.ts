@@ -1,5 +1,5 @@
 import path from 'path'
-import electron, { app, BrowserWindow, autoUpdater, Menu } from 'electron'
+import electron, { app, BrowserWindow, autoUpdater, Menu, dialog, shell } from 'electron'
 import { BackendConnector } from 'uzume-backend-connector'
 import { showFooterMessageByBrowserWindow } from './ipc/footer'
 import { IpcId as backendSetupIpcId } from './ipc/backendSetup'
@@ -10,6 +10,37 @@ import './mainProc/images'
 import './mainProc/tags'
 import './mainProc/tagGroups'
 import './mainProc/tagManage'
+// ここでimportしないとwebpackがdistにコピーしてくれない
+import uzume_icon from './images/uzume-icon-radius.png'
+
+function githubBaseUrlWithVersion() {
+  return 'https://github.com/Saigo1997/uzume/blob/main'
+}
+
+function aboutPanel() {
+  const options: Electron.MessageBoxOptions = {
+    title: `${app.name}について`,
+    message: `${app.name} ${app.getVersion()}`,
+    detail: 'Copyright © 2022 amanoiwato',
+    icon: path.join(__dirname, uzume_icon),
+    buttons: ['閉じる', 'Notice'],
+    cancelId: -1, // Escで閉じられたとき
+  }
+
+  const selected = dialog.showMessageBoxSync(options)
+  if (selected == 1) {
+    // Noticeボタンを押したとき
+    shell.openExternal(`${githubBaseUrlWithVersion()}/NOTICE`)
+  }
+}
+
+function openLicense() {
+  shell.openExternal(`${githubBaseUrlWithVersion()}/LICENSE`)
+}
+
+function openNotice() {
+  shell.openExternal(`${githubBaseUrlWithVersion()}/NOTICE`)
+}
 
 function createWindow() {
   const options: Electron.BrowserWindowConstructorOptions = {
@@ -29,7 +60,7 @@ function createWindow() {
           {
             label: app.name,
             submenu: [
-              { role: 'about', label: `${app.name}について` },
+              { label: `${app.name}について`, click: aboutPanel },
               {
                 label: `アップデートを確認`,
                 click: () => {
@@ -111,16 +142,6 @@ function createWindow() {
     //        ])
     //   ]
     // },
-    // {
-    //   label:'ヘルプ',
-    //   submenu: [
-    //     {label:`${app.name} ヘルプ`},    // ToDo
-    //     ...(isMac ? [ ] : [
-    //       {type:'separator'} ,
-    //       {role:'about',  label:`${app.name}について` }
-    //     ])
-    //   ]
-    // }
     {
       label: 'ワークスペース',
       submenu: [
@@ -130,6 +151,17 @@ function createWindow() {
             win.webContents.send(backendSetupIpcId.ToRenderer.SHOW_BACKEND_CONFIG_MODAL, showBackendConfigModalParam())
           },
         },
+      ],
+    },
+    {
+      label: 'ヘルプ',
+      submenu: [
+        // { label: `${app.name} ヘルプ` }, // TODO
+        // { type: 'separator' },
+        { label: `${app.name}について`, click: aboutPanel },
+        { type: 'separator' },
+        { label: 'LICENSE(ブラウザで開く)', click: openLicense },
+        { label: 'NOTICE(ブラウザで開く)', click: openNotice },
       ],
     },
   ])
