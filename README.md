@@ -13,7 +13,7 @@ uzumeは、LAN内の1箇所に保存されている画像をPCやスマートフ
 Goで作成された、uzumeのバックエンド
 * [BackendConnector](https://github.com/Saigo1997/uzume-backend-connector)<br>
 uzumeBackendに接続するためのTypeScriptライブラリ
-* [uzumeLP](https://github.com/Saigo1997/uzume-LP)<br>
+* [uzumeLP(private)](https://github.com/Saigo1997/uzume-LP)<br>
 前述のランディングページのソース
 
 
