@@ -1,25 +1,29 @@
 # uzume
-[uzumeBackendリポジトリ](https://github.com/Saigo1997/uzume-backend)<br>
-[BackendConnectorリポジトリ](https://github.com/Saigo1997/uzume-backend-connector)<br>
-[uzumeLPリポジトリ](https://github.com/Saigo1997/uzume-LP)
 
-## やりたいこと
-* NASにある画像をPCで見たい
-* スマホからも同様に見たい
+uzumeは理想の画像管理ソフトを目指しているプロジェクトです。<br>
+[ランディングページ](https://uzume.amanoiwato.link/)
 
-## 機能一覧
-* 画像一覧機能(サムネイル)
-* 画像表示機能(一枚)
+## 思想
+uzumeは、LAN内の1箇所に保存されている画像をPCやスマートフォンで管理できるようにすることを目的としています。<br>
+現在はPC版しか存在していませんが、前述のようにスマホアプリも制作する予定です。<br>
+そのため、frontendとbackendを分けることでLAN内に存在するマシン1台にbackendを配置、frontendをそれぞれの端末で起動し1箇所のリソースに複数からアクセスできるように設計しています。
 
-## 仕様
-### オフライン時のスマホの扱いについて
-`未分類`扱いとして画像をスマホ内に保存しておき、オンライン復帰時にNASにアップロードする
+## 関連リポジトリ
+* [uzumeBackend](https://github.com/Saigo1997/uzume-backend)<br>
+Goで作成された、uzumeのバックエンド
+* [BackendConnector](https://github.com/Saigo1997/uzume-backend-connector)<br>
+uzumeBackendに接続するためのTypeScriptライブラリ
+* [uzumeLP](https://github.com/Saigo1997/uzume-LP)<br>
+前述のランディングページのソース
+
+
+# 開発用情報
 
 ## ブランチ戦略
 * issue番号0を作業する場合、`feature/0`ブランチを作成する。
 * 作業が終わったら`main`ブランチに対してPRを作成する。
-* PRに`resolves #0`と記載する。そうするとPRがマージされたときにissueを自動でクローズしてくれる。
+* PRに`resolves #0`と記載する。(PRがマージされたときにissueを自動でクローズしてくれる。)
 
-## pushする前にすること
-### backend/blueprint以下を編集したとき
-* `backend/blueprint/converter.sh`を実行し、生成される`docs/index.html`をコミットに含める
+## PRを出すときの注意点
+`.github/pull_request_template.md`(PRのテンプレート)のチェックリストを確認してください。
+
