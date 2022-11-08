@@ -8,14 +8,13 @@ import {
   Reflect,
   ImageFiles,
   ImageInfo,
-  ImageInfos,
-  ShowImages,
-  RequestImage,
   ImageData,
   ImageUploadProgress,
 } from '../../ipc/images'
 import CssConst from './../cssConst'
 import { Event } from './../lib/eventCustomHooks'
+import { useCollectImage } from './collectImagesHooks'
+import { usePreview } from './previewHooks'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -29,38 +28,23 @@ type ImageIndexViewProps = {
   onShowImagesEvent: Event
 }
 
-type ImageList = {
-  page: number
-  images: ImageInfo[]
-}
-
-type Point = {
-  x: number
-  y: number
-}
-
-type Preview = {
-  isDisplay: boolean
-  isFlagBreak: boolean
-  startingPos: Point
-}
-
 type UploadModalInfo = {
   completeCnt: number
   allImagesCnt: number
 }
 
 export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
-  const [isDragOverState, setIsDragOver] = useState(false)
-  const [imageList, setImageList] = useState({ page: 0, images: [] } as ImageList)
-  const [nextPageRequestableState, setNextPageRequestable] = useState(false)
-  const [lastClickImageId, setLastClickImageId] = useState('')
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
-  const [preview, setPreview] = useState({
-    isDisplay: false,
-    isFlagBreak: false,
-    startingPos: { x: 0, y: 0 },
-  } as Preview)
+  const [imageList, nextPageRequestableState, infScrollRef] = useCollectImage(
+    props.workspaceId,
+    props.uncategorized,
+    props.tagIds,
+    props.searchType,
+    () => setSelectedImageId([])
+  )
+  const [previewStatus, onLeaveThumbneil, iconEnter] = usePreview(props.workspaceId)
+  const [isDragOverState, setIsDragOver] = useState(false)
+  const [lastClickImageId, setLastClickImageId] = useState('')
   const [isShowImageUploadModal, setIsShowImageUploadModal] = useState(false)
   const [uploadModalInfo, setUploadModalInfo] = useState({ completeCnt: 0, allImagesCnt: 0 } as UploadModalInfo)
 
@@ -70,12 +54,11 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mM0/g8AAWsBNAUUB5MAAAAASUVORK5CYII='
 
   useEffect(() => {
-    if (props.workspaceId.length > 0) {
-      setImageList({ images: [], page: 0 })
-      setNextPageRequestable(false)
-      requestShowImages(1)
-    }
-  }, [props.workspaceId, props.uncategorized])
+    window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
+      const reflect = JSON.parse(arg) as Reflect
+      window.api.send(reflect.replyId)
+    })
+  }, [])
 
   useEffect(() => {
     const imgs: any = document.getElementsByClassName('thumbnail-img')
@@ -87,70 +70,11 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   }, [props.onShowImagesEvent])
 
   useEffect(() => {
-    if (imageList.page > 0) setNextPageRequestable(true)
-  }, [imageList.page])
-
-  useEffect(() => {
     if (props.onChangeSelectedImages) props.onChangeSelectedImages(selectedImageId)
   }, [selectedImageId])
 
+  // 画像(情報)受信系
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.SHOW_IMAGES, (_e, arg) => {
-      const rcvImageInfos = JSON.parse(arg) as ImageInfos
-      setSelectedImageId([])
-
-      if (rcvImageInfos.images.length == 0) {
-        if (rcvImageInfos.page == 1) setImageList({ page: 1, images: [] })
-        setNextPageRequestable(false)
-        return
-      }
-
-      setImageList(prevState => {
-        const requestImage = (newImages: ImageInfo[]) => {
-          newImages.forEach(image => {
-            const reqImage: RequestImage = {
-              workspaceId: rcvImageInfos.workspaceId,
-              imageId: image.image_id,
-              isThumbnail: true,
-            }
-            window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
-          })
-        }
-
-        if (rcvImageInfos.page == 1) {
-          // TODO:スクロール量もリセットする必要あり？
-          requestImage(rcvImageInfos.images)
-          return {
-            images: rcvImageInfos.images,
-            page: 1,
-          }
-        }
-
-        const addImages: ImageInfo[] = []
-        const currImages: { [image_id: string]: boolean } = {}
-        for (let i = 0; i < prevState.images.length; i++) {
-          currImages[prevState.images[i].image_id] = true
-        }
-        for (let i = 0; i < rcvImageInfos.images.length; i++) {
-          if (rcvImageInfos.images[i].image_id in currImages) continue
-          addImages.push(rcvImageInfos.images[i])
-        }
-
-        requestImage(addImages)
-        return {
-          images: [...prevState.images, ...addImages],
-          page: rcvImageInfos.page,
-        }
-      })
-    })
-  }, [])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
-      const reflect = JSON.parse(arg) as Reflect
-      window.api.send(reflect.replyId)
-    })
-
     window.api.on(ImagesIpcId.ToRenderer.REQUEST_THUMB_IMAGE, (_e, arg) => {
       const imageData = JSON.parse(arg) as ImageData
 
@@ -159,9 +83,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
         img.src = 'data:image;base64,' + imageData.imageBase64
       }
     })
-  }, [])
 
-  useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.UPDATE_IMAGE_INFO, (_e, arg) => {
       const imageInfoList = JSON.parse(arg) as ImageInfo[]
       imageInfoList.forEach(img => {
@@ -172,9 +94,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
         }
       })
     })
-  }, [])
 
-  useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
       const imageData = JSON.parse(arg) as ImageData
       const imgPreview: any = document.getElementById('image-preview')
@@ -182,9 +102,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
         imgPreview.src = 'data:image;base64,' + imageData.imageBase64
       }
     })
-  }, [])
 
-  useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, (_e, arg) => {
       const progress = JSON.parse(arg) as ImageUploadProgress
       if (progress.completeCnt < progress.allImagesCnt) {
@@ -195,15 +113,6 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
       }
     })
   }, [])
-
-  useEffect(() => {
-    const thumbnailArea: any = document.getElementById('thumbnail-area')
-    thumbnailArea.addEventListener('mousemove', onMousemove)
-
-    return () => {
-      thumbnailArea.removeEventListener('mousemove', onMousemove)
-    }
-  })
 
   const showContextMenu = (e: any) => {
     e.preventDefault()
@@ -226,18 +135,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     }
   })
 
-  const requestShowImages = (page: number) => {
-    if (props.workspaceId == '') return
-
-    const showImages: ShowImages = {
-      workspaceId: props.workspaceId,
-      page: page,
-      tagIds: props.tagIds,
-      searchType: props.searchType,
-      uncategorized: props.uncategorized,
-    }
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
-  }
+  /* シンプルなイベントハンドラ */
 
   const handleDragOver = (e: any) => {
     e.stopPropagation()
@@ -281,41 +179,13 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     window.api.send(ImagesIpcId.ToMainProc.UPLOAD_IMAGES, JSON.stringify(imageFiles))
   }
 
-  const onMousemove = (e: MouseEvent) => {
-    setPreview((state: Preview): Preview => {
-      let isDisplay = state.isDisplay
-      let isFlagBreak = state.isFlagBreak
-      let x = e.screenX
-      let y = e.screenY
-
-      if (state.isDisplay) {
-        const dx = Math.abs(state.startingPos.x - e.screenX)
-        const dy = Math.abs(state.startingPos.y - e.screenY)
-        x = state.startingPos.x
-        y = state.startingPos.y
-
-        if (dx > 16 || dy > 16) {
-          // マウスを早く動かしたときscreenX,screenYが飛び飛びになって、
-          // 表示範囲に入った瞬間に消えてしまうため、範囲内で一回以上MouseEventが置きないと非表示にしない
-          if (isFlagBreak) {
-            isDisplay = false
-          } else {
-            x = e.screenX
-            y = e.screenY
-          }
-        } else {
-          isFlagBreak = true
-        }
-      }
-
-      return { isDisplay: isDisplay, isFlagBreak: isFlagBreak, startingPos: { x: x, y: y } }
-    })
-  }
-
   const onThumbnailAreaClick = (e: any) => {
     if (e.target == e.currentTarget) updateSelectImages([])
   }
 
+  const updateSelectImages = (imageIds: string[]) => {
+    setSelectedImageId(imageIds)
+  }
   const onImageClick = (e: any, imageId: string) => {
     e.preventDefault()
 
@@ -341,64 +211,12 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     setLastClickImageId(imageId)
   }
 
-  const updateSelectImages = (imageIds: string[]) => {
-    setSelectedImageId(imageIds)
-  }
-
-  const onLeaveThumbneil = () => {
-    setPreview({ isDisplay: false, isFlagBreak: false, startingPos: { x: 0, y: 0 } })
-  }
+  /* デザイン */
 
   const thumbImgStyle = (width: number, height: number): React.CSSProperties => {
     const heightMax = 120
     return { width: `${(width * heightMax) / height}px`, height: `${heightMax}px` }
   }
-
-  const iconEnter = (e: any) => {
-    setPreview((state: Preview): Preview => {
-      return { isDisplay: true, isFlagBreak: false, startingPos: state.startingPos }
-    })
-
-    const imageId = e.target.dataset.image_id
-    const img: any = document.getElementById(`image-${imageId}`)
-    if (img) {
-      const imgPreview: any = document.getElementById('image-preview')
-      imgPreview.src = img.src
-      imgPreview.style.width = `${e.target.dataset.width}px`
-      imgPreview.style.height = `${e.target.dataset.height}px`
-    }
-
-    const requestImage: RequestImage = {
-      workspaceId: props.workspaceId,
-      imageId: imageId,
-      isThumbnail: false,
-    }
-    window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage))
-  }
-
-  // 無限スクロール発火の監視
-  const ref = React.useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (nextPageRequestableState) {
-            setNextPageRequestable(false)
-            requestShowImages(imageList.page + 1)
-          }
-        }
-      },
-      { threshold: 0.5 }
-    )
-    if (ref.current === null) return
-    observer.unobserve(ref.current)
-    if (nextPageRequestableState) observer.observe(ref.current)
-
-    return () => {
-      if (ref.current === null) return
-      observer.unobserve(ref.current)
-    }
-  })
 
   const thumbnailArea: HTMLElement | null = document.getElementById('thumbnail-area')
 
@@ -406,8 +224,8 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     position: 'absolute',
     maxWidth: thumbnailArea?.offsetWidth,
     maxHeight: thumbnailArea?.offsetHeight,
-    visibility: preview.isDisplay ? 'visible' : 'hidden',
-    opacity: preview.isDisplay ? '1' : '0',
+    visibility: previewStatus.isDisplay ? 'visible' : 'hidden',
+    opacity: previewStatus.isDisplay ? '1' : '0',
     backgroundColor: 'rbga(0,0,0,0)',
     objectFit: 'contain',
     transitionProperty: 'opacity',
@@ -492,7 +310,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
       })}
       {(() => {
         if (nextPageRequestableState) {
-          return <div id="infinite-scroll-end-marker" ref={ref}></div>
+          return <div id="infinite-scroll-end-marker" ref={infScrollRef}></div>
         } else {
           return
         }
