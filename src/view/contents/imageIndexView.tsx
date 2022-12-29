@@ -15,6 +15,7 @@ import CssConst from './../cssConst'
 import { Event } from './../lib/eventCustomHooks'
 import { useCollectImage } from './collectImagesHooks'
 import { usePreview } from './previewHooks'
+import { CtrlLikeKey } from '../lib/helper'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -189,7 +190,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const onImageClick = (e: any, imageId: string) => {
     e.preventDefault()
 
-    if (e.metaKey || e.ctrlKey) {
+    if (CtrlLikeKey(e)) {
       // command or ctrl
       setSelectedImageId(state => [...state, imageId])
     } else if (e.shiftKey) {

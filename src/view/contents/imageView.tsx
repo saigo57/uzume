@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautiful-dnd'
 import { IpcId as ImagesIpcId, RequestImage, ImageData, SortGroupImages } from '../../ipc/images'
+import { ImageViewMulti } from './imageViewMulti'
+import { ImageViewSingle } from './imageViewSingle'
 
 type ImageViewProps = {
   workspaceId: string
@@ -9,6 +11,7 @@ type ImageViewProps = {
 
 export const ImageView: React.VFC<ImageViewProps> = props => {
   const [origImages, setOrigImages] = useState([] as ImageData[])
+  const [selectedImageId, setSelectedImageId] = useState(null as string | null)
 
   useEffect(() => {
     const requestImage: RequestImage = {
@@ -42,6 +45,18 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
     window.api.send(ImagesIpcId.ToMainProc.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
   }, [origImages])
 
+  const findImageById = (imageId: string | null): ImageData | null => {
+    if (imageId == null) return null
+
+    for (let i = 0; i < origImages.length; i++) {
+      if (origImages[i].imageId == imageId) {
+        return origImages[i]
+      }
+    }
+
+    return null
+  }
+
   // ドラッグ&ドロップした要素を入れ替える
   const reorder = (list: ImageData[], startIndex: number, endIndex: number): ImageData[] => {
     const result = Array.from(list)
@@ -65,49 +80,70 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
     setOrigImages(movedItems)
   }
 
-  const isShowSidePanel = origImages.length > 1
+  const isShowSidePanel = origImages.length > 1 && selectedImageId == null
 
   return (
     <div className="image-view-area">
       {(() => {
-        if (isShowSidePanel) {
+        if (!isShowSidePanel) return
+
+        return (
+          <div className="images-side-panel">
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="images">
+                {provided => (
+                  <div className="images" {...provided.droppableProps} ref={provided.innerRef}>
+                    {origImages.map((imageData, index) => {
+                      return (
+                        <Draggable key={imageData.imageId} draggableId={imageData.imageId} index={index}>
+                          {provided => (
+                            <img
+                              key={imageData.imageId}
+                              src={'data:image;base64,' + imageData.imageBase64}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps} // TODO: styleが直で書かれる影響？でCSPが出ている
+                            ></img>
+                          )}
+                        </Draggable>
+                      )
+                      {
+                        provided.placeholder
+                      }
+                    })}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </div>
+        )
+      })()}
+
+      {(() => {
+        // 選択したときか1枚だけのときはsingleで表示
+        const imageData = origImages.length == 1 ? origImages[0] : findImageById(selectedImageId)
+        if (imageData) {
           return (
-            <div className="images-side-panel">
-              <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="images">
-                  {provided => (
-                    <div className="images" {...provided.droppableProps} ref={provided.innerRef}>
-                      {origImages.map((imageData, index) => {
-                        return (
-                          <Draggable key={imageData.imageId} draggableId={imageData.imageId} index={index}>
-                            {provided => (
-                              <img
-                                key={imageData.imageId}
-                                src={'data:image;base64,' + imageData.imageBase64}
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps} // TODO: styleが直で書かれる影響？でCSPが出ている
-                              ></img>
-                            )}
-                          </Draggable>
-                        )
-                        {
-                          provided.placeholder
-                        }
-                      })}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            </div>
+            <ImageViewSingle
+              image={imageData}
+              onContextMenu={() => {
+                setSelectedImageId(null)
+              }}
+            />
           )
         }
+
+        return (
+          <ImageViewMulti
+            images={origImages}
+            selectedImageId={selectedImageId}
+            isShowSidePanel={isShowSidePanel}
+            onImageSelect={(imageId: string) => {
+              setSelectedImageId(imageId)
+            }}
+          />
+        )
       })()}
-      <div className={`images-area ${isShowSidePanel ? 'show-side-panel' : ''}`}>
-        {origImages.map(imageData => {
-          return <img id={`image-orig-${imageData.imageId}`} src={'data:image;base64,' + imageData.imageBase64}></img>
-        })}
-      </div>
     </div>
   )
 }
