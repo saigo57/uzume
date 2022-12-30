@@ -4,6 +4,7 @@ import { CtrlLikeKey } from '../lib/helper'
 
 type ImageViewSingleProps = {
   image: ImageData
+  isShowSidePanel: boolean
   onContextMenu: () => void
 }
 
@@ -69,7 +70,12 @@ export const ImageViewSingle: React.VFC<ImageViewSingleProps> = props => {
   })
 
   return (
-    <div ref={imageRef} id="hoge-images-area" className={`images-area images-area-single ${isHoming ? 'homing' : ''}`}>
+    <div
+      ref={imageRef}
+      className={`images-area images-area-single  ${props.isShowSidePanel ? 'show-side-panel' : ''} ${
+        isHoming ? 'homing' : ''
+      }`}
+    >
       <img
         id={`image-orig-${props.image.imageId}`}
         src={'data:image;base64,' + props.image.imageBase64}

@@ -3,10 +3,13 @@ import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautif
 import { IpcId as ImagesIpcId, RequestImage, ImageData, SortGroupImages } from '../../ipc/images'
 import { ImageViewMulti } from './imageViewMulti'
 import { ImageViewSingle } from './imageViewSingle'
+import { Event } from './../lib/eventCustomHooks'
 
 type ImageViewProps = {
   workspaceId: string
   imageId: string
+  onNextImageEvent: Event
+  onPrevImageEvent: Event
 }
 
 export const ImageView: React.VFC<ImageViewProps> = props => {
@@ -45,6 +48,62 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
     window.api.send(ImagesIpcId.ToMainProc.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
   }, [origImages])
 
+  const setNextImageId = () => {
+    setSelectedImageId(currId => {
+      if (!currId) return null
+
+      let cnt = 0
+      for (; cnt < origImages.length; cnt++) {
+        if (origImages[cnt].imageId == currId) break
+      }
+
+      if (cnt + 1 < origImages.length) {
+        return origImages[cnt + 1].imageId
+      }
+
+      return currId
+    })
+  }
+
+  const setPrevImageId = () => {
+    setSelectedImageId(currId => {
+      if (!currId) return null
+
+      let prevImageId = currId
+      for (let i = 0; i < origImages.length; i++) {
+        if (origImages[i].imageId == currId) break
+        prevImageId = origImages[i].imageId
+      }
+
+      return prevImageId
+    })
+  }
+
+  useEffect(() => {
+    setNextImageId()
+  }, [props.onNextImageEvent])
+
+  useEffect(() => {
+    setPrevImageId()
+  }, [props.onPrevImageEvent])
+
+  const onKeyDown = (e: any) => {
+    if (e.code == 'ArrowUp' || e.code == 'ArrowLeft') {
+      setPrevImageId()
+    }
+
+    if (e.code == 'ArrowDown' || e.code == 'ArrowRight') {
+      setNextImageId()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  })
+
   const findImageById = (imageId: string | null): ImageData | null => {
     if (imageId == null) return null
 
@@ -80,7 +139,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
     setOrigImages(movedItems)
   }
 
-  const isShowSidePanel = origImages.length > 1 && selectedImageId == null
+  const isShowSidePanel = origImages.length > 1
 
   return (
     <div className="image-view-area">
@@ -98,8 +157,14 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
                         <Draggable key={imageData.imageId} draggableId={imageData.imageId} index={index}>
                           {provided => (
                             <img
+                              className={imageData.imageId == selectedImageId ? 'selected' : ''}
                               key={imageData.imageId}
                               src={'data:image;base64,' + imageData.imageBase64}
+                              onClick={() => {
+                                if (!selectedImageId) return
+
+                                setSelectedImageId(imageData.imageId)
+                              }}
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps} // TODO: styleが直で書かれる影響？でCSPが出ている
@@ -126,6 +191,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
           return (
             <ImageViewSingle
               image={imageData}
+              isShowSidePanel={isShowSidePanel}
               onContextMenu={() => {
                 setSelectedImageId(null)
               }}

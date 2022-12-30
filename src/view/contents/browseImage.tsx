@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { useTags } from '../lib/tagCustomHooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faRotateRight } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faRotateRight, faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import { Tag } from './../component/atmos/tag'
 import { SearchPanel } from './../component/organisms/searchPanel'
 import { ImageIndexView } from './imageIndexView'
@@ -33,6 +33,8 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
     useTags(props.workspaceId)
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
   const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null)
+  const [onNextImageEvent, raiseOnNextImageEvent] = useEvent(null)
+  const [onPrevImageEvent, raiseOnPrevImageEvent] = useEvent(null)
 
   const showImages = () => {
     if (props.workspaceId == '') return
@@ -190,12 +192,22 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
               )
             })}
           </div>
-          {/* <div className="control-panel">
+          <div className="control-panel">
             <div className="back-foward">
-              <FontAwesomeIcon icon={faStepBackward} />
-              <FontAwesomeIcon icon={faStepForward} />
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                onClick={() => {
+                  raiseOnPrevImageEvent(null)
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faChevronRight}
+                onClick={() => {
+                  raiseOnNextImageEvent(null)
+                }}
+              />
             </div>
-          </div> */}
+          </div>
 
           <SearchPanel
             id="search-panel-id"
@@ -221,7 +233,14 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
 
         {(() => {
           if (props.imageId) {
-            return <ImageView workspaceId={props.workspaceId} imageId={props.imageId} />
+            return (
+              <ImageView
+                workspaceId={props.workspaceId}
+                imageId={props.imageId}
+                onNextImageEvent={onNextImageEvent}
+                onPrevImageEvent={onPrevImageEvent}
+              />
+            )
           }
         })()}
       </section>
