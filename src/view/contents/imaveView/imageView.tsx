@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautiful-dnd'
-import { IpcId as ImagesIpcId, RequestImage, ImageData, SortGroupImages } from '../../ipc/images'
+import { IpcId as ImagesIpcId, RequestImage, ImageData, SortGroupImages } from '../../../ipc/images'
 import { ImageViewMulti } from './imageViewMulti'
 import { ImageViewSingle } from './imageViewSingle'
-import { Event } from './../lib/eventCustomHooks'
+import { Event } from '../../lib/eventCustomHooks'
 
 type ImageViewProps = {
   workspaceId: string

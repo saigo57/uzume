@@ -1,5 +1,5 @@
 import React from 'react'
-import { ImageData } from '../../ipc/images'
+import { ImageData } from '../../../ipc/images'
 
 type ImageViewMultiProps = {
   images: ImageData[]

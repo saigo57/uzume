@@ -6,7 +6,7 @@ import { faArrowLeft, faRotateRight, faChevronRight, faChevronLeft } from '@fort
 import { Tag } from './../component/atmos/tag'
 import { SearchPanel } from './../component/organisms/searchPanel'
 import { ImageIndexView } from './imageIndexView'
-import { ImageView } from './imageView'
+import { ImageView } from './imaveView/imageView'
 import { ImageSideBar } from './imageSideBar'
 import { TagInfo } from '../../ipc/tags'
 import { sendIpcGetAllTags } from '../commonIpc'

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ImageData } from '../../ipc/images'
-import { CtrlLikeKey } from '../lib/helper'
+import { ImageData } from '../../../ipc/images'
+import { CtrlLikeKey } from '../../lib/helper'
 
 type ImageViewSingleProps = {
   image: ImageData
