@@ -1,8 +1,9 @@
 import React from 'react'
-import { ImageData } from '../../../ipc/images'
+import { ImageBulk } from './imageTypes'
+import { dummyImageBase64 } from '../../lib/helper'
 
 type ImageViewMultiProps = {
-  images: ImageData[]
+  images: ImageBulk[]
   selectedImageId: string | null
   isShowSidePanel: boolean
   onImageSelect: (imageId: string) => void
@@ -11,15 +12,26 @@ type ImageViewMultiProps = {
 export const ImageViewMulti: React.VFC<ImageViewMultiProps> = props => {
   return (
     <div className={`images-area images-area-multi ${props.isShowSidePanel ? 'show-side-panel' : ''}`}>
-      {props.images.map(imageData => {
-        const selected = props.selectedImageId == imageData.imageId ? 'selected' : ''
+      {props.images.map(imageBulk => {
+        if (!imageBulk.imageData) {
+          const style = {
+            width: `${imageBulk.imageInfo.width}px`,
+            height: `${imageBulk.imageInfo.height}px`,
+          } as React.CSSProperties
+
+          return <img src={dummyImageBase64} style={style}></img>
+        }
+
+        const selected = props.selectedImageId == imageBulk.imageData.imageId ? 'selected' : ''
         return (
           <img
-            id={`image-orig-${imageData.imageId}`}
+            id={`image-orig-${imageBulk.imageData.imageId}`}
             className={selected}
-            src={'data:image;base64,' + imageData.imageBase64}
+            src={'data:image;base64,' + imageBulk.imageData.imageBase64}
             onDoubleClick={() => {
-              props.onImageSelect(imageData.imageId)
+              if (!imageBulk.imageData) return
+
+              props.onImageSelect(imageBulk.imageData.imageId)
             }}
           ></img>
         )
