@@ -70,6 +70,11 @@ ipcMain.on(IpcId.ToMainProc.GET_IMAGE_INFO_LIST, (e, arg) => {
   e.reply(IpcId.ToRenderer.GET_IMAGE_INFO_LIST, JSON.stringify(imageInfoList))
 })
 
+ipcMain.on(IpcId.ToMainProc.REQUEST_SIMPLE_THUMB_IMAGE, (e, arg) => {
+  const reqImage: RequestImage = JSON.parse(arg)
+  getImage(e, reqImage, IpcId.ToRenderer.REQUEST_SIMPLE_THUMB_IMAGE)
+})
+
 ipcMain.on(IpcId.ToMainProc.REQUEST_THUMB_IMAGE, (e, arg) => {
   const reqImage: RequestImage = JSON.parse(arg)
   if (Globals.thumb_image_queue.length == 0) {
@@ -129,6 +134,27 @@ ipcMain.on(IpcId.ToMainProc.REQUEST_ORIG_IMAGES, (e, arg) => {
     })
   } else {
     getImages(e, [reqImage], IpcId.ToRenderer.REQUEST_ORIG_IMAGES)
+  }
+})
+
+ipcMain.on(IpcId.ToMainProc.REQUEST_GROUP_IMAGE_INFO_LIST, (e, arg) => {
+  const reqImage: RequestImage = JSON.parse(arg)
+  if (!reqImage.imageId) return
+
+  const image = Globals.imageInfoList[reqImage.workspaceId][reqImage.imageId]
+  if (image.is_group_thumb_nail) {
+    BackendConnector.workspace(reqImage.workspaceId, ws => {
+      ws.image.getGroupedImages(image.group_id).then(resImages => {
+        if (!resImages.images) return
+
+        const requestImages = resImages.images.map(image => {
+          return resImageToImageInfo(image)
+        })
+        e.reply(IpcId.ToRenderer.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify(requestImages))
+      })
+    })
+  } else {
+    e.reply(IpcId.ToRenderer.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify([image]))
   }
 })
 

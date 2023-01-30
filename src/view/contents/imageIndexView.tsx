@@ -15,6 +15,7 @@ import CssConst from './../cssConst'
 import { Event } from './../lib/eventCustomHooks'
 import { useCollectImage } from './collectImagesHooks'
 import { usePreview } from './previewHooks'
+import { CtrlLikeKey, dummyImageBase64 } from '../lib/helper'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -50,8 +51,6 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
   // TODO: どこで持つべきか(少なくともここではなさそう)
   const supportedExts = ['jpeg', 'jpg', 'png', 'gif']
-  const dummyImageBase64 =
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mM0/g8AAWsBNAUUB5MAAAAASUVORK5CYII='
 
   useEffect(() => {
     window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
@@ -189,7 +188,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const onImageClick = (e: any, imageId: string) => {
     e.preventDefault()
 
-    if (e.metaKey || e.ctrlKey) {
+    if (CtrlLikeKey(e)) {
       // command or ctrl
       setSelectedImageId(state => [...state, imageId])
     } else if (e.shiftKey) {

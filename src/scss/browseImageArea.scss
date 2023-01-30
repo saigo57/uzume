@@ -58,11 +58,11 @@
     width: 140px;
     background-color: $light-background-color;
     & > .back-foward {
-      margin-left: 60px;
-      margin-top: 16px;
+      margin-left: 70px;
+      margin-top: 22px;
       & > svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         color: $main-font-color;
         cursor: pointer;
         &:nth-of-type(2) {
@@ -93,6 +93,11 @@
     img {
       width: 100%;
       height: auto;
+      &.selected {
+        width: calc(100% - 1px * 2);
+        border: solid 1px $selected-border-color;
+        border-radius: 2px;
+      }
     }
   }
   .images-area {
@@ -102,14 +107,28 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    img {
-      width: 100%;
-      height: auto;
-    }
 
     &.show-side-panel {
       float: right;
       width: calc(100% - $side-panel-width);
+    }
+    &.homing {
+      cursor: move;
+    }
+  }
+  .images-area-multi {
+    img {
+      width: 100%;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+  }
+  .images-area-single {
+    img {
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
     }
   }
 }
