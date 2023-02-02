@@ -15,6 +15,7 @@ import {
   RemoveTagFromImage,
   ImageUploadProgress,
   SortGroupImages,
+  GroupThumbChanged,
 } from '../ipc/images'
 import { BackendConnector, Image as BackendConnectorImage, ResImage } from 'uzume-backend-connector'
 import { showFooterMessage } from '../ipc/footer'
@@ -233,7 +234,22 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
 ipcMain.on(IpcId.ToMainProc.SORT_GROUP_IMAGES, (e, arg) => {
   const sortGroupImages: SortGroupImages = JSON.parse(arg)
   BackendConnector.workspace(sortGroupImages.workspaceId, ws => {
-    ws.image.patchImagesGroupSort(sortGroupImages.imageIds)
+    ws.image.patchImagesGroupSort(sortGroupImages.imageIds).then(() => {
+      // ソート後にグループの画像リストを取得し、画面側に新しいサムネの情報を送る
+      ws.image.getGroupedImages(sortGroupImages.groupId).then(groupImages => {
+        groupImages.images?.map(image => {
+          if (!image.is_group_thumb_nail) return
+
+          Globals.imageInfoList[sortGroupImages.workspaceId][image.image_id] = image
+          const groupThumbChanged: GroupThumbChanged = {
+            workspaceId: sortGroupImages.workspaceId,
+            prevThumbImageId: sortGroupImages.currThumbImageId,
+            image: image,
+          }
+          e.reply(IpcId.ToRenderer.GROUP_THUMB_CHANGED, JSON.stringify(groupThumbChanged))
+        })
+      })
+    })
   })
 })
 

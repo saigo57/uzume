@@ -12,7 +12,7 @@ export const useCollectImage = (
   tagIds: string[],
   searchType: string,
   clearSelectedImage: () => void
-): [ImageList, boolean, React.RefObject<HTMLDivElement>] => {
+): [ImageList, boolean, React.RefObject<HTMLDivElement>, (targetImageId: string, imageInfo: ImageInfo) => void] => {
   const [imageList, setImageList] = useState({ page: 0, images: [] } as ImageList)
   const [nextPageRequestableState, setNextPageRequestable] = useState(false)
 
@@ -119,5 +119,23 @@ export const useCollectImage = (
     }
   })
 
-  return [imageList, nextPageRequestableState, ref]
+  const replaceImageInfo = (targetImageId: string, imageInfo: ImageInfo) => {
+    setImageList(prevState => {
+      const nextImages = [...prevState.images]
+
+      for (let i = 0; i < nextImages.length; i++) {
+        if (nextImages[i].image_id == targetImageId) {
+          // 差し替え
+          nextImages[i] = imageInfo
+        }
+      }
+
+      return {
+        images: nextImages,
+        page: prevState.page,
+      }
+    })
+  }
+
+  return [imageList, nextPageRequestableState, ref, replaceImageInfo]
 }

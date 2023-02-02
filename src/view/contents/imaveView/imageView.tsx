@@ -118,6 +118,8 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
     const sortGroupImages: SortGroupImages = {
       workspaceId: props.workspaceId,
       imageIds: imageIds,
+      groupId: imageInfoList[0].group_id,
+      currThumbImageId: props.imageId,
     }
 
     window.api.send(ImagesIpcId.ToMainProc.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))

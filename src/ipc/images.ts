@@ -31,6 +31,7 @@ export class IpcId extends IpcIdBase {
     static readonly IMAGE_INFO_LIST_UPDATED: string = IpcId.generateIpcId()
     static readonly IMAGE_UPLOAD_PROGRESS: string = IpcId.generateIpcId()
     static readonly RELOAD_IMAGES: string = IpcId.generateIpcId()
+    static readonly GROUP_THUMB_CHANGED: string = IpcId.generateIpcId()
   }
 
   static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
@@ -116,4 +117,12 @@ export type ImageUploadProgress = {
 export type SortGroupImages = {
   workspaceId: string
   imageIds: string[]
+  groupId: string
+  currThumbImageId: string
+}
+
+export type GroupThumbChanged = {
+  workspaceId: string
+  prevThumbImageId: string
+  image: ImageInfo
 }

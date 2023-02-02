@@ -10,6 +10,8 @@ import {
   ImageInfo,
   ImageData,
   ImageUploadProgress,
+  GroupThumbChanged,
+  RequestImage,
 } from '../../ipc/images'
 import CssConst from './../cssConst'
 import { Event } from './../lib/eventCustomHooks'
@@ -34,9 +36,15 @@ type UploadModalInfo = {
   allImagesCnt: number
 }
 
+type SelectedSingleImageId = {
+  imageId: string | null
+}
+
 export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
-  const [imageList, nextPageRequestableState, infScrollRef] = useCollectImage(
+  // api.onの中でselectedImageIdを使うと最初の参照しか見れないので、参照が変わらないstateに都度コピーする
+  const [selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
+  const [imageList, nextPageRequestableState, infScrollRef, replaceImageInfo] = useCollectImage(
     props.workspaceId,
     props.uncategorized,
     props.tagIds,
@@ -70,6 +78,13 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
   useEffect(() => {
     if (props.onChangeSelectedImages) props.onChangeSelectedImages(selectedImageId)
+
+    let imageId = null as string | null
+    if (selectedImageId.length == 1) imageId = selectedImageId[0]
+    setSelectedSingleImageId(state => {
+      state.imageId = imageId
+      return state
+    })
   }, [selectedImageId])
 
   // 画像(情報)受信系
@@ -110,6 +125,33 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
         props.clearSearchTags()
         setIsShowImageUploadModal(false)
       }
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.on(ImagesIpcId.ToRenderer.GROUP_THUMB_CHANGED, (_e: any, arg: any) => {
+      const groupThumbChanged = JSON.parse(arg) as GroupThumbChanged
+
+      // もともとのthumb画像が同じであること
+      if (selectedSingleImageId.imageId != groupThumbChanged.prevThumbImageId) return
+      // thumb画像が変化していること
+      if (groupThumbChanged.prevThumbImageId == groupThumbChanged.image.image_id) return
+
+      // 旧thumbをダミー画像に置き換え
+      const img: any = document.getElementById(`image-${groupThumbChanged.prevThumbImageId}`)
+      if (img) {
+        img.src = dummyImageBase64
+      }
+      // thumb画像の情報を差し替え
+      replaceImageInfo(groupThumbChanged.prevThumbImageId, groupThumbChanged.image)
+      setSelectedImageId([groupThumbChanged.image.image_id])
+      // thumb画像を要求
+      const reqImage: RequestImage = {
+        workspaceId: groupThumbChanged.workspaceId,
+        imageId: groupThumbChanged.image.image_id,
+        isThumbnail: true,
+      }
+      window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
     })
   }, [])
 
