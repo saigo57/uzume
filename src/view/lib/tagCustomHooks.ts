@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { IpcId as TagsIpcId, TagInfo, TagList } from '../../ipc/tags'
-import { IpcId as TagGroupsIpcId, GetAllTagGroups, TagGroupInfo, TagGroupList } from '../../ipc/tagGroups'
+import { useRecoilState } from 'recoil'
+import { tagListAtom } from '../recoil/tagListAtom'
+import { IpcId as TagsIpcId, TagInfo, ShowContextMenu } from '../../ipc/tags'
 import { sendIpcGetAllTags } from '../commonIpc'
 
 export class MenuItem {
@@ -9,11 +10,8 @@ export class MenuItem {
   // その他はTagGroup
 }
 
-export const useTags = (
-  workspaceId: string
-): [TagGroupInfo[], TagInfo[], TagInfo[], () => void, string, (menu: string) => void] => {
-  const [tagGroupListState, setTagGroupList] = useState([] as TagGroupInfo[])
-  const [tagAllListState, setTagAllList] = useState([] as TagInfo[])
+export const useTags = (workspaceId: string): [TagInfo[], TagInfo[], () => void, string, (menu: string) => void] => {
+  const [tagAllListState, setTagAllList] = useRecoilState(tagListAtom)
   const [showingTagAllListState, setShowingTagAllList] = useState([] as TagInfo[])
   const [selectingMenu, setSelectingMenu] = useState(MenuItem.ALL_TAG)
 
@@ -21,28 +19,8 @@ export const useTags = (
     if (workspaceId == '') return
 
     setSelectingMenu(MenuItem.ALL_TAG)
-    sendIpcGetAllTags(workspaceId)
-
-    const req = {
-      workspaceId: workspaceId,
-    } as GetAllTagGroups
-
-    window.api.send(TagGroupsIpcId.ToMainProc.GET_ALL_TAG_GROUPS, JSON.stringify(req))
+    sendIpcGetAllTags(workspaceId, setTagAllList)
   }, [workspaceId])
-
-  useEffect(() => {
-    window.api.on(TagsIpcId.ToRenderer.GET_ALL_TAGS, (_e, arg) => {
-      const tagList = JSON.parse(arg) as TagList
-      setTagAllList(tagList.tags)
-    })
-  }, [])
-
-  useEffect(() => {
-    window.api.on(TagGroupsIpcId.ToRenderer.GET_ALL_TAG_GROUPS, (_e, arg) => {
-      const tagGroupList = JSON.parse(arg) as TagGroupList
-      setTagGroupList(tagGroupList.tag_groups)
-    })
-  }, [])
 
   useEffect(() => {
     switch (selectingMenu) {
@@ -68,5 +46,13 @@ export const useTags = (
     setSelectingMenu(menu)
   }
 
-  return [tagGroupListState, tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu]
+  return [tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu]
+}
+
+export const createOnContextMenu = (req: ShowContextMenu) => {
+  return () => {
+    if (!req) return
+
+    window.api.send(TagsIpcId.TagContextMenu.SHOW_CONTEXT_MENU, JSON.stringify(req))
+  }
 }

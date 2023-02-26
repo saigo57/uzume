@@ -51,7 +51,7 @@ ipcMain.on(IpcId.ToMainProc.UPLOAD_IMAGES, (e, arg) => {
         showImagesReply(e, imageFiles.workspaceId, 1, imageFiles.tagIds, imageFiles.searchType)
       })
       .catch(err => {
-        showFooterMessage(e, `画像の登録に失敗しました。[${err}}]`)
+        showFooterMessage(e, `画像の登録に失敗しました。[${err}]`)
       })
   })
 })
@@ -171,7 +171,7 @@ ipcMain.on(IpcId.ToMainProc.REMOVE_TAG, (e, arg) => {
     const imageInfoList: ImageInfo[] = []
     removeTagFromImage.imageIds.forEach(image_id => {
       ws.image.removeTag(image_id, removeTagFromImage.tagId).catch(err => {
-        showFooterMessage(e, `タグの削除に失敗しました。[${err}}]`)
+        showFooterMessage(e, `タグの削除に失敗しました。[${err}]`)
       })
       const imageInfo = Globals.imageInfoList[removeTagFromImage.workspaceId][image_id]
       const newTags: string[] = []
@@ -345,7 +345,7 @@ export function showImagesReply(
         e.reply(IpcId.ToRenderer.SHOW_IMAGES, JSON.stringify(imageInfos))
       })
       .catch(err => {
-        showFooterMessage(e, `画像リストの取得に失敗しました。[${err}}]`)
+        showFooterMessage(e, `画像リストの取得に失敗しました。[${err}]`)
       })
   })
 }
@@ -358,7 +358,7 @@ export function addTagToImages(e: Electron.IpcMainEvent, workspaceId: string, im
       if (imageInfo.tags.includes(tagId)) continue // 既に付与されていたらスキップする
 
       ws.image.addTag(imageIds[i], tagId).catch(err => {
-        showFooterMessage(e, `タグの付与に失敗しました。[${err}}]`)
+        showFooterMessage(e, `タグの付与に失敗しました。[${err}]`)
       })
       imageInfo.tags.push(tagId)
       imageInfoList.push(imageInfo)

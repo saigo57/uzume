@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-
+import { useRecoilValue } from 'recoil'
+import { tagGroupListAtom } from './recoil/tagGroupListAtom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faHome,
@@ -10,8 +11,8 @@ import {
   faCaretRight,
   faCaretDown,
 } from '@fortawesome/free-solid-svg-icons'
-import { useTags } from './lib/tagCustomHooks'
-import { IpcId as TagsIpcId, ShowContextMenu, TagInfo } from '../ipc/tags'
+import { useTags, createOnContextMenu } from './lib/tagCustomHooks'
+import { ShowContextMenu, TagInfo } from '../ipc/tags'
 
 type MainMenuProps = {
   workspaceId: string
@@ -23,9 +24,11 @@ type MainMenuProps = {
 }
 
 export const MainMenu: React.VFC<MainMenuProps> = props => {
+  const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [FavoriteTagListState, setFavoriteTagList] = useState([] as TagInfo[])
-  const [tagGroupListState, tagAllListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] =
-    useTags(props.workspaceId)
+  const [tagAllListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(
+    props.workspaceId
+  )
   const [isTagGroupOpen, setIsTagGroupOpen] = useState({} as { [key: string]: boolean })
 
   useEffect(() => {
@@ -60,18 +63,13 @@ export const MainMenu: React.VFC<MainMenuProps> = props => {
     })
   }
 
-  const createOnContextMenu = (tag: TagInfo | null) => {
-    return () => {
-      if (!tag) return
-
-      const req: ShowContextMenu = {
-        workspaceId: props.workspaceId,
-        tagId: tag.tagId,
-        tagName: tag.name,
-        currFavorite: tag.favorite,
-      }
-      window.api.send(TagsIpcId.ToMainProc.SHOW_CONTEXT_MENU, JSON.stringify(req))
-    }
+  const tagInfoToShowContextMenu = (tagInfo: TagInfo) => {
+    return {
+      workspaceId: props.workspaceId,
+      tagId: tagInfo.tagId,
+      tagName: tagInfo.name,
+      currFavorite: tagInfo.favorite,
+    } as ShowContextMenu
   }
 
   return (
@@ -101,7 +99,7 @@ export const MainMenu: React.VFC<MainMenuProps> = props => {
               onClick={() => {
                 props.onSingleTagClick(tag.tagId)
               }}
-              onContextMenu={createOnContextMenu(tag)}
+              onContextMenu={createOnContextMenu(tagInfoToShowContextMenu(tag))}
             >
               <FontAwesomeIcon icon={faTag} />
               {tag.name}
@@ -137,7 +135,7 @@ export const MainMenu: React.VFC<MainMenuProps> = props => {
                         onClick={() => {
                           props.onSingleTagClick(tag.tagId)
                         }}
-                        onContextMenu={createOnContextMenu(tag)}
+                        onContextMenu={createOnContextMenu(tagInfoToShowContextMenu(tag))}
                       >
                         <FontAwesomeIcon icon={faTag} />
                         {tag.name}

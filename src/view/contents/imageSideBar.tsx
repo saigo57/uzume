@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { tagListAtom } from '../recoil/tagListAtom'
 import { useTags } from '../lib/tagCustomHooks'
 import { IpcId as ImageIpcId, RequestImageInfo, ImageInfo, RemoveTagFromImage } from '../../ipc/images'
 import { TagInfo } from '../../ipc/tags'
@@ -13,10 +15,10 @@ type ImageSideBarProps = {
 }
 
 export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
   const [imageInfoList, setImageInfoList] = useState([] as ImageInfo[])
   const [isShowTagCtrlPanel, setIsShowTagCtrlPanel] = useState(false)
-  const [_tagGroupListState, tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] =
-    useTags(props.workspaceId)
+  const [tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(props.workspaceId)
 
   useEffect(() => {
     updateImageInfo()
@@ -31,7 +33,7 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
   }, [])
 
   useEffect(() => {
-    sendIpcGetAllTags(props.workspaceId)
+    sendIpcGetAllTags(props.workspaceId, setTagAllList)
   }, [props.workspaceId])
 
   useEffect(() => {

@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { tagListAtom } from '../recoil/tagListAtom'
+import { tagGroupListAtom } from './../recoil/tagGroupListAtom'
 import ReactModal from 'react-modal'
 import { useDrop } from 'react-dnd'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { MenuItem, useTags } from '../lib/tagCustomHooks'
 import { Tag } from './../component/atmos/tag'
-import { IpcId as TagGroupsIpcId, CreateTagGroup, AddToTagGroup } from '../../ipc/tagGroups'
+import { IpcId as TagIpcId, GetAllTags, TagList } from '../../ipc/tags'
+import {
+  IpcId as TagGroupsIpcId,
+  CreateTagGroup,
+  AddToTagGroup,
+  TagGroupList,
+  GetAllTagGroups,
+} from '../../ipc/tagGroups'
 import { IpcId as TagManageIpcId, TagGroupContextMenu } from '../../ipc/tagManage'
 import CssConst from './../cssConst'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -41,6 +51,7 @@ const reactModalStyle: ReactModal.Styles = {
 }
 
 const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
   const onDrop = (item: any) => {
     const req = {
       workspaceId: props.workspaceId,
@@ -48,7 +59,15 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
       tagId: item.tagId,
     } as AddToTagGroup
 
-    window.api.send(TagGroupsIpcId.ToMainProc.ADD_TO_TAG_GROUP, JSON.stringify(req))
+    window.api.invoke(TagGroupsIpcId.Invoke.ADD_TO_TAG_GROUP, JSON.stringify(req)).then(() => {
+      const req = {
+        workspaceId: props.workspaceId,
+      } as GetAllTags
+      window.api.invoke(TagIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(req)).then(arg => {
+        const tagList = JSON.parse(arg) as TagList
+        setTagAllList(tagList.tags)
+      })
+    })
   }
 
   const [{ isOver }, dropRef] = useDrop({
@@ -65,7 +84,7 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
       tagGroupId: props.tagGroupId,
       tagGroupName: props.name,
     } as TagGroupContextMenu
-    window.api.send(TagManageIpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, JSON.stringify(req))
+    window.api.send(TagManageIpcId.TagGroupContextMenu.SHOW_CONTEXT_MENU, JSON.stringify(req))
   }
 
   return (
@@ -81,18 +100,37 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
 }
 
 export const TagManage: React.VFC<TagManageProps> = props => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
+  const [tagGroupListState, setTagGroupList] = useRecoilState(tagGroupListAtom)
   const [newTagGroupNameState, setNewTagGroupName] = useState('')
   const [isShowNewTagGroupModalState, setIsShowNewTagGroupModal] = useState(false)
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] =
-    useTags(props.workspaceId)
+  const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId)
 
   useEffect(() => {
     resetTagList()
   }, [props.workspaceId])
 
   useEffect(() => {
-    window.api.on(TagManageIpcId.ToRenderer.TAG_GROUP_DELETE, (_e, _arg) => {
+    window.api.on(TagManageIpcId.TagGroupContextMenu.TAG_GROUP_DELETED, (_e, _arg) => {
       selectMenu(MenuItem.ALL_TAG)
+
+      const tagGroupReq = {
+        workspaceId: props.workspaceId,
+      } as GetAllTagGroups
+
+      window.api.invoke(TagGroupsIpcId.Invoke.GET_ALL_TAG_GROUPS, JSON.stringify(tagGroupReq)).then((arg: string) => {
+        const tagGroupList = JSON.parse(arg) as TagGroupList
+        setTagGroupList(tagGroupList.tag_groups)
+      })
+
+      const tagReq = {
+        workspaceId: props.workspaceId,
+      } as GetAllTags
+
+      window.api.invoke(TagIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(tagReq)).then(arg => {
+        const tagList = JSON.parse(arg) as TagList
+        setTagAllList(tagList.tags)
+      })
     })
   }, [])
 
@@ -110,7 +148,13 @@ export const TagManage: React.VFC<TagManageProps> = props => {
       workspaceId: props.workspaceId,
       name: newTagGroupNameState,
     } as CreateTagGroup
-    window.api.send(TagGroupsIpcId.ToMainProc.CREATE_NEW_TAG_GROUP, JSON.stringify(req))
+
+    window.api.invoke(TagGroupsIpcId.Invoke.CREATE_NEW_TAG_GROUP, JSON.stringify(req)).then(() => {
+      window.api.invoke(TagGroupsIpcId.Invoke.GET_ALL_TAG_GROUPS, JSON.stringify(req)).then((arg: string) => {
+        const tagGroupList = JSON.parse(arg) as TagGroupList
+        setTagGroupList(tagGroupList.tag_groups)
+      })
+    })
   }
 
   const menuSelected = (menu: string): string => {

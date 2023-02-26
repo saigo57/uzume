@@ -1,32 +1,32 @@
 import { ipcMain, BrowserWindow, Menu } from 'electron'
-import { IpcId, GetAllTags, TagInfo, CreateTagToImage, ShowContextMenu, TagRenameReply, TagRename } from '../ipc/tags'
-import { addTagToImages } from './images'
-import { BackendConnector } from 'uzume-backend-connector'
+import { IpcId, GetAllTags, CreateTagToImage, ShowContextMenu, TagRenameReply, TagRename } from '../ipc/tags'
+import { CreatedTagToImage } from '../ipc/tags'
 import { showFooterMessage } from '../ipc/footer'
+import TagUseCase from './useCase/tagUseCase'
 
-ipcMain.on(IpcId.ToMainProc.GET_ALL_TAGS, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.GET_ALL_TAGS, async (e, arg) => {
   const reqAllTags: GetAllTags = JSON.parse(arg)
-  getNewTags(e, reqAllTags.workspaceId)
+  const tags = await TagUseCase.fetchAllTags(reqAllTags.workspaceId)
+  return JSON.stringify({ tags: tags })
 })
 
-ipcMain.on(IpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.CREATE_NEW_TAG_TO_IMAGE, async (e, arg) => {
   const createTag: CreateTagToImage = JSON.parse(arg)
-  BackendConnector.workspace(createTag.workspaceId, ws => {
-    ws.tags
-      .createNewTag(createTag.tagName)
-      .then(tagInfo => {
-        // タグ再取得
-        getNewTags(e, createTag.workspaceId)
-        // 画像にタグ付与
-        addTagToImages(e, createTag.workspaceId, createTag.imageIds, tagInfo.tag_id)
-      })
-      .catch(err => {
-        showFooterMessage(e, `画像へのタグ付与に失敗しました。[${err}}]`)
-      })
-  })
+
+  try {
+    const createdTagInfo = await TagUseCase.createNewTag(createTag.workspaceId, createTag.tagName)
+
+    const createdTagToImage = {
+      createTag: createTag,
+      createdTagInfo: createdTagInfo,
+    } as CreatedTagToImage
+    return JSON.stringify(createdTagToImage)
+  } catch (err) {
+    showFooterMessage(e, `画像へのタグ付与に失敗しました。[${err}]`)
+  }
 })
 
-ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
+ipcMain.on(IpcId.TagContextMenu.SHOW_CONTEXT_MENU, (e, arg) => {
   const requestShowContextMenu: ShowContextMenu = JSON.parse(arg)
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
@@ -34,27 +34,21 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
       label: `お気に入り登録${requestShowContextMenu.currFavorite ? '解除' : ''}`,
       click: () => {
         if (requestShowContextMenu.currFavorite) {
-          BackendConnector.workspace(requestShowContextMenu.workspaceId, ws => {
-            ws.tags
-              .removeFavorite(requestShowContextMenu.tagId)
-              .then(() => {
-                getNewTags(e, requestShowContextMenu.workspaceId)
-              })
-              .catch(err => {
-                showFooterMessage(e, `お気に入りタグからの削除に失敗しました。[${err}}]`)
-              })
-          })
+          TagUseCase.removeFavorite(requestShowContextMenu.workspaceId, requestShowContextMenu.tagId)
+            .then(() => {
+              e.reply(IpcId.TagContextMenu.TAG_FAVORITE_CHANGED)
+            })
+            .catch(err => {
+              showFooterMessage(e, `お気に入りタグからの削除に失敗しました。[${err}]`)
+            })
         } else {
-          BackendConnector.workspace(requestShowContextMenu.workspaceId, ws => {
-            ws.tags
-              .addFavorite(requestShowContextMenu.tagId)
-              .then(() => {
-                getNewTags(e, requestShowContextMenu.workspaceId)
-              })
-              .catch(err => {
-                showFooterMessage(e, `お気に入りタグへの追加に失敗しました。[${err}}]`)
-              })
-          })
+          TagUseCase.addFavorite(requestShowContextMenu.workspaceId, requestShowContextMenu.tagId)
+            .then(() => {
+              e.reply(IpcId.TagContextMenu.TAG_FAVORITE_CHANGED)
+            })
+            .catch(err => {
+              showFooterMessage(e, `お気に入りタグへの追加に失敗しました。[${err}]`)
+            })
         }
       },
     },
@@ -66,7 +60,7 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
           tagId: requestShowContextMenu.tagId,
           tagName: requestShowContextMenu.tagName,
         }
-        e.reply(IpcId.ToRenderer.TO_TAG_RENAME, JSON.stringify(req))
+        e.reply(IpcId.TagContextMenu.SHOW_TAG_RENAME_MODAL, JSON.stringify(req))
       },
     },
   ]
@@ -75,41 +69,12 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
   menu.popup(contents)
 })
 
-ipcMain.on(IpcId.ToMainProc.TAG_RENAME, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.TAG_RENAME, async (e, arg) => {
   const requestTagRename: TagRename = JSON.parse(arg)
 
-  BackendConnector.workspace(requestTagRename.workspaceId, ws => {
-    ws.tags
-      .renameTag(requestTagRename.tagId, requestTagRename.tagName)
-      .then(() => {
-        getNewTags(e, requestTagRename.workspaceId)
-      })
-      .catch(err => {
-        showFooterMessage(e, `タグのリネームに失敗しました。[${err}}]`)
-      })
-  })
+  try {
+    await TagUseCase.renameTag(requestTagRename.workspaceId, requestTagRename.tagId, requestTagRename.tagName)
+  } catch (err) {
+    showFooterMessage(e, `タグのリネームに失敗しました。[${err}]`)
+  }
 })
-
-export function getNewTags(e: Electron.IpcMainEvent, workspaceId: string) {
-  BackendConnector.workspace(workspaceId, ws => {
-    ws.tags
-      .getList(false)
-      .then(resTagList => {
-        const tags: TagInfo[] = []
-        if (resTagList.tags !== null) {
-          for (let i = 0; i < resTagList.tags.length; i++) {
-            tags.push({
-              tagId: resTagList.tags[i].tag_id,
-              name: resTagList.tags[i].name,
-              tagGroupId: resTagList.tags[i].tag_group_id,
-              favorite: resTagList.tags[i].favorite,
-            })
-          }
-        }
-        e.reply(IpcId.ToRenderer.GET_ALL_TAGS, JSON.stringify({ tags: tags }))
-      })
-      .catch(err => {
-        showFooterMessage(e, `タグリストの取得に失敗しました。[${err}}]`)
-      })
-  })
-}

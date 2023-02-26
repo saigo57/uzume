@@ -3,14 +3,14 @@ import { IpcIdBase } from './ipcIdBase'
 export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = 'tagManage'
 
-  public static ToMainProc = class {
-    static readonly TAG_GROUP_CONTEXT_MENU: string = IpcId.generateIpcId()
-    static readonly TAG_GROUP_RENAME: string = IpcId.generateIpcId()
+  public static TagGroupContextMenu = class {
+    static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId()
+    static readonly SHOW_GROUP_RENAME_MODAL: string = IpcId.generateIpcId()
+    static readonly TAG_GROUP_DELETED: string = IpcId.generateIpcId()
   }
 
-  public static ToRenderer = class {
-    static readonly TAG_GROUP_DELETE: string = IpcId.generateIpcId()
-    static readonly TO_TAG_GROUP_RENAME: string = IpcId.generateIpcId()
+  public static Invoke = class {
+    static readonly TAG_GROUP_RENAME: string = IpcId.generateIpcId()
   }
 }
 

@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { tagGroupListAtom } from './../../recoil/tagGroupListAtom'
 import ReactModal from 'react-modal'
 import CssConst from './../../cssConst'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
-import { IpcId as TagGroupsIpcId, TagGroupRenameReply, TagGroupRename } from '../../../ipc/tagManage'
+import { IpcId as TagManageIpcId, TagGroupRenameReply, TagGroupRename } from '../../../ipc/tagManage'
+import { IpcId as TagGroupsIpcId } from '../../../ipc/tagGroups'
+import { TagGroupList } from '../../../ipc/tagGroups'
 
 export const TagGroupRenameModal = () => {
+  const setTagGroupList = useSetRecoilState(tagGroupListAtom)
   const [isOpen, setIsOpen] = useState(false)
   const [tagGroupNameState, setTagGroupNameState] = useState('')
   const [workspaceId, setWorkspaceId] = useState('')
   const [tagGroupId, setTagGroupId] = useState('')
 
   useEffect(() => {
-    window.api.on(TagGroupsIpcId.ToRenderer.TO_TAG_GROUP_RENAME, (_e, arg) => {
+    window.api.on(TagManageIpcId.TagGroupContextMenu.SHOW_GROUP_RENAME_MODAL, (_e, arg) => {
       const tagRenameReply = JSON.parse(arg) as TagGroupRenameReply
       setWorkspaceId(tagRenameReply.workspaceId)
       setTagGroupId(tagRenameReply.tagGroupId)
@@ -32,7 +37,12 @@ export const TagGroupRenameModal = () => {
       tagGroupName: tagGroupNameState,
     }
 
-    window.api.send(TagGroupsIpcId.ToMainProc.TAG_GROUP_RENAME, JSON.stringify(req))
+    window.api.invoke(TagManageIpcId.Invoke.TAG_GROUP_RENAME, JSON.stringify(req)).then(() => {
+      window.api.invoke(TagGroupsIpcId.Invoke.GET_ALL_TAG_GROUPS, JSON.stringify(req)).then((arg: string) => {
+        const tagGroupList = JSON.parse(arg) as TagGroupList
+        setTagGroupList(tagGroupList.tag_groups)
+      })
+    })
   }
 
   const reactModalStyle: ReactModal.Styles = {

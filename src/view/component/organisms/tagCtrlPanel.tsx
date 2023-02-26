@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { tagListAtom } from '../../recoil/tagListAtom'
+import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
 import { MenuItem, useTags } from '../../lib/tagCustomHooks'
 import { Tag } from '../atmos/tag'
-import { IpcId as TagsIpcId, TagInfo, CreateTagToImage } from '../../../ipc/tags'
+import {
+  IpcId as TagsIpcId,
+  TagInfo,
+  CreateTagToImage,
+  GetAllTags,
+  TagList,
+  CreatedTagToImage,
+} from '../../../ipc/tags'
 import { IpcId as ImagesIpcId, AddTagToImage } from '../../../ipc/images'
 import CssConst from './../../cssConst'
 
@@ -17,9 +27,12 @@ type TagCtrlPanelProps = {
 }
 
 export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
+  const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [searchTagText, setSearchTagText] = useState('')
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] =
-    useTags(props.workspaceId)
+  const [_tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(
+    props.workspaceId
+  )
 
   useEffect(() => {
     if (!props.display) setSearchTagText('')
@@ -38,7 +51,29 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
       imageIds: props.imageIds,
       tagName: tagName,
     }
-    window.api.send(TagsIpcId.ToMainProc.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req))
+
+    window.api.invoke(TagsIpcId.Invoke.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req)).then((createdTagStr: string) => {
+      // タグ再取得
+      const reqTags = {
+        workspaceId: props.workspaceId,
+      } as GetAllTags
+
+      window.api.invoke(TagsIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(reqTags)).then(arg => {
+        const tagList = JSON.parse(arg) as TagList
+        setTagAllList(tagList.tags)
+      })
+
+      // 画像にタグ付与
+      const createdTag = JSON.parse(createdTagStr) as CreatedTagToImage
+
+      const reqAddTag: AddTagToImage = {
+        workspaceId: createdTag.createTag.workspaceId,
+        imageIds: createdTag.createTag.imageIds,
+        tagId: createdTag.createdTagInfo.tagId,
+      }
+      window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(reqAddTag))
+    })
+
     setSearchTagText('')
   }
 

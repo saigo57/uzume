@@ -1,11 +1,9 @@
 import { ipcMain, BrowserWindow, Menu } from 'electron'
 import { IpcId, TagGroupContextMenu, TagGroupRenameReply, TagGroupRename } from '../ipc/tagManage'
-import { getNewTags } from './tags'
-import { fetchAllTagGroups } from './tagGroups'
-import { BackendConnector } from 'uzume-backend-connector'
 import { showFooterMessage } from '../ipc/footer'
+import TagGroupUseCase from './useCase/tagGroupUseCase'
 
-ipcMain.on(IpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
+ipcMain.on(IpcId.TagGroupContextMenu.SHOW_CONTEXT_MENU, (e, arg) => {
   const reqTagGroupContextMenu: TagGroupContextMenu = JSON.parse(arg)
 
   const template: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
@@ -17,25 +15,20 @@ ipcMain.on(IpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
           tagGroupId: reqTagGroupContextMenu.tagGroupId,
           tagGroupName: reqTagGroupContextMenu.tagGroupName,
         }
-        e.reply(IpcId.ToRenderer.TO_TAG_GROUP_RENAME, JSON.stringify(req))
+        e.reply(IpcId.TagGroupContextMenu.SHOW_GROUP_RENAME_MODAL, JSON.stringify(req))
       },
     },
     { type: 'separator' },
     {
       label: 'タググループを削除',
       click: () => {
-        BackendConnector.workspace(reqTagGroupContextMenu.workspaceId, ws => {
-          ws.tag_groups
-            .DeleteTagGroup(reqTagGroupContextMenu.tagGroupId)
-            .then(() => {
-              getNewTags(e, reqTagGroupContextMenu.workspaceId)
-              fetchAllTagGroups(e, reqTagGroupContextMenu.workspaceId)
-              e.reply(IpcId.ToRenderer.TAG_GROUP_DELETE)
-            })
-            .catch(err => {
-              showFooterMessage(e, `タググループの削除に失敗しました。[${err}}]`)
-            })
-        })
+        TagGroupUseCase.deleteTagGroup(reqTagGroupContextMenu.workspaceId, reqTagGroupContextMenu.tagGroupId)
+          .then(() => {
+            e.reply(IpcId.TagGroupContextMenu.TAG_GROUP_DELETED)
+          })
+          .catch(err => {
+            showFooterMessage(e, `タググループの削除に失敗しました。[${err}]`)
+          })
       },
     },
   ]
@@ -44,17 +37,15 @@ ipcMain.on(IpcId.ToMainProc.TAG_GROUP_CONTEXT_MENU, (e, arg) => {
   menu.popup(contents)
 })
 
-ipcMain.on(IpcId.ToMainProc.TAG_GROUP_RENAME, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.TAG_GROUP_RENAME, async (e, arg) => {
   const requestTagRename: TagGroupRename = JSON.parse(arg)
-
-  BackendConnector.workspace(requestTagRename.workspaceId, ws => {
-    ws.tag_groups
-      .RenameTagGroup(requestTagRename.tagGroupId, requestTagRename.tagGroupName)
-      .then(() => {
-        fetchAllTagGroups(e, requestTagRename.workspaceId)
-      })
-      .catch(err => {
-        showFooterMessage(e, `タググループのリネームに失敗しました。[${err}}]`)
-      })
-  })
+  try {
+    await TagGroupUseCase.renameTagGroup(
+      requestTagRename.workspaceId,
+      requestTagRename.tagGroupId,
+      requestTagRename.tagGroupName
+    )
+  } catch (err) {
+    showFooterMessage(e, `タググループのリネームに失敗しました。[${err}]`)
+  }
 })

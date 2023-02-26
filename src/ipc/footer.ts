@@ -1,5 +1,6 @@
 import { IpcIdBase } from './ipcIdBase'
 import { BrowserWindow } from 'electron'
+import { isIpcMainEvent, isIpcMainInvokeEvent } from '../lib/typeGuard'
 
 export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = 'footer'
@@ -29,8 +30,10 @@ function buildMessage(message: string): FooterMessage {
   }
 }
 
-export function showFooterMessage(e: Electron.IpcMainEvent, message: string) {
-  e.reply(IpcId.ToRenderer.FOOTER_MESSAGE_REPLY, JSON.stringify(buildMessage(message)))
+export function showFooterMessage(e: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent, message: string) {
+  const messageJson = JSON.stringify(buildMessage(message))
+  if (isIpcMainEvent(e)) e.reply(IpcId.ToRenderer.FOOTER_MESSAGE_REPLY, messageJson)
+  if (isIpcMainInvokeEvent(e)) e.sender.send(IpcId.ToRenderer.FOOTER_MESSAGE_REPLY, messageJson)
 }
 
 export function showFooterMessageByBrowserWindow(win: BrowserWindow, message: string) {

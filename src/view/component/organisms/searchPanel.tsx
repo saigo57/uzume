@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilValue } from 'recoil'
+import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
 import { Tag } from '../atmos/tag'
 import { MenuItem, useTags } from '../../lib/tagCustomHooks'
 import CssConst from './../../cssConst'
@@ -16,9 +18,9 @@ type SearchPanelProps = {
 }
 
 export const SearchPanel: React.VFC<SearchPanelProps> = props => {
+  const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [searchTagText, setSearchTagText] = useState('')
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] =
-    useTags(props.workspaceId)
+  const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId)
 
   useEffect(() => {
     resetTagList()

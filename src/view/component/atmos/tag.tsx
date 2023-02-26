@@ -2,7 +2,8 @@ import React from 'react'
 import { useDrag } from 'react-dnd'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
-import { IpcId as TagsIpcId, ShowContextMenu } from '../../../ipc/tags'
+import { ShowContextMenu } from '../../../ipc/tags'
+import { createOnContextMenu } from '../../lib/tagCustomHooks'
 
 // TODO: CSS in JSに置き換えたい
 import './tag.scss'
@@ -46,23 +47,18 @@ export const Tag: React.VFC<TagProps> = props => {
     if (props.onDeleteClick && props.tagId) props.onDeleteClick(props.tagId)
   }
 
-  const onContextMenu = () => {
-    if (!props.tagId) return
-
-    const req: ShowContextMenu = {
-      workspaceId: props.workspaceId,
-      tagId: props.tagId,
-      tagName: props.tagName,
-      currFavorite: props.favorite,
-    }
-    window.api.send(TagsIpcId.ToMainProc.SHOW_CONTEXT_MENU, JSON.stringify(req))
-  }
+  const showContextMenu = {
+    workspaceId: props.workspaceId,
+    tagId: props.tagId,
+    tagName: props.tagName,
+    currFavorite: props.favorite,
+  } as ShowContextMenu
 
   return (
     <div
       className={`tag ${props.delete ? 'disp-delete' : ''} ${props.alreadyAdded ? 'added' : ''}`}
       onClick={onTagClick}
-      onContextMenu={onContextMenu}
+      onContextMenu={createOnContextMenu(showContextMenu)}
       ref={dragRef}
     >
       <div className="tag-text">{props.tagName}</div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { RecoilRoot } from 'recoil'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ConfirmModal } from './component/organisms/confirmModal'
@@ -39,33 +40,35 @@ export function App() {
   }, [])
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="container">
-        {(() => {
-          switch (windowMode) {
-            case WINDOW_MODE.INIT:
-              return <div>読込中</div>
+    <RecoilRoot>
+      <DndProvider backend={HTML5Backend}>
+        <div className="container">
+          {(() => {
+            switch (windowMode) {
+              case WINDOW_MODE.INIT:
+                return <div>読込中</div>
 
-            case WINDOW_MODE.BACKEND_ERROR:
-              return <BackendSetup backendState={backendState} />
+              case WINDOW_MODE.BACKEND_ERROR:
+                return <BackendSetup backendState={backendState} />
 
-            case WINDOW_MODE.UZUME_MAIN:
-              return <UzumeMain />
-          }
-        })()}
-      </div>
+              case WINDOW_MODE.UZUME_MAIN:
+                return <UzumeMain />
+            }
+          })()}
+        </div>
 
-      {/* 共通処理 */}
-      <ConfirmModal
-        display={confirmMessage != null}
-        message={confirmMessage || ''}
-        onClose={() => {
-          setConfirmMessage(null)
-        }}
-      />
-      <TagRenameModal />
-      <TagGroupRenameModal />
-      <BackendConfigModal />
-    </DndProvider>
+        {/* 共通処理 */}
+        <ConfirmModal
+          display={confirmMessage != null}
+          message={confirmMessage || ''}
+          onClose={() => {
+            setConfirmMessage(null)
+          }}
+        />
+        <TagRenameModal />
+        <TagGroupRenameModal />
+        <BackendConfigModal />
+      </DndProvider>
+    </RecoilRoot>
   )
 }

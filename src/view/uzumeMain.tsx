@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { tagListAtom } from './recoil/tagListAtom'
+import { tagGroupListAtom } from './recoil/tagGroupListAtom'
 import { useEvent } from './lib/eventCustomHooks'
 import { useDraggableSplitBar } from './lib/draggableSplitBarHooks'
 import { WorkspaceList } from './workspaceList'
@@ -6,11 +9,15 @@ import { MainMenu } from './mainMenu'
 import { ContentsArea } from './contentsArea'
 import { Footer } from './footer'
 import { IpcId as CurrWsIpcId, CurrentWorkspace } from '../ipc/currentWorkspace'
+import { IpcId as TagGroupsIpcId, GetAllTagGroups, TagGroupList } from '../ipc/tagGroups'
+import { IpcId as TagsIpcId, GetAllTags, TagList } from '../ipc/tags'
 import { resetWorkspaceId as commonIpcResetWorkspaceId } from './commonIpc'
 
 export function UzumeMain() {
   commonIpcResetWorkspaceId()
 
+  const setTagAllList = useSetRecoilState(tagListAtom)
+  const setTagGroupList = useSetRecoilState(tagGroupListAtom)
   const [currentWorkspaceState, setCurrentWorkspace] = useState<CurrentWorkspace>({
     workspace_name: '',
     workspace_id: '',
@@ -31,6 +38,30 @@ export function UzumeMain() {
   useEffect(() => {
     setCurrMode('home')
     raiseShowIndexImageEvent(null)
+
+    if (currentWorkspaceState.workspace_id != '') {
+      const req = {
+        workspaceId: currentWorkspaceState.workspace_id,
+      } as GetAllTagGroups
+
+      window.api.invoke(TagGroupsIpcId.Invoke.GET_ALL_TAG_GROUPS, JSON.stringify(req)).then((arg: string) => {
+        const tagGroupList = JSON.parse(arg) as TagGroupList
+        setTagGroupList(tagGroupList.tag_groups)
+      })
+    }
+
+    // TagContextMenuのイベントハンドラ
+    // TODO: 対MainProcのイベントハンドラをまとめたい
+    window.api.on(TagsIpcId.TagContextMenu.TAG_FAVORITE_CHANGED, (_e, _arg) => {
+      const req = {
+        workspaceId: currentWorkspaceState.workspace_id,
+      } as GetAllTags
+
+      window.api.invoke(TagsIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(req)).then(arg => {
+        const tagList = JSON.parse(arg) as TagList
+        setTagAllList(tagList.tags)
+      })
+    })
   }, [currentWorkspaceState])
 
   useEffect(() => {

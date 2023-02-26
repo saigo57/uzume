@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { tagListAtom } from '../recoil/tagListAtom'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { useTags } from '../lib/tagCustomHooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -25,12 +27,14 @@ type BrowseImageProps = {
 }
 
 export const BrowseImage: React.VFC<BrowseImageProps> = props => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
   const [selectedImageIds, setSelectedImageIds] = useState([] as string[])
   const [searchTags, setSearchTags] = useState([] as TagInfo[])
   const [showSearchPanel, setShowSearchPanel] = useState(false)
   const [searchType, setSearchType] = useState('and')
-  const [_tagGroupListState, tagAllListState, _showingTagAllListState, resetTagList, _selectingMenu, _selectMenu] =
-    useTags(props.workspaceId)
+  const [tagAllListState, _showingTagAllListState, resetTagList, _selectingMenu, _selectMenu] = useTags(
+    props.workspaceId
+  )
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
   const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null)
   const [onNextImageEvent, raiseOnNextImageEvent] = useEvent(null)
@@ -54,7 +58,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
     setSelectedImageIds([])
     setSearchTags([])
     resetTagList()
-    sendIpcGetAllTags(props.workspaceId)
+    sendIpcGetAllTags(props.workspaceId, setTagAllList)
 
     showImages()
   }, [props.workspaceId])
