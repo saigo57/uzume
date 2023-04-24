@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilState } from 'recoil'
 import ReactModal from 'react-modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
@@ -18,6 +19,7 @@ import { Event } from './../lib/eventCustomHooks'
 import { useCollectImage } from './collectImagesHooks'
 import { usePreview } from './previewHooks'
 import { CtrlLikeKey, dummyImageBase64 } from '../lib/helper'
+import { imageQueueAtom, imageRequestingAtom } from '../recoil/imageQueueAtom'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -57,6 +59,10 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const [isShowImageUploadModal, setIsShowImageUploadModal] = useState(false)
   const [uploadModalInfo, setUploadModalInfo] = useState({ completeCnt: 0, allImagesCnt: 0 } as UploadModalInfo)
 
+  const [imageQueueClock, setImageQueueClock] = useState(false)
+  const [imageQueue, setImageQueue] = useRecoilState(imageQueueAtom)
+  const [imageRequesting, setImageRequesting] = useRecoilState(imageRequestingAtom)
+
   // TODO: どこで持つべきか(少なくともここではなさそう)
   const supportedExts = ['jpeg', 'jpg', 'png', 'gif']
 
@@ -87,17 +93,35 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     })
   }, [selectedImageId])
 
+  // imageQueueの動作clock
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImageQueueClock(prev => !prev)
+    }, 5)
+    return () => clearInterval(interval)
+  })
+
+  useEffect(() => {
+    if (imageRequesting || imageQueue.length == 0) return
+
+    setImageRequesting(true)
+    window.api
+      .invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(imageQueue[0]))
+      .then((data: string) => {
+        const imageData: ImageData = JSON.parse(data)
+        const img: any = document.getElementById(`image-${imageData.imageId}`)
+        if (img) {
+          img.src = 'data:image;base64,' + imageData.imageBase64
+        }
+      })
+      .finally(() => {
+        setImageRequesting(false)
+      })
+    setImageQueue(prevImages => prevImages.slice(1))
+  }, [imageQueueClock])
+
   // 画像(情報)受信系
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_THUMB_IMAGE, (_e, arg) => {
-      const imageData = JSON.parse(arg) as ImageData
-
-      const img: any = document.getElementById(`image-${imageData.imageId}`)
-      if (img) {
-        img.src = 'data:image;base64,' + imageData.imageBase64
-      }
-    })
-
     window.api.on(ImagesIpcId.ToRenderer.UPDATE_IMAGE_INFO, (_e, arg) => {
       const imageInfoList = JSON.parse(arg) as ImageInfo[]
       imageInfoList.forEach(img => {
@@ -107,14 +131,6 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
           }
         }
       })
-    })
-
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e, arg) => {
-      const imageData = JSON.parse(arg) as ImageData
-      const imgPreview: any = document.getElementById('image-preview')
-      if (imgPreview) {
-        imgPreview.src = 'data:image;base64,' + imageData.imageBase64
-      }
     })
 
     window.api.on(ImagesIpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, (_e, arg) => {

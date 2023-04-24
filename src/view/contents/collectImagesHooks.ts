@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useSetRecoilState } from 'recoil'
 import { IpcId as ImagesIpcId, ImageInfo, ImageInfos, ShowImages, RequestImage } from '../../ipc/images'
+import { imageQueueAtom } from '../recoil/imageQueueAtom'
 
 export type ImageList = {
   page: number
@@ -15,6 +17,7 @@ export const useCollectImage = (
 ): [ImageList, boolean, React.RefObject<HTMLDivElement>, (targetImageId: string, imageInfo: ImageInfo) => void] => {
   const [imageList, setImageList] = useState({ page: 0, images: [] } as ImageList)
   const [nextPageRequestableState, setNextPageRequestable] = useState(false)
+  const setImageQueue = useSetRecoilState(imageQueueAtom)
 
   const requestShowImages = (page: number) => {
     if (workspaceId == '') return
@@ -55,13 +58,16 @@ export const useCollectImage = (
 
       setImageList(prevState => {
         const requestImage = (newImages: ImageInfo[]) => {
-          newImages.forEach(image => {
+          const newImageRequests = newImages.map(image => {
             const reqImage: RequestImage = {
               workspaceId: rcvImageInfos.workspaceId,
               imageId: image.image_id,
               isThumbnail: true,
             }
-            window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
+            return reqImage
+          })
+          setImageQueue(prevState => {
+            return prevState.concat(newImageRequests)
           })
         }
 

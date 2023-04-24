@@ -34,7 +34,17 @@ export class IpcId extends IpcIdBase {
     static readonly GROUP_THUMB_CHANGED: string = IpcId.generateIpcId()
   }
 
+  public static Invoke = class {
+    static readonly FETCH_IMAGE: string = IpcId.generateIpcId()
+  }
+
   static readonly ACTUAL_REQUEST_THUMB_IMAGE: string = IpcId.generateIpcId()
+}
+
+export type FetchImage = {
+  workspaceId: string
+  imageId: string
+  isThumbnail: boolean
 }
 
 export type Reflect = {

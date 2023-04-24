@@ -3,6 +3,7 @@ import { isCurrentWorkspace } from './currWorkspace'
 import {
   IpcId,
   ShowContextMenu,
+  FetchImage,
   Reflect,
   ImageFiles,
   ImageInfos,
@@ -18,6 +19,7 @@ import {
   GroupThumbChanged,
 } from '../ipc/images'
 import { BackendConnector, Image as BackendConnectorImage, ResImage } from 'uzume-backend-connector'
+import ImageUseCase from './useCase/imageUseCase'
 import { showFooterMessage } from '../ipc/footer'
 import { Globals } from './globals'
 
@@ -30,6 +32,13 @@ const sendReflect = (e: Electron.IpcMainEvent, replyId: string) => {
   const reflect = { replyId: replyId } as Reflect
   e.reply(IpcId.ToRenderer.REPLY_REFLECT, JSON.stringify(reflect))
 }
+
+ipcMain.handle(IpcId.Invoke.FETCH_IMAGE, async (e, arg) => {
+  const fetchImage: FetchImage = JSON.parse(arg)
+  const imageData = await ImageUseCase.fetchImage(fetchImage.workspaceId, fetchImage.imageId, fetchImage.isThumbnail)
+
+  return JSON.stringify(imageData)
+})
 
 ipcMain.on(IpcId.ToMainProc.UPLOAD_IMAGES, (e, arg) => {
   const imageFiles: ImageFiles = JSON.parse(arg)

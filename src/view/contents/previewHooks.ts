@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { IpcId as ImagesIpcId, RequestImage } from '../../ipc/images'
+import { IpcId as ImagesIpcId, RequestImage, ImageData } from '../../ipc/images'
 
 type Point = {
   x: number
@@ -73,7 +73,14 @@ export const usePreview = (workspaceId: string): [PreviewStatus, () => void, (e:
       imageId: imageId,
       isThumbnail: false,
     }
-    window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage))
+
+    window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(requestImage)).then((data: string) => {
+      const imageData: ImageData = JSON.parse(data)
+      const imgPreview: any = document.getElementById('image-preview')
+      if (imgPreview) {
+        imgPreview.src = 'data:image;base64,' + imageData.imageBase64
+      }
+    })
   }
 
   useEffect(() => {
