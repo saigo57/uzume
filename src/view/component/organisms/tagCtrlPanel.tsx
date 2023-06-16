@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { imageInfoListAtom } from '../../recoil/imageListAtom'
 import { tagListAtom } from '../../recoil/tagListAtom'
 import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
 import { MenuItem, useTags } from '../../lib/tagCustomHooks'
@@ -12,7 +13,7 @@ import {
   TagList,
   CreatedTagToImage,
 } from '../../../ipc/tags'
-import { IpcId as ImagesIpcId, AddTagToImage } from '../../../ipc/images'
+import { IpcId as ImagesIpcId, ImageInfo, AddTagToImage } from '../../../ipc/images'
 import CssConst from './../../cssConst'
 
 import './tagGroupMenu.scss'
@@ -33,6 +34,7 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
   const [_tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(
     props.workspaceId
   )
+  const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
 
   useEffect(() => {
     if (!props.display) setSearchTagText('')
@@ -71,7 +73,11 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
         imageIds: createdTag.createTag.imageIds,
         tagId: createdTag.createdTagInfo.tagId,
       }
-      window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(reqAddTag))
+
+      window.api.invoke(ImagesIpcId.Invoke.ADD_TAG, JSON.stringify(reqAddTag)).then(arg => {
+        const imageInfoList = JSON.parse(arg) as ImageInfo[]
+        setImageInfoList(imageInfoList)
+      })
     })
 
     setSearchTagText('')
@@ -83,7 +89,10 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
       imageIds: props.imageIds,
       tagId: tagId,
     }
-    window.api.send(ImagesIpcId.ToMainProc.ADD_TAG, JSON.stringify(req))
+    window.api.invoke(ImagesIpcId.Invoke.ADD_TAG, JSON.stringify(req)).then(arg => {
+      const imageInfoList = JSON.parse(arg) as ImageInfo[]
+      setImageInfoList(imageInfoList)
+    })
   }
 
   const alreadyLinkedTagId = props.alreadyLinkedTag.map(t => t.tagId)

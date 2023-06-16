@@ -12,7 +12,7 @@ import { ImageView } from './imaveView/imageView'
 import { ImageSideBar } from './imageSideBar'
 import { TagInfo } from '../../ipc/tags'
 import { sendIpcGetAllTags } from '../commonIpc'
-import { IpcId as ImagesIpcId, ShowImages } from '../../ipc/images'
+import { IpcId as ImagesIpcId } from '../../ipc/images'
 import { useEvent, Event } from './../lib/eventCustomHooks'
 
 type BrowseImageProps = {
@@ -42,16 +42,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
 
   const showImages = () => {
     if (props.workspaceId == '') return
-
-    const showImages: ShowImages = {
-      workspaceId: props.workspaceId,
-      page: 1,
-      tagIds: searchTags.map(tag => tag.tagId),
-      searchType: searchType,
-      uncategorized: props.uncategorized,
-    }
     raiseOnShowImagesEvent(null)
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
   }
 
   useEffect(() => {
@@ -106,7 +97,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
   }, [tagAllListState])
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.RELOAD_IMAGES, (_e, _arg) => {
+    window.api.on(ImagesIpcId.ImageContextMenu.RELOAD_IMAGES, (_e, _arg) => {
       const reload = document.getElementById('browse-image-area-reload')
       if (reload) reload.click()
     })

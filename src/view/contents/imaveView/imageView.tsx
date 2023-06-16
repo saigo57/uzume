@@ -28,15 +28,14 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
       imageId: props.imageId,
       isThumbnail: false,
     }
-    window.api.send(ImagesIpcId.ToMainProc.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify(requestImage))
+    window.api
+      .invoke(ImagesIpcId.Invoke.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify(requestImage))
+      .then((data: string | null) => {
+        if (!data) return
+        const imageInfoList = JSON.parse(data) as ImageInfo[]
+        setImageInfoList(imageInfoList)
+      })
   }, [props.imageId])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_GROUP_IMAGE_INFO_LIST, (_e, arg) => {
-      const imageInfoList = JSON.parse(arg) as ImageInfo[]
-      setImageInfoList(imageInfoList)
-    })
-  }, [])
 
   useEffect(() => {
     if (imageInfoList.length == 0) return
@@ -48,7 +47,10 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
         isThumbnail: true,
       }
 
-      window.api.send(ImagesIpcId.ToMainProc.REQUEST_SIMPLE_THUMB_IMAGE, JSON.stringify(requestImage))
+      window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(requestImage)).then((data: string) => {
+        const imageData = JSON.parse(data) as ImageData
+        setImageThumbDataList(prev => [...prev, imageData])
+      })
     }
 
     for (let i = 0; i < imageInfoList.length; i++) {
@@ -58,7 +60,10 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
         isThumbnail: false,
       }
 
-      window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage))
+      window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(requestImage)).then((data: string) => {
+        const imageData = JSON.parse(data) as ImageData
+        setImageDataList(prev => [...prev, imageData])
+      })
     }
   }, [props.imageId, imageInfoList])
 
@@ -95,20 +100,6 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
   }, [imageThumbDataList])
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e: any, arg: any) => {
-      const imageData = JSON.parse(arg) as ImageData
-      setImageDataList(prev => [...prev, imageData])
-    })
-  }, [])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_SIMPLE_THUMB_IMAGE, (_e: any, arg: any) => {
-      const imageData = JSON.parse(arg) as ImageData
-      setImageThumbDataList(prev => [...prev, imageData])
-    })
-  }, [])
-
-  useEffect(() => {
     if (imageInfoList.length < 2) return
 
     const imageIds: string[] = []
@@ -121,8 +112,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
       groupId: imageInfoList[0].group_id,
       currThumbImageId: props.imageId,
     }
-
-    window.api.send(ImagesIpcId.ToMainProc.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
+    window.api.invoke(ImagesIpcId.Invoke.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
   }, [imageInfoList])
 
   const setNextImageId = () => {

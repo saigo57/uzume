@@ -15,7 +15,6 @@ import {
 } from '../ipc/workspaceList'
 import { BackendConnector } from 'uzume-backend-connector'
 import { changeCurrentWorkspace } from './currWorkspace'
-import { showImagesReply } from './images'
 import { showFooterMessage } from '../ipc/footer'
 import { Globals } from './globals'
 
@@ -288,7 +287,8 @@ function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
 
   replyWorkspaceList(e)
   callChangeCurrentWorkspace(e)
-  showImagesReply(e, workspace_id, 1, [], '')
+  // TODO: 画面側からリクエストが来るはずなので、こちらから送る必要はないはず
+  // showImagesReply(e, workspace_id, 1, [], '')
 }
 
 function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {

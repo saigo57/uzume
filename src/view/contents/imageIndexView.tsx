@@ -3,17 +3,7 @@ import { useRecoilState } from 'recoil'
 import ReactModal from 'react-modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
-import {
-  IpcId as ImagesIpcId,
-  ShowContextMenu,
-  Reflect,
-  ImageFiles,
-  ImageInfo,
-  ImageData,
-  ImageUploadProgress,
-  GroupThumbChanged,
-  RequestImage,
-} from '../../ipc/images'
+import { IpcId as ImagesIpcId, ShowContextMenu, ImageFiles, ImageData, ImageUploadProgress } from '../../ipc/images'
 import CssConst from './../cssConst'
 import { Event } from './../lib/eventCustomHooks'
 import { useCollectImage } from './collectImagesHooks'
@@ -46,7 +36,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
   // api.onの中でselectedImageIdを使うと最初の参照しか見れないので、参照が変わらないstateに都度コピーする
   const [selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
-  const [imageList, nextPageRequestableState, infScrollRef, replaceImageInfo] = useCollectImage(
+  const [imageList, nextPageRequestableState, infScrollRef, replaceImageInfo, reloadImageInfo] = useCollectImage(
     props.workspaceId,
     props.uncategorized,
     props.tagIds,
@@ -65,13 +55,6 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
   // TODO: どこで持つべきか(少なくともここではなさそう)
   const supportedExts = ['jpeg', 'jpg', 'png', 'gif']
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REPLY_REFLECT, (_e, arg) => {
-      const reflect = JSON.parse(arg) as Reflect
-      window.api.send(reflect.replyId)
-    })
-  }, [])
 
   useEffect(() => {
     const imgs: any = document.getElementsByClassName('thumbnail-img')
@@ -122,17 +105,6 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
   // 画像(情報)受信系
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.UPDATE_IMAGE_INFO, (_e, arg) => {
-      const imageInfoList = JSON.parse(arg) as ImageInfo[]
-      imageInfoList.forEach(img => {
-        for (let i = 0; i < imageList.images.length; i++) {
-          if (imageList.images[i].image_id == img.image_id) {
-            imageList.images[i] = img
-          }
-        }
-      })
-    })
-
     window.api.on(ImagesIpcId.ToRenderer.IMAGE_UPLOAD_PROGRESS, (_e, arg) => {
       const progress = JSON.parse(arg) as ImageUploadProgress
       if (progress.completeCnt < progress.allImagesCnt) {
@@ -144,32 +116,34 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     })
   }, [])
 
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.GROUP_THUMB_CHANGED, (_e: any, arg: any) => {
-      const groupThumbChanged = JSON.parse(arg) as GroupThumbChanged
+  // TODO: グループ画像が変わったときの処理を改めて書く
+  // useEffect(() => {
+  //   window.api.on(ImagesIpcId.ToRenderer.GROUP_THUMB_CHANGED, (_e: any, arg: any) => {
+  //     const groupThumbChanged = JSON.parse(arg) as GroupThumbChanged
 
-      // もともとのthumb画像が同じであること
-      if (selectedSingleImageId.imageId != groupThumbChanged.prevThumbImageId) return
-      // thumb画像が変化していること
-      if (groupThumbChanged.prevThumbImageId == groupThumbChanged.image.image_id) return
+  //     // もともとのthumb画像が同じであること
+  //     if (selectedSingleImageId.imageId != groupThumbChanged.prevThumbImageId) return
+  //     // thumb画像が変化していること
+  //     if (groupThumbChanged.prevThumbImageId == groupThumbChanged.image.image_id) return
 
-      // 旧thumbをダミー画像に置き換え
-      const img: any = document.getElementById(`image-${groupThumbChanged.prevThumbImageId}`)
-      if (img) {
-        img.src = dummyImageBase64
-      }
-      // thumb画像の情報を差し替え
-      replaceImageInfo(groupThumbChanged.prevThumbImageId, groupThumbChanged.image)
-      setSelectedImageId([groupThumbChanged.image.image_id])
-      // thumb画像を要求
-      const reqImage: RequestImage = {
-        workspaceId: groupThumbChanged.workspaceId,
-        imageId: groupThumbChanged.image.image_id,
-        isThumbnail: true,
-      }
-      window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
-    })
-  }, [])
+  //     // 旧thumbをダミー画像に置き換え
+  //     const img: any = document.getElementById(`image-${groupThumbChanged.prevThumbImageId}`)
+  //     if (img) {
+  //       img.src = dummyImageBase64
+  //     }
+  //     // thumb画像の情報を差し替え
+  //     replaceImageInfo(groupThumbChanged.prevThumbImageId, groupThumbChanged.image)
+  //     setSelectedImageId([groupThumbChanged.image.image_id])
+  //     // thumb画像を要求
+  //     const reqImage: RequestImage = {
+  //       workspaceId: groupThumbChanged.workspaceId,
+  //       imageId: groupThumbChanged.image.image_id,
+  //       isThumbnail: true,
+  //     }
+  //     // TODO:
+  //     window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
+  //   })
+  // }, [])
 
   const showContextMenu = (e: any) => {
     e.preventDefault()
@@ -177,7 +151,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
       workspaceId: props.workspaceId,
       imageIds: selectedImageId,
     } as ShowContextMenu)
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_CONTEXT_MENU, msg)
+    window.api.send(ImagesIpcId.ImageContextMenu.SHOW_CONTEXT_MENU, msg)
   }
 
   useEffect(() => {
@@ -233,7 +207,9 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
 
     setIsShowImageUploadModal(true)
     setUploadModalInfo({ completeCnt: 0, allImagesCnt: imageFiles.imageFileList.length })
-    window.api.send(ImagesIpcId.ToMainProc.UPLOAD_IMAGES, JSON.stringify(imageFiles))
+    window.api.invoke(ImagesIpcId.Invoke.UPLOAD_IMAGES, JSON.stringify(imageFiles)).then(() => {
+      reloadImageInfo()
+    })
   }
 
   const onThumbnailAreaClick = (e: any) => {
