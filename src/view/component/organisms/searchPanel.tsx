@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../../recoil/workspaceAtom'
+import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
+import { searchTagIdsAtom } from '../../recoil/searchAtom'
 import { Tag } from '../atmos/tag'
 import { MenuItem, useTags } from '../../lib/tagCustomHooks'
 import CssConst from './../../cssConst'
-import { TagInfo } from '../../../ipc/tags'
 
 import './tagGroupMenu.scss'
 
 type SearchPanelProps = {
   id: string
   display: boolean
-  workspaceId: string
-  selectedTag: TagInfo[]
   onTagAddClick: (tagId: string | null, tagName: string) => void
   onTagDeleteClick: (tagId: string) => void
 }
 
 export const SearchPanel: React.VFC<SearchPanelProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
+  const tagGroupListState = useRecoilValue(tagGroupListAtom)
+  const selectedTagIds = useRecoilValue(searchTagIdsAtom)
   const [searchTagText, setSearchTagText] = useState('')
-  const [tagGroupListState, _tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] =
-    useTags(props.workspaceId)
+  const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(workspaceId)
 
   useEffect(() => {
     resetTagList()
-  }, [props.workspaceId])
-
-  const selectedTagIds = props.selectedTag.map(t => t.tagId)
+  }, [workspaceId])
 
   const style: React.CSSProperties = {
     position: 'absolute',
@@ -122,7 +123,6 @@ export const SearchPanel: React.VFC<SearchPanelProps> = props => {
             if (searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1) {
               return (
                 <Tag
-                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import { useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../../recoil/workspaceAtom'
 import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautiful-dnd'
 import { IpcId as ImagesIpcId, RequestImage, ImageData, ImageInfo, SortGroupImages } from '../../../ipc/images'
 import { ImageViewMulti } from './imageViewMulti'
@@ -8,13 +10,13 @@ import { dummyImageBase64 } from '../../lib/helper'
 import { ImageBulk } from './imageTypes'
 
 type ImageViewProps = {
-  workspaceId: string
   imageId: string
   onNextImageEvent: Event
   onPrevImageEvent: Event
 }
 
 export const ImageView: React.VFC<ImageViewProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const [imageInfoList, setImageInfoList] = useState([] as ImageInfo[])
   const [imageDataList, setImageDataList] = useState([] as ImageData[])
   const [imageThumbDataList, setImageThumbDataList] = useState([] as ImageData[])
@@ -24,41 +26,46 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
 
   useEffect(() => {
     const requestImage: RequestImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageId: props.imageId,
       isThumbnail: false,
     }
-    window.api.send(ImagesIpcId.ToMainProc.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify(requestImage))
+    window.api
+      .invoke(ImagesIpcId.Invoke.REQUEST_GROUP_IMAGE_INFO_LIST, JSON.stringify(requestImage))
+      .then((data: string | null) => {
+        if (!data) return
+        const imageInfoList = JSON.parse(data) as ImageInfo[]
+        setImageInfoList(imageInfoList)
+      })
   }, [props.imageId])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_GROUP_IMAGE_INFO_LIST, (_e, arg) => {
-      const imageInfoList = JSON.parse(arg) as ImageInfo[]
-      setImageInfoList(imageInfoList)
-    })
-  }, [])
 
   useEffect(() => {
     if (imageInfoList.length == 0) return
 
     for (let i = 0; i < imageInfoList.length; i++) {
       const requestImage: RequestImage = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
         imageId: imageInfoList[i].image_id,
         isThumbnail: true,
       }
 
-      window.api.send(ImagesIpcId.ToMainProc.REQUEST_SIMPLE_THUMB_IMAGE, JSON.stringify(requestImage))
+      window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(requestImage)).then((data: string) => {
+        const imageData = JSON.parse(data) as ImageData
+        setImageThumbDataList(prev => [...prev, imageData])
+      })
     }
 
     for (let i = 0; i < imageInfoList.length; i++) {
       const requestImage: RequestImage = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
         imageId: imageInfoList[i].image_id,
         isThumbnail: false,
       }
 
-      window.api.send(ImagesIpcId.ToMainProc.REQUEST_ORIG_IMAGE, JSON.stringify(requestImage))
+      window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(requestImage)).then((data: string) => {
+        const imageData = JSON.parse(data) as ImageData
+        setImageDataList(prev => [...prev, imageData])
+      })
     }
   }, [props.imageId, imageInfoList])
 
@@ -95,20 +102,6 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
   }, [imageThumbDataList])
 
   useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_ORIG_IMAGE, (_e: any, arg: any) => {
-      const imageData = JSON.parse(arg) as ImageData
-      setImageDataList(prev => [...prev, imageData])
-    })
-  }, [])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.REQUEST_SIMPLE_THUMB_IMAGE, (_e: any, arg: any) => {
-      const imageData = JSON.parse(arg) as ImageData
-      setImageThumbDataList(prev => [...prev, imageData])
-    })
-  }, [])
-
-  useEffect(() => {
     if (imageInfoList.length < 2) return
 
     const imageIds: string[] = []
@@ -116,13 +109,12 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
       imageIds.push(imageInfoList[i].image_id)
     }
     const sortGroupImages: SortGroupImages = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: imageIds,
       groupId: imageInfoList[0].group_id,
       currThumbImageId: props.imageId,
     }
-
-    window.api.send(ImagesIpcId.ToMainProc.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
+    window.api.invoke(ImagesIpcId.Invoke.SORT_GROUP_IMAGES, JSON.stringify(sortGroupImages))
   }, [imageInfoList])
 
   const setNextImageId = () => {

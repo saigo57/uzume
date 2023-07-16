@@ -15,7 +15,6 @@ import {
 } from '../ipc/workspaceList'
 import { BackendConnector } from 'uzume-backend-connector'
 import { changeCurrentWorkspace } from './currWorkspace'
-import { showImagesReply } from './images'
 import { showFooterMessage } from '../ipc/footer'
 import { Globals } from './globals'
 
@@ -71,7 +70,7 @@ ipcMain.on(IpcId.ToMainProc.CREATE_NEW_WORKSPACE, (e, arg) => {
       fetchWorkspaceList(e, workspaceId.workspace_id)
     })
     .catch(err => {
-      showFooterMessage(e, `ワークスペースの新規作成に失敗しました。[${err}}]`)
+      showFooterMessage(e, `ワークスペースの新規作成に失敗しました。[${err}]`)
     })
 })
 
@@ -83,7 +82,7 @@ ipcMain.on(IpcId.ToMainProc.CREATE_ADD_WORKSPACE, (e, arg) => {
       fetchWorkspaceList(e, null as any)
     })
     .catch(err => {
-      showFooterMessage(e, `既存ワークスペースの追加に失敗しました。[${err}}]`)
+      showFooterMessage(e, `既存ワークスペースの追加に失敗しました。[${err}]`)
     })
 })
 
@@ -96,7 +95,7 @@ ipcMain.on(IpcId.ToMainProc.SET_WORKSPACE_ICON, (e, arg) => {
         fetchWorkspaceList(e, null as any)
       })
       .catch(err => {
-        showFooterMessage(e, `ワークスペースアイコンの設定に失敗しました。[${err}}]`)
+        showFooterMessage(e, `ワークスペースアイコンの設定に失敗しました。[${err}]`)
       })
   })
 })
@@ -110,7 +109,7 @@ ipcMain.on(IpcId.ToMainProc.UPDATE_WORKSPACE_NAME, (e, arg) => {
         fetchWorkspaceList(e, updateWorkspaceName.workspaceId)
       })
       .catch(err => {
-        showFooterMessage(e, `ワークスペース名の変更に失敗しました。[${err}}]`)
+        showFooterMessage(e, `ワークスペース名の変更に失敗しました。[${err}]`)
       })
   })
 })
@@ -171,7 +170,7 @@ ipcMain.on(IpcId.ToMainProc.SHOW_CONTEXT_MENU, (e, arg) => {
             fetchWorkspaceList(e, null as any)
           })
           .catch(err => {
-            showFooterMessage(e, `アイコンの削除に失敗しました。[${err}}]`)
+            showFooterMessage(e, `アイコンの削除に失敗しました。[${err}]`)
           })
       })
     },
@@ -207,7 +206,7 @@ ipcMain.on(IpcId.ToMainProc.DELETE_WORKSPACE, (e, arg) => {
         fetchWorkspaceList(e, null as any)
       })
       .catch(err => {
-        showFooterMessage(e, `ワークスペースの削除に失敗しました。[${err}}]`)
+        showFooterMessage(e, `ワークスペースの削除に失敗しました。[${err}]`)
       })
   })
 })
@@ -235,10 +234,10 @@ ipcMain.on(IpcId.ToMainProc.FETCH_WORKSPACE_ICON, (e, arg) => {
             }
             e.reply(IpcId.ToRenderer.FETCH_WORKSPACE_ICON, JSON.stringify(imageData))
           } else {
-            showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err.response.status}}]`)
+            showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err.response.status}]`)
           }
         } else {
-          showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err}}]`)
+          showFooterMessage(e, `ワークスペースアイコンの取得に失敗しました[${err}]`)
         }
       })
   })
@@ -269,7 +268,7 @@ function fetchWorkspaceList(e: Electron.IpcMainEvent, selectWorkspaceId: string)
       callChangeCurrentWorkspace(e)
     })
     .catch(err => {
-      showFooterMessage(e, `ワークスペースリストの取得に失敗しました。[${err}}]`)
+      showFooterMessage(e, `ワークスペースリストの取得に失敗しました。[${err}]`)
     })
 }
 
@@ -288,7 +287,8 @@ function selectWorkspace(e: Electron.IpcMainEvent, workspace_id: string) {
 
   replyWorkspaceList(e)
   callChangeCurrentWorkspace(e)
-  showImagesReply(e, workspace_id, 1, [], '')
+  // TODO: 画面側からリクエストが来るはずなので、こちらから送る必要はないはず
+  // showImagesReply(e, workspace_id, 1, [], '')
 }
 
 function callChangeCurrentWorkspace(e: Electron.IpcMainEvent) {

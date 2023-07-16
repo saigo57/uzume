@@ -3,16 +3,16 @@ import { IpcIdBase } from './ipcIdBase'
 export class IpcId extends IpcIdBase {
   static readonly NAME_SPACE: string = 'tags'
 
-  public static ToMainProc = class {
-    static readonly GET_ALL_TAGS: string = IpcId.generateIpcId()
-    static readonly CREATE_NEW_TAG_TO_IMAGE: string = IpcId.generateIpcId()
+  public static TagContextMenu = class {
     static readonly SHOW_CONTEXT_MENU: string = IpcId.generateIpcId()
-    static readonly TAG_RENAME: string = IpcId.generateIpcId()
+    static readonly TAG_FAVORITE_CHANGED: string = IpcId.generateIpcId()
+    static readonly SHOW_TAG_RENAME_MODAL: string = IpcId.generateIpcId()
   }
 
-  public static ToRenderer = class {
+  public static Invoke = class {
     static readonly GET_ALL_TAGS: string = IpcId.generateIpcId()
-    static readonly TO_TAG_RENAME: string = IpcId.generateIpcId()
+    static readonly TAG_RENAME: string = IpcId.generateIpcId()
+    static readonly CREATE_NEW_TAG_TO_IMAGE: string = IpcId.generateIpcId()
   }
 }
 
@@ -35,6 +35,11 @@ export type CreateTagToImage = {
   workspaceId: string
   imageIds: string[]
   tagName: string
+}
+
+export type CreatedTagToImage = {
+  createTag: CreateTagToImage
+  createdTagInfo: TagInfo
 }
 
 export type ShowContextMenu = {

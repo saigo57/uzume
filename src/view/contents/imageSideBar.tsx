@@ -1,67 +1,35 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../recoil/workspaceAtom'
+import { imageInfoListAtom } from '../recoil/imageListAtom'
+import { tagListAtom } from '../recoil/tagListAtom'
 import { useTags } from '../lib/tagCustomHooks'
-import { IpcId as ImageIpcId, RequestImageInfo, ImageInfo, RemoveTagFromImage } from '../../ipc/images'
+import { IpcId as ImageIpcId, ImageInfo, RemoveTagFromImage } from '../../ipc/images'
 import { TagInfo } from '../../ipc/tags'
 import { Tag } from '../component/atmos/tag'
 import { TagCtrlPanel } from '../component/organisms/tagCtrlPanel'
 import { sendIpcGetAllTags } from '../commonIpc'
 
 type ImageSideBarProps = {
-  workspaceId: string
   imageIds: string[]
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
 export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
-  const [imageInfoList, setImageInfoList] = useState([] as ImageInfo[])
+  const workspaceId = useRecoilValue(workspaceIdAtom)
+  const setTagAllList = useSetRecoilState(tagListAtom)
+  const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
+
   const [isShowTagCtrlPanel, setIsShowTagCtrlPanel] = useState(false)
-  const [_tagGroupListState, tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] =
-    useTags(props.workspaceId)
+  const [tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(workspaceId)
 
   useEffect(() => {
-    updateImageInfo()
     if (props.imageIds.length == 0) setIsShowTagCtrlPanel(false)
   }, [props.imageIds])
 
   useEffect(() => {
-    window.api.on(ImageIpcId.ToRenderer.GET_IMAGE_INFO_LIST, (_e, arg) => {
-      const imageInfoList = JSON.parse(arg) as ImageInfo[]
-      setImageInfoList(imageInfoList)
-    })
-  }, [])
-
-  useEffect(() => {
-    sendIpcGetAllTags(props.workspaceId)
-  }, [props.workspaceId])
-
-  useEffect(() => {
-    window.api.on(ImageIpcId.ToRenderer.IMAGE_INFO_LIST_UPDATED, (_e, arg) => {
-      const imageInfoList = JSON.parse(arg) as ImageInfo[]
-      setImageInfoList(imageInfoList)
-    })
-  }, [])
-
-  const updateImageInfo = () => {
-    const imageInfoList = props.imageIds.map(
-      image_id =>
-        ({
-          image_id: image_id,
-          file_name: '',
-          ext: '',
-          memo: '',
-          author: '',
-          created_at: '',
-        } as ImageInfo)
-    )
-
-    const req = {
-      workspaceId: props.workspaceId,
-      imageIds: props.imageIds,
-    } as RequestImageInfo
-    window.api.send(ImageIpcId.ToMainProc.GET_IMAGE_INFO_LIST, JSON.stringify(req))
-
-    setImageInfoList(imageInfoList)
-  }
+    sendIpcGetAllTags(workspaceId, setTagAllList)
+  }, [workspaceId])
 
   const onTagAreaClick = () => {
     setIsShowTagCtrlPanel(prev => !prev && props.imageIds.length > 0)
@@ -71,10 +39,16 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
     // 複数の画像を選択しているときは、共通しているタグのみ表示する
     const tagCount: { [key: string]: number } = {}
     let allImageCount = 0
-    if (!imageInfoList) return []
+    if (!props.imageIds) return []
+
+    const imageInfoMap: { [key: string]: ImageInfo } = {}
+    imageInfoList.forEach(imageInfo => {
+      imageInfoMap[imageInfo.image_id] = imageInfo
+    })
 
     // タグが何枚の画像に付与されているかをカウントする
-    imageInfoList.forEach(imageInfo => {
+    props.imageIds.forEach(image_id => {
+      const imageInfo = imageInfoMap[image_id]
       allImageCount++
       if (imageInfo && imageInfo.tags) {
         imageInfo.tags.forEach(tag => {
@@ -94,11 +68,14 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
 
   const removeTag = (tagId: string) => {
     const req: RemoveTagFromImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: props.imageIds,
       tagId: tagId,
     }
-    window.api.send(ImageIpcId.ToMainProc.REMOVE_TAG, JSON.stringify(req))
+    window.api.invoke(ImageIpcId.Invoke.REMOVE_TAG, JSON.stringify(req)).then(arg => {
+      const imageInfoList = JSON.parse(arg) as ImageInfo[]
+      setImageInfoList(imageInfoList)
+    })
   }
 
   const linkedTagList = linkedTag()
@@ -141,7 +118,6 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
             {linkedTagList.map(t => {
               return (
                 <Tag
-                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}
@@ -197,7 +173,6 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
       </section>
 
       <TagCtrlPanel
-        workspaceId={props.workspaceId}
         display={isShowTagCtrlPanel}
         imageIds={props.imageIds}
         alreadyLinkedTag={linkedTagList}

@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
 import { IpcId as ImagesIpcId, ImageInfo, ImageInfos, ShowImages, RequestImage } from '../../ipc/images'
-
-export type ImageList = {
-  page: number
-  images: ImageInfo[]
-}
+import { imageQueueAtom } from '../recoil/imageQueueAtom'
+import { imageListAtom, ImageList } from '../recoil/imageListAtom'
+import { searchTagIdsAtom, searchTypeAtom } from '../recoil/searchAtom'
+import { reloadImagesEventAtom } from '../recoil/eventAtom'
+import { useRecoilEvent } from './../lib/eventCustomHooks'
 
 export const useCollectImage = (
   workspaceId: string,
   uncategorized: boolean,
-  tagIds: string[],
-  searchType: string,
   clearSelectedImage: () => void
-): [ImageList, boolean, React.RefObject<HTMLDivElement>, (targetImageId: string, imageInfo: ImageInfo) => void] => {
-  const [imageList, setImageList] = useState({ page: 0, images: [] } as ImageList)
+): [ImageList, boolean, React.RefObject<HTMLDivElement>, () => void] => {
+  const [imageList, setImageList] = useRecoilState(imageListAtom)
+  const tagIds = useRecoilValue(searchTagIdsAtom)
+  const searchType = useRecoilValue(searchTypeAtom)
   const [nextPageRequestableState, setNextPageRequestable] = useState(false)
+  const setImageQueue = useSetRecoilState(imageQueueAtom)
+  const [reloadImageEvent, _] = useRecoilEvent(reloadImagesEventAtom, null)
 
   const requestShowImages = (page: number) => {
     if (workspaceId == '') return
@@ -26,24 +29,8 @@ export const useCollectImage = (
       searchType: searchType,
       uncategorized: uncategorized,
     }
-    window.api.send(ImagesIpcId.ToMainProc.SHOW_IMAGES, JSON.stringify(showImages))
-  }
 
-  // ワークスペースの切替時にリセットする
-  useEffect(() => {
-    if (workspaceId.length > 0) {
-      setImageList({ images: [], page: 0 })
-      setNextPageRequestable(false)
-      requestShowImages(1)
-    }
-  }, [workspaceId, uncategorized])
-
-  useEffect(() => {
-    if (imageList.page > 0) setNextPageRequestable(true)
-  }, [imageList.page])
-
-  useEffect(() => {
-    window.api.on(ImagesIpcId.ToRenderer.SHOW_IMAGES, (_e, arg) => {
+    window.api.invoke(ImagesIpcId.Invoke.FETCH_IMAGE_LIST, JSON.stringify(showImages)).then(arg => {
       const rcvImageInfos = JSON.parse(arg) as ImageInfos
       clearSelectedImage()
 
@@ -53,47 +40,68 @@ export const useCollectImage = (
         return
       }
 
-      setImageList(prevState => {
-        const requestImage = (newImages: ImageInfo[]) => {
-          newImages.forEach(image => {
-            const reqImage: RequestImage = {
-              workspaceId: rcvImageInfos.workspaceId,
-              imageId: image.image_id,
-              isThumbnail: true,
-            }
-            window.api.send(ImagesIpcId.ToMainProc.REQUEST_THUMB_IMAGE, JSON.stringify(reqImage))
-          })
-        }
-
-        if (rcvImageInfos.page == 1) {
-          // TODO:スクロール量もリセットする必要あり？
-          requestImage(rcvImageInfos.images)
-          return {
-            images: rcvImageInfos.images,
-            page: 1,
+      const requestImage = (newImages: ImageInfo[]) => {
+        const newImageRequests = newImages.map(image => {
+          const reqImage: RequestImage = {
+            workspaceId: rcvImageInfos.workspaceId,
+            imageId: image.image_id,
+            isThumbnail: true,
           }
-        }
+          return reqImage
+        })
+        setImageQueue(prevState => {
+          return prevState.concat(newImageRequests)
+        })
+      }
 
-        // 新しく取得した画像のデータを取得する
-        const addImages: ImageInfo[] = []
-        const currImages: { [image_id: string]: boolean } = {}
-        for (let i = 0; i < prevState.images.length; i++) {
-          currImages[prevState.images[i].image_id] = true
-        }
-        for (let i = 0; i < rcvImageInfos.images.length; i++) {
-          if (rcvImageInfos.images[i].image_id in currImages) continue
-          addImages.push(rcvImageInfos.images[i])
-        }
+      if (rcvImageInfos.page == 1) {
+        // TODO:スクロール量もリセットする必要あり？
+        requestImage(rcvImageInfos.images)
+        setImageList({
+          images: rcvImageInfos.images,
+          page: 1,
+        })
+        return
+      }
 
-        requestImage(addImages)
+      // 新しく取得した画像のデータを取得する
+      const addImages: ImageInfo[] = []
+      const currImages: { [image_id: string]: boolean } = {}
+      for (let i = 0; i < imageList.images.length; i++) {
+        currImages[imageList.images[i].image_id] = true
+      }
+      for (let i = 0; i < rcvImageInfos.images.length; i++) {
+        if (rcvImageInfos.images[i].image_id in currImages) continue
+        addImages.push(rcvImageInfos.images[i])
+      }
 
+      requestImage(addImages)
+
+      setImageList(prevState => {
         return {
           images: [...prevState.images, ...addImages],
           page: rcvImageInfos.page,
         }
       })
     })
-  }, [])
+  }
+
+  const reloadImageInfo = () => {
+    if (workspaceId.length > 0) {
+      setImageList({ images: [], page: 0 })
+      setNextPageRequestable(false)
+      requestShowImages(1)
+    }
+  }
+
+  useEffect(() => {
+    // 条件が変わったら画像情報をリロードする
+    reloadImageInfo()
+  }, [workspaceId, uncategorized, tagIds.join('-'), searchType, reloadImageEvent])
+
+  useEffect(() => {
+    if (imageList.page > 0) setNextPageRequestable(true)
+  }, [imageList.page])
 
   // 無限スクロール発火の監視
   const ref = React.useRef<HTMLDivElement>(null)
@@ -119,23 +127,5 @@ export const useCollectImage = (
     }
   })
 
-  const replaceImageInfo = (targetImageId: string, imageInfo: ImageInfo) => {
-    setImageList(prevState => {
-      const nextImages = [...prevState.images]
-
-      for (let i = 0; i < nextImages.length; i++) {
-        if (nextImages[i].image_id == targetImageId) {
-          // 差し替え
-          nextImages[i] = imageInfo
-        }
-      }
-
-      return {
-        images: nextImages,
-        page: prevState.page,
-      }
-    })
-  }
-
-  return [imageList, nextPageRequestableState, ref, replaceImageInfo]
+  return [imageList, nextPageRequestableState, ref, reloadImageInfo]
 }

@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react'
+import { useSetRecoilState } from 'recoil'
+import { tagListAtom } from '../../recoil/tagListAtom'
 import ReactModal from 'react-modal'
 import CssConst from './../../cssConst'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
-import { IpcId as TagsIpcId, TagRenameReply, TagRename } from '../../../ipc/tags'
+import { IpcId as TagsIpcId, TagRenameReply, TagRename, GetAllTags, TagList } from '../../../ipc/tags'
 
 export const TagRenameModal = () => {
+  const setTagAllList = useSetRecoilState(tagListAtom)
   const [isOpen, setIsOpen] = useState(false)
   const [tagNameState, setTagNameState] = useState('')
   const [workspaceId, setWorkspaceId] = useState('')
   const [tagId, setTagId] = useState('')
 
   useEffect(() => {
-    window.api.on(TagsIpcId.ToRenderer.TO_TAG_RENAME, (_e, arg) => {
+    window.api.on(TagsIpcId.TagContextMenu.SHOW_TAG_RENAME_MODAL, (_e, arg) => {
       const tagRenameReply = JSON.parse(arg) as TagRenameReply
       setWorkspaceId(tagRenameReply.workspaceId)
       setTagId(tagRenameReply.tagId)
@@ -32,7 +35,16 @@ export const TagRenameModal = () => {
       tagName: tagNameState,
     }
 
-    window.api.send(TagsIpcId.ToMainProc.TAG_RENAME, JSON.stringify(req))
+    window.api.invoke(TagsIpcId.Invoke.TAG_RENAME, JSON.stringify(req)).then(() => {
+      if (workspaceId == '') return
+      const req = {
+        workspaceId: workspaceId,
+      } as GetAllTags
+      window.api.invoke(TagsIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(req)).then(arg => {
+        const tagList = JSON.parse(arg) as TagList
+        setTagAllList(tagList.tags)
+      })
+    })
   }
 
   const reactModalStyle: ReactModal.Styles = {

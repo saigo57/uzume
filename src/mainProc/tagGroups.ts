@@ -1,60 +1,38 @@
 import { ipcMain } from 'electron'
-import { IpcId, GetAllTagGroups, TagGroupInfo, CreateTagGroup, AddToTagGroup } from '../ipc/tagGroups'
-import { getNewTags } from './tags'
-import { BackendConnector } from 'uzume-backend-connector'
+import { IpcId, GetAllTagGroups, CreateTagGroup, AddToTagGroup } from '../ipc/tagGroups'
+import TagGroupUseCase from './useCase/tagGroupUseCase'
 import { showFooterMessage } from '../ipc/footer'
 
-ipcMain.on(IpcId.ToMainProc.GET_ALL_TAG_GROUPS, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.GET_ALL_TAG_GROUPS, async (e, arg) => {
   const reqAllTagGroups: GetAllTagGroups = JSON.parse(arg)
-  fetchAllTagGroups(e, reqAllTagGroups.workspaceId)
+
+  try {
+    const tagGroups = await TagGroupUseCase.fetchAllTagGroups(reqAllTagGroups.workspaceId)
+    return JSON.stringify({ tag_groups: tagGroups })
+  } catch (err) {
+    showFooterMessage(e, `タググループリストの取得に失敗しました。[${err}]`)
+  }
 })
 
-ipcMain.on(IpcId.ToMainProc.CREATE_NEW_TAG_GROUP, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.CREATE_NEW_TAG_GROUP, async (e, arg) => {
   const reqCreateTagGroup: CreateTagGroup = JSON.parse(arg)
-  BackendConnector.workspace(reqCreateTagGroup.workspaceId, ws => {
-    ws.tag_groups
-      .createNewTagGroup(reqCreateTagGroup.name)
-      .then(() => {
-        fetchAllTagGroups(e, reqCreateTagGroup.workspaceId)
-      })
-      .catch(err => {
-        showFooterMessage(e, `タググループの新規作成に失敗しました。[${err}}]`)
-      })
-  })
+  try {
+    await TagGroupUseCase.createTagGroup(reqCreateTagGroup.workspaceId, reqCreateTagGroup.name)
+  } catch (err) {
+    showFooterMessage(e, `タググループの新規作成に失敗しました。[${err}]`)
+  }
 })
 
-ipcMain.on(IpcId.ToMainProc.ADD_TO_TAG_GROUP, (e, arg) => {
+ipcMain.handle(IpcId.Invoke.ADD_TO_TAG_GROUP, async (e, arg) => {
   const reqAddToTagGroup: AddToTagGroup = JSON.parse(arg)
-  BackendConnector.workspace(reqAddToTagGroup.workspaceId, ws => {
-    ws.tag_groups
-      .AddTagToTagGroup(reqAddToTagGroup.tagGroupId, reqAddToTagGroup.tagId)
-      .then(() => {
-        getNewTags(e, reqAddToTagGroup.workspaceId)
-      })
-      .catch(err => {
-        showFooterMessage(e, `タググループへのタグ追加に失敗しました。[${err}}]`)
-      })
-  })
-})
 
-export function fetchAllTagGroups(e: Electron.IpcMainEvent, workspace_id: string) {
-  BackendConnector.workspace(workspace_id, ws => {
-    ws.tag_groups
-      .getList()
-      .then(resTagList => {
-        const tag_groups: TagGroupInfo[] = []
-        if (resTagList.tag_groups !== null) {
-          for (let i = 0; i < resTagList.tag_groups.length; i++) {
-            tag_groups.push({
-              tagGroupId: resTagList.tag_groups[i].tag_group_id,
-              name: resTagList.tag_groups[i].name,
-            })
-          }
-        }
-        e.reply(IpcId.ToRenderer.GET_ALL_TAG_GROUPS, JSON.stringify({ tag_groups: tag_groups }))
-      })
-      .catch(err => {
-        showFooterMessage(e, `タググループリストの取得に失敗しました。[${err}}]`)
-      })
-  })
-}
+  try {
+    await TagGroupUseCase.addTagToTagGroup(
+      reqAddToTagGroup.workspaceId,
+      reqAddToTagGroup.tagGroupId,
+      reqAddToTagGroup.tagId
+    )
+  } catch (err) {
+    showFooterMessage(e, `タググループへのタグ追加に失敗しました。[${err}]`)
+  }
+})
