@@ -30,6 +30,7 @@ type SelectedSingleImageId = {
 }
 
 export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
+  const SEND_IMAGE_COUNT_MAX = 5
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
   // api.onの中でselectedImageIdを使うと最初の参照しか見れないので、参照が変わらないstateに都度コピーする
@@ -90,19 +91,22 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     if (imageRequesting || imageQueue.length == 0) return
 
     setImageRequesting(true)
-    window.api
-      .invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(imageQueue[0]))
-      .then((data: string) => {
-        const imageData: ImageData = JSON.parse(data)
-        const img: any = document.getElementById(`image-${imageData.imageId}`)
-        if (img) {
-          img.src = 'data:image;base64,' + imageData.imageBase64
-        }
-      })
-      .finally(() => {
-        setImageRequesting(false)
-      })
-    setImageQueue(prevImages => prevImages.slice(1))
+    const sendCount = Math.min(imageQueue.length, SEND_IMAGE_COUNT_MAX)
+    for (let i = 0; i < sendCount; i++) {
+      window.api
+        .invoke(ImagesIpcId.Invoke.FETCH_IMAGE, JSON.stringify(imageQueue[i]))
+        .then((data: string) => {
+          const imageData: ImageData = JSON.parse(data)
+          const img: any = document.getElementById(`image-${imageData.imageId}`)
+          if (img) {
+            img.src = 'data:image;base64,' + imageData.imageBase64
+          }
+        })
+        .finally(() => {
+          setImageRequesting(false)
+        })
+    }
+    setImageQueue(prevImages => prevImages.slice(sendCount))
   }, [imageQueueClock])
 
   // 画像(情報)受信系
