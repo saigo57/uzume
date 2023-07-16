@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
 import { IpcId as ImagesIpcId, ImageInfo, ImageInfos, ShowImages, RequestImage } from '../../ipc/images'
 import { imageQueueAtom } from '../recoil/imageQueueAtom'
 import { imageListAtom, ImageList } from '../recoil/imageListAtom'
+import { searchTagIdsAtom, searchTypeAtom } from '../recoil/searchAtom'
+import { reloadImagesEventAtom } from '../recoil/eventAtom'
+import { useRecoilEvent } from './../lib/eventCustomHooks'
 
 export const useCollectImage = (
   workspaceId: string,
   uncategorized: boolean,
-  tagIds: string[],
-  searchType: string,
   clearSelectedImage: () => void
-): [
-  ImageList,
-  boolean,
-  React.RefObject<HTMLDivElement>,
-  (targetImageId: string, imageInfo: ImageInfo) => void,
-  () => void
-] => {
+): [ImageList, boolean, React.RefObject<HTMLDivElement>, () => void] => {
   const [imageList, setImageList] = useRecoilState(imageListAtom)
+  const tagIds = useRecoilValue(searchTagIdsAtom)
+  const searchType = useRecoilValue(searchTypeAtom)
   const [nextPageRequestableState, setNextPageRequestable] = useState(false)
   const setImageQueue = useSetRecoilState(imageQueueAtom)
+  const [reloadImageEvent, _] = useRecoilEvent(reloadImagesEventAtom, null)
 
   const requestShowImages = (page: number) => {
     if (workspaceId == '') return
@@ -88,14 +86,18 @@ export const useCollectImage = (
     })
   }
 
-  // ワークスペースの切替時にリセットする
-  useEffect(() => {
+  const reloadImageInfo = () => {
     if (workspaceId.length > 0) {
       setImageList({ images: [], page: 0 })
       setNextPageRequestable(false)
       requestShowImages(1)
     }
-  }, [workspaceId, uncategorized])
+  }
+
+  useEffect(() => {
+    // 条件が変わったら画像情報をリロードする
+    reloadImageInfo()
+  }, [workspaceId, uncategorized, tagIds.join('-'), searchType, reloadImageEvent])
 
   useEffect(() => {
     if (imageList.page > 0) setNextPageRequestable(true)
@@ -125,27 +127,5 @@ export const useCollectImage = (
     }
   })
 
-  const replaceImageInfo = (targetImageId: string, imageInfo: ImageInfo) => {
-    setImageList(prevState => {
-      const nextImages = [...prevState.images]
-
-      for (let i = 0; i < nextImages.length; i++) {
-        if (nextImages[i].image_id == targetImageId) {
-          // 差し替え
-          nextImages[i] = imageInfo
-        }
-      }
-
-      return {
-        images: nextImages,
-        page: prevState.page,
-      }
-    })
-  }
-
-  const reloadImageInfo = () => {
-    requestShowImages(1)
-  }
-
-  return [imageList, nextPageRequestableState, ref, replaceImageInfo, reloadImageInfo]
+  return [imageList, nextPageRequestableState, ref, reloadImageInfo]
 }

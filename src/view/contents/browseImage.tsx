@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import { tagListAtom } from '../recoil/tagListAtom'
+import { searchTagsAtom, searchTypeAtom } from '../recoil/searchAtom'
+import { reloadImagesEventAtom } from '../recoil/eventAtom'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { useTags } from '../lib/tagCustomHooks'
+import { useEvent, useRecoilEvent, Event } from './../lib/eventCustomHooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft, faRotateRight, faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import { Tag } from './../component/atmos/tag'
@@ -10,10 +13,8 @@ import { SearchPanel } from './../component/organisms/searchPanel'
 import { ImageIndexView } from './imageIndexView'
 import { ImageView } from './imaveView/imageView'
 import { ImageSideBar } from './imageSideBar'
-import { TagInfo } from '../../ipc/tags'
 import { sendIpcGetAllTags } from '../commonIpc'
 import { IpcId as ImagesIpcId } from '../../ipc/images'
-import { useEvent, Event } from './../lib/eventCustomHooks'
 
 type BrowseImageProps = {
   display: boolean
@@ -29,29 +30,22 @@ type BrowseImageProps = {
 export const BrowseImage: React.VFC<BrowseImageProps> = props => {
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [selectedImageIds, setSelectedImageIds] = useState([] as string[])
-  const [searchTags, setSearchTags] = useState([] as TagInfo[])
+  const [searchTags, setSearchTags] = useRecoilState(searchTagsAtom)
   const [showSearchPanel, setShowSearchPanel] = useState(false)
-  const [searchType, setSearchType] = useState('and')
+  const [searchType, setSearchType] = useRecoilState(searchTypeAtom)
   const [tagAllListState, _showingTagAllListState, resetTagList, _selectingMenu, _selectMenu] = useTags(
     props.workspaceId
   )
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
-  const [onShowImagesEvent, raiseOnShowImagesEvent] = useEvent(null)
   const [onNextImageEvent, raiseOnNextImageEvent] = useEvent(null)
   const [onPrevImageEvent, raiseOnPrevImageEvent] = useEvent(null)
-
-  const showImages = () => {
-    if (props.workspaceId == '') return
-    raiseOnShowImagesEvent(null)
-  }
+  const [_, raiseReloadImageEvent] = useRecoilEvent(reloadImagesEventAtom, null)
 
   useEffect(() => {
     setSelectedImageIds([])
     setSearchTags([])
     resetTagList()
     sendIpcGetAllTags(props.workspaceId, setTagAllList)
-
-    showImages()
   }, [props.workspaceId])
 
   useEffect(() => {
@@ -71,12 +65,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
     })
 
     setSingleClickTagId(null)
-    showImages()
   }, [singleClickTagId])
-
-  useEffect(() => {
-    showImages()
-  }, [searchTags.length, searchType, singleClickTagId]) // renameのときは発火させない
 
   useEffect(() => {
     if (showSearchPanel) {
@@ -116,7 +105,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
       // TODO: 画像表示のリロード
     } else {
       // 一覧表示のリロード
-      showImages()
+      raiseReloadImageEvent(null)
     }
   }
 
@@ -208,7 +197,6 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
             id="search-panel-id"
             display={showSearchPanel}
             workspaceId={props.workspaceId}
-            selectedTag={searchTags}
             onTagAddClick={onSearchPanelTagAddClick}
             onTagDeleteClick={onSearchPanelTagDeleteClick}
           />
@@ -220,10 +208,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
           onImageDoubleClick={onImageDoubleClick}
           clearSearchTags={clearSearchTags}
           hide={!!props.imageId}
-          tagIds={searchTags.map(tag => tag.tagId)}
-          searchType={searchType}
           uncategorized={props.uncategorized}
-          onShowImagesEvent={onShowImagesEvent}
         />
 
         {(() => {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useRecoilValue } from 'recoil'
 import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
+import { searchTagIdsAtom } from '../../recoil/searchAtom'
 import { Tag } from '../atmos/tag'
 import { MenuItem, useTags } from '../../lib/tagCustomHooks'
 import CssConst from './../../cssConst'
-import { TagInfo } from '../../../ipc/tags'
 
 import './tagGroupMenu.scss'
 
@@ -12,21 +12,19 @@ type SearchPanelProps = {
   id: string
   display: boolean
   workspaceId: string
-  selectedTag: TagInfo[]
   onTagAddClick: (tagId: string | null, tagName: string) => void
   onTagDeleteClick: (tagId: string) => void
 }
 
 export const SearchPanel: React.VFC<SearchPanelProps> = props => {
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
+  const selectedTagIds = useRecoilValue(searchTagIdsAtom)
   const [searchTagText, setSearchTagText] = useState('')
   const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId)
 
   useEffect(() => {
     resetTagList()
   }, [props.workspaceId])
-
-  const selectedTagIds = props.selectedTag.map(t => t.tagId)
 
   const style: React.CSSProperties = {
     position: 'absolute',

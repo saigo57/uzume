@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import ReactModal from 'react-modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
 import { IpcId as ImagesIpcId, ShowContextMenu, ImageFiles, ImageData, ImageUploadProgress } from '../../ipc/images'
 import CssConst from './../cssConst'
-import { Event } from './../lib/eventCustomHooks'
 import { useCollectImage } from './collectImagesHooks'
 import { usePreview } from './previewHooks'
 import { CtrlLikeKey, dummyImageBase64 } from '../lib/helper'
 import { imageQueueAtom, imageRequestingAtom } from '../recoil/imageQueueAtom'
+import { searchTagIdsAtom, searchTypeAtom } from '../recoil/searchAtom'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -17,10 +17,7 @@ type ImageIndexViewProps = {
   onImageDoubleClick: (imageId: string) => void
   clearSearchTags: () => void
   hide: boolean
-  tagIds: string[]
-  searchType: string
   uncategorized: boolean
-  onShowImagesEvent: Event
 }
 
 type UploadModalInfo = {
@@ -35,12 +32,12 @@ type SelectedSingleImageId = {
 export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
   // api.onの中でselectedImageIdを使うと最初の参照しか見れないので、参照が変わらないstateに都度コピーする
-  const [selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
-  const [imageList, nextPageRequestableState, infScrollRef, replaceImageInfo, reloadImageInfo] = useCollectImage(
+  const [_selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
+  const searchTagIds = useRecoilValue(searchTagIdsAtom)
+  const searchType = useRecoilValue(searchTypeAtom)
+  const [imageList, nextPageRequestableState, infScrollRef, reloadImageInfo] = useCollectImage(
     props.workspaceId,
     props.uncategorized,
-    props.tagIds,
-    props.searchType,
     () => setSelectedImageId([])
   )
   const [previewStatus, onLeaveThumbneil, iconEnter] = usePreview(props.workspaceId)
@@ -57,13 +54,16 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const supportedExts = ['jpeg', 'jpg', 'png', 'gif']
 
   useEffect(() => {
+    // 画像リストがリセットされてたらダミー画像に置き換える
+    if (imageList.page != 0) return
+
     const imgs: any = document.getElementsByClassName('thumbnail-img')
     if (!imgs) return
 
     for (let i = 0; i < imgs.length; i++) {
       imgs[i].src = dummyImageBase64
     }
-  }, [props.onShowImagesEvent])
+  }, [imageList.page])
 
   useEffect(() => {
     if (props.onChangeSelectedImages) props.onChangeSelectedImages(selectedImageId)
@@ -191,8 +191,8 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     const imageFiles: ImageFiles = {
       workspaceId: props.workspaceId,
       imageFileList: [],
-      tagIds: props.tagIds,
-      searchType: props.searchType,
+      tagIds: searchTagIds,
+      searchType: searchType,
     }
     for (let i = 0; i < e.dataTransfer.files.length; i++) {
       const filePath = e.dataTransfer.files[i].path
