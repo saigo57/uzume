@@ -11,7 +11,6 @@ import { TagCtrlPanel } from '../component/organisms/tagCtrlPanel'
 import { sendIpcGetAllTags } from '../commonIpc'
 
 type ImageSideBarProps = {
-  workspaceId: string
   imageIds: string[]
   dsb_ref: React.RefObject<HTMLDivElement>
 }

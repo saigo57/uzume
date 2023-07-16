@@ -29,7 +29,7 @@ export const ContentsArea: React.VFC<contentsAreaProps> = props => {
   return (
     <>
       {(() => {
-        return currMode == MenuMode.TAG_MANAGE ? <TagManage workspaceId={workspaceId} dsb_ref={props.dsb_ref} /> : <></>
+        return currMode == MenuMode.TAG_MANAGE ? <TagManage dsb_ref={props.dsb_ref} /> : <></>
       })()}
 
       {/* tag_manage表示時にレンダリングしない場合、stateが消えてしまうのでcomponent内で非表示にすることでstateを保持するようにする */}

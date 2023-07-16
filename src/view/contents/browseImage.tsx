@@ -221,7 +221,7 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
 
       <div id="after-browse-image-area" className="split-bar" ref={dsb_split_bar}></div>
 
-      <ImageSideBar workspaceId={workspaceId} imageIds={selectedImageIds} dsb_ref={dsb_right} />
+      <ImageSideBar imageIds={selectedImageIds} dsb_ref={dsb_right} />
     </>
   )
 }

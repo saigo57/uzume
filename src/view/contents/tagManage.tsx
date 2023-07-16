@@ -29,7 +29,6 @@ type TagGroupMenuProps = {
 }
 
 type TagManageProps = {
-  workspaceId: string
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
