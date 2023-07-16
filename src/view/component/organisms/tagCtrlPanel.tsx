@@ -33,7 +33,7 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [searchTagText, setSearchTagText] = useState('')
   const [_tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(workspaceId)
-  const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
+  const [_imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
 
   useEffect(() => {
     if (!props.display) setSearchTagText('')
