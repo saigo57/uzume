@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { MenuMode, menuModeAtom } from './recoil/menuModeAtom'
 import { tagListAtom } from './recoil/tagListAtom'
 import { tagGroupListAtom } from './recoil/tagGroupListAtom'
-import { useEvent } from './lib/eventCustomHooks'
+import { singleTagClickEventAtom } from './recoil/eventAtom'
+import { useRecoilEvent } from './lib/eventCustomHooks'
 import { useDraggableSplitBar } from './lib/draggableSplitBarHooks'
 import { WorkspaceList } from './workspaceList'
 import { MainMenu } from './mainMenu'
@@ -22,22 +24,11 @@ export function UzumeMain() {
     workspace_name: '',
     workspace_id: '',
   })
-  const [currMode, setCurrMode] = useState('home')
-
-  const [showIndexImageEvent, raiseShowIndexImageEvent] = useEvent(() => {
-    setCurrMode('home')
-  })
-  const [uncategorizedEvent, raiseUncategorizedEvent] = useEvent(() => {
-    setCurrMode('uncategorized')
-  })
-  const [tagManageEvent, raiseTagManageEvent] = useEvent(() => {
-    setCurrMode('tag_manage')
-  })
-  const [singleTagClickEvent, raiseSingleTagClickEvent] = useEvent(null)
+  const [currMode, setCurrMode] = useRecoilState(menuModeAtom)
+  const [_singleTagClickEvent, raiseSingleTagClickEvent] = useRecoilEvent(singleTagClickEventAtom, null)
 
   useEffect(() => {
-    setCurrMode('home')
-    raiseShowIndexImageEvent(null)
+    setCurrMode(MenuMode.HOME)
 
     if (currentWorkspaceState.workspace_id != '') {
       const req = {
@@ -79,19 +70,19 @@ export function UzumeMain() {
   const onMenuAction = (action: string) => {
     switch (action) {
       case 'home_click':
-        raiseShowIndexImageEvent(null)
+        setCurrMode(MenuMode.HOME)
         break
       case 'uncategorized_click':
-        raiseUncategorizedEvent(null)
+        setCurrMode(MenuMode.UNCATEGORIZED)
         break
       case 'tag_manage_click':
-        raiseTagManageEvent(null)
+        setCurrMode(MenuMode.TAG_MANAGE)
         break
     }
   }
 
   const onSingleTagClick = (tagId: string) => {
-    raiseShowIndexImageEvent(null)
+    setCurrMode(MenuMode.HOME)
     raiseSingleTagClickEvent(tagId)
   }
 
@@ -107,15 +98,7 @@ export function UzumeMain() {
         dsb_ref={dsb_left}
       />
       <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>
-      <ContentsArea
-        workspaceId={currentWorkspaceState.workspace_id}
-        uncategorized={currMode == 'uncategorized'}
-        showIndexImageEvent={showIndexImageEvent}
-        uncategorizedEvent={uncategorizedEvent}
-        tagManageEvent={tagManageEvent}
-        singleTagClickEvent={singleTagClickEvent}
-        dsb_ref={dsb_right}
-      />
+      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} dsb_ref={dsb_right} />
       <Footer />
     </>
   )

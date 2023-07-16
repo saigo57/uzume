@@ -45,7 +45,8 @@ ipcMain.handle(IpcId.Invoke.UPLOAD_IMAGES, async (e, arg) => {
 
 ipcMain.handle(IpcId.Invoke.FETCH_IMAGE_LIST, async (e, arg) => {
   const showImages: ShowImages = JSON.parse(arg)
-  const tags: string[] = showImages.tagIds
+  let tags: string[] = showImages.tagIds
+  if (showImages.uncategorized) tags = [...tags, '_system_tag_uncategorized']
   try {
     const imageInfos: ImageInfos = await ImageUseCase.fetchImageList(
       showImages.workspaceId,

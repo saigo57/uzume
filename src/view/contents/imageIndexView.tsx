@@ -10,6 +10,7 @@ import { usePreview } from './previewHooks'
 import { CtrlLikeKey, dummyImageBase64 } from '../lib/helper'
 import { imageQueueAtom, imageRequestingAtom } from '../recoil/imageQueueAtom'
 import { searchTagIdsAtom, searchTypeAtom } from '../recoil/searchAtom'
+import { isUncategorizedModeAtom } from '../recoil/menuModeAtom'
 
 type ImageIndexViewProps = {
   workspaceId: string
@@ -17,7 +18,6 @@ type ImageIndexViewProps = {
   onImageDoubleClick: (imageId: string) => void
   clearSearchTags: () => void
   hide: boolean
-  uncategorized: boolean
 }
 
 type UploadModalInfo = {
@@ -35,9 +35,10 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const [_selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
   const searchTagIds = useRecoilValue(searchTagIdsAtom)
   const searchType = useRecoilValue(searchTypeAtom)
+  const isUncategorizedMode = useRecoilValue(isUncategorizedModeAtom)
   const [imageList, nextPageRequestableState, infScrollRef, reloadImageInfo] = useCollectImage(
     props.workspaceId,
-    props.uncategorized,
+    isUncategorizedMode,
     () => setSelectedImageId([])
   )
   const [previewStatus, onLeaveThumbneil, iconEnter] = usePreview(props.workspaceId)

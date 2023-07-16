@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
 import { tagListAtom } from '../recoil/tagListAtom'
 import { searchTagsAtom, searchTypeAtom } from '../recoil/searchAtom'
-import { reloadImagesEventAtom } from '../recoil/eventAtom'
+import { reloadImagesEventAtom, singleTagClickEventAtom } from '../recoil/eventAtom'
+import { isUncategorizedModeAtom } from '../recoil/menuModeAtom'
 import { useDraggableSplitBar } from '../lib/draggableSplitBarHooks'
 import { useTags } from '../lib/tagCustomHooks'
-import { useEvent, useRecoilEvent, Event } from './../lib/eventCustomHooks'
+import { useEvent, useRecoilEvent } from './../lib/eventCustomHooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft, faRotateRight, faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import { Tag } from './../component/atmos/tag'
@@ -20,8 +21,6 @@ type BrowseImageProps = {
   display: boolean
   workspaceId: string
   imageId: string | null
-  uncategorized: boolean
-  singleTagClickEvent: Event
   onModeChange: (imageId: string | null) => void
   onPrevClick: () => void
   dsb_ref: React.RefObject<HTMLDivElement>
@@ -39,7 +38,9 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
   const [singleClickTagId, setSingleClickTagId] = useState(null as string | null)
   const [onNextImageEvent, raiseOnNextImageEvent] = useEvent(null)
   const [onPrevImageEvent, raiseOnPrevImageEvent] = useEvent(null)
-  const [_, raiseReloadImageEvent] = useRecoilEvent(reloadImagesEventAtom, null)
+  const [_raiseReloadImage, raiseReloadImageEvent] = useRecoilEvent(reloadImagesEventAtom, null)
+  const isUncategorizedMode = useRecoilValue(isUncategorizedModeAtom)
+  const [singleTagClickEvent, _raiseSingleTagClickEvent] = useRecoilEvent(singleTagClickEventAtom, null)
 
   useEffect(() => {
     setSelectedImageIds([])
@@ -50,12 +51,12 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
 
   useEffect(() => {
     setSearchTags([])
-  }, [props.uncategorized])
+  }, [isUncategorizedMode])
 
   useEffect(() => {
-    const tagId = props.singleTagClickEvent.data
+    const tagId = singleTagClickEvent.data
     setSingleClickTagId(tagId)
-  }, [props.singleTagClickEvent])
+  }, [singleTagClickEvent])
 
   useEffect(() => {
     setSearchTags(state => {
@@ -208,7 +209,6 @@ export const BrowseImage: React.VFC<BrowseImageProps> = props => {
           onImageDoubleClick={onImageDoubleClick}
           clearSearchTags={clearSearchTags}
           hide={!!props.imageId}
-          uncategorized={props.uncategorized}
         />
 
         {(() => {
