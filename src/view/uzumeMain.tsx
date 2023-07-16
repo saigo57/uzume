@@ -22,7 +22,7 @@ export function UzumeMain() {
   const setTagAllList = useSetRecoilState(tagListAtom)
   const setTagGroupList = useSetRecoilState(tagGroupListAtom)
   const [currentWorkspaceState, setCurrentWorkspace] = useRecoilState(workspaceAtom)
-  const [currMode, setCurrMode] = useRecoilState(menuModeAtom)
+  const [_currMode, setCurrMode] = useRecoilState(menuModeAtom)
   const [_singleTagClickEvent, raiseSingleTagClickEvent] = useRecoilEvent(singleTagClickEventAtom, null)
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export function UzumeMain() {
   return (
     <>
       <WorkspaceList />
-      <MainMenu currMode={currMode} onAction={onMenuAction} onSingleTagClick={onSingleTagClick} dsb_ref={dsb_left} />
+      <MainMenu onAction={onMenuAction} onSingleTagClick={onSingleTagClick} dsb_ref={dsb_left} />
       <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>
       <ContentsArea dsb_ref={dsb_right} />
       <Footer />

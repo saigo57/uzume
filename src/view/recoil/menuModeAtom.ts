@@ -2,7 +2,6 @@ import { atom, selector } from 'recoil'
 
 export const MenuMode = {
   HOME: 'home',
-  BROWSE_IMAGE: 'browse_image',
   TAG_MANAGE: 'tag_manage',
   UNCATEGORIZED: 'uncategorized',
 } as const
