@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRecoilValue } from 'recoil'
+import { workspaceAtom } from './recoil/workspaceAtom'
 import { tagGroupListAtom } from './recoil/tagGroupListAtom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -15,8 +16,6 @@ import { useTags, createOnContextMenu } from './lib/tagCustomHooks'
 import { ShowContextMenu, TagInfo } from '../ipc/tags'
 
 type MainMenuProps = {
-  workspaceId: string
-  workspaceName: string
   currMode: string
   onAction: (action: string) => void
   onSingleTagClick: (tagId: string) => void
@@ -24,10 +23,11 @@ type MainMenuProps = {
 }
 
 export const MainMenu: React.VFC<MainMenuProps> = props => {
+  const workspace = useRecoilValue(workspaceAtom)
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [FavoriteTagListState, setFavoriteTagList] = useState([] as TagInfo[])
   const [tagAllListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(
-    props.workspaceId
+    workspace.workspace_id
   )
   const [isTagGroupOpen, setIsTagGroupOpen] = useState({} as { [key: string]: boolean })
 
@@ -65,7 +65,7 @@ export const MainMenu: React.VFC<MainMenuProps> = props => {
 
   const tagInfoToShowContextMenu = (tagInfo: TagInfo) => {
     return {
-      workspaceId: props.workspaceId,
+      workspaceId: workspace.workspace_id,
       tagId: tagInfo.tagId,
       tagName: tagInfo.name,
       currFavorite: tagInfo.favorite,
@@ -74,7 +74,7 @@ export const MainMenu: React.VFC<MainMenuProps> = props => {
 
   return (
     <section id="main-menu" className="main-menu" ref={props.dsb_ref}>
-      <h1 className="menu-title">{props.workspaceName}</h1>
+      <h1 className="menu-title">{workspace.workspace_name}</h1>
       <h1 className={`menu-title clickable ${selectedClass('home')}`} onClick={onHomeClick}>
         <FontAwesomeIcon icon={faHome} />
         <div className="menu-title-text">Home</div>

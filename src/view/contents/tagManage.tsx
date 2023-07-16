@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../recoil/workspaceAtom'
 import { tagListAtom } from '../recoil/tagListAtom'
 import { tagGroupListAtom } from './../recoil/tagGroupListAtom'
 import ReactModal from 'react-modal'
@@ -21,7 +22,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
 
 type TagGroupMenuProps = {
-  workspaceId: string
   tagGroupId: string
   name: string
   isSelected: boolean
@@ -51,17 +51,18 @@ const reactModalStyle: ReactModal.Styles = {
 }
 
 const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const onDrop = (item: any) => {
     const req = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       tagGroupId: props.tagGroupId,
       tagId: item.tagId,
     } as AddToTagGroup
 
     window.api.invoke(TagGroupsIpcId.Invoke.ADD_TO_TAG_GROUP, JSON.stringify(req)).then(() => {
       const req = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
       } as GetAllTags
       window.api.invoke(TagIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(req)).then(arg => {
         const tagList = JSON.parse(arg) as TagList
@@ -80,7 +81,7 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
 
   const showContextMenu = () => {
     const req = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       tagGroupId: props.tagGroupId,
       tagGroupName: props.name,
     } as TagGroupContextMenu
@@ -100,22 +101,23 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
 }
 
 export const TagManage: React.VFC<TagManageProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [tagGroupListState, setTagGroupList] = useRecoilState(tagGroupListAtom)
   const [newTagGroupNameState, setNewTagGroupName] = useState('')
   const [isShowNewTagGroupModalState, setIsShowNewTagGroupModal] = useState(false)
-  const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(props.workspaceId)
+  const [_tagAllListState, showingTagAllListState, resetTagList, selectingMenu, selectMenu] = useTags(workspaceId)
 
   useEffect(() => {
     resetTagList()
-  }, [props.workspaceId])
+  }, [workspaceId])
 
   useEffect(() => {
     window.api.on(TagManageIpcId.TagGroupContextMenu.TAG_GROUP_DELETED, (_e, _arg) => {
       selectMenu(MenuItem.ALL_TAG)
 
       const tagGroupReq = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
       } as GetAllTagGroups
 
       window.api.invoke(TagGroupsIpcId.Invoke.GET_ALL_TAG_GROUPS, JSON.stringify(tagGroupReq)).then((arg: string) => {
@@ -124,7 +126,7 @@ export const TagManage: React.VFC<TagManageProps> = props => {
       })
 
       const tagReq = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
       } as GetAllTags
 
       window.api.invoke(TagIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(tagReq)).then(arg => {
@@ -145,7 +147,7 @@ export const TagManage: React.VFC<TagManageProps> = props => {
 
   const createTagGroup = () => {
     const req = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       name: newTagGroupNameState,
     } as CreateTagGroup
 
@@ -188,7 +190,6 @@ export const TagManage: React.VFC<TagManageProps> = props => {
         {tagGroupListState.map(tg => {
           return (
             <TagGroupMenu
-              workspaceId={props.workspaceId}
               name={tg.name}
               tagGroupId={tg.tagGroupId}
               isSelected={selectingMenu == tg.tagGroupId}
@@ -204,7 +205,6 @@ export const TagManage: React.VFC<TagManageProps> = props => {
         {showingTagAllListState.map(t => {
           return (
             <Tag
-              workspaceId={props.workspaceId}
               tagId={t.tagId}
               tagName={t.name}
               favorite={t.favorite}

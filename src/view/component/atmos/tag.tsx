@@ -1,4 +1,6 @@
 import React from 'react'
+import { useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../../recoil/workspaceAtom'
 import { useDrag } from 'react-dnd'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -9,7 +11,6 @@ import { createOnContextMenu } from '../../lib/tagCustomHooks'
 import './tag.scss'
 
 type TagProps = {
-  workspaceId: string
   tagId: string | null
   tagName: string
   favorite: boolean
@@ -20,6 +21,7 @@ type TagProps = {
 }
 
 export const Tag: React.VFC<TagProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const [{ isDragging }, dragRef] = useDrag({
     /* eslint-enable @typescript-eslint/no-unused-vars */
@@ -48,7 +50,7 @@ export const Tag: React.VFC<TagProps> = props => {
   }
 
   const showContextMenu = {
-    workspaceId: props.workspaceId,
+    workspaceId: workspaceId,
     tagId: props.tagId,
     tagName: props.tagName,
     currFavorite: props.favorite,

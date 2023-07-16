@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import { useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../../recoil/workspaceAtom'
 import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautiful-dnd'
 import { IpcId as ImagesIpcId, RequestImage, ImageData, ImageInfo, SortGroupImages } from '../../../ipc/images'
 import { ImageViewMulti } from './imageViewMulti'
@@ -8,13 +10,13 @@ import { dummyImageBase64 } from '../../lib/helper'
 import { ImageBulk } from './imageTypes'
 
 type ImageViewProps = {
-  workspaceId: string
   imageId: string
   onNextImageEvent: Event
   onPrevImageEvent: Event
 }
 
 export const ImageView: React.VFC<ImageViewProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const [imageInfoList, setImageInfoList] = useState([] as ImageInfo[])
   const [imageDataList, setImageDataList] = useState([] as ImageData[])
   const [imageThumbDataList, setImageThumbDataList] = useState([] as ImageData[])
@@ -24,7 +26,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
 
   useEffect(() => {
     const requestImage: RequestImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageId: props.imageId,
       isThumbnail: false,
     }
@@ -42,7 +44,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
 
     for (let i = 0; i < imageInfoList.length; i++) {
       const requestImage: RequestImage = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
         imageId: imageInfoList[i].image_id,
         isThumbnail: true,
       }
@@ -55,7 +57,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
 
     for (let i = 0; i < imageInfoList.length; i++) {
       const requestImage: RequestImage = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
         imageId: imageInfoList[i].image_id,
         isThumbnail: false,
       }
@@ -107,7 +109,7 @@ export const ImageView: React.VFC<ImageViewProps> = props => {
       imageIds.push(imageInfoList[i].image_id)
     }
     const sortGroupImages: SortGroupImages = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: imageIds,
       groupId: imageInfoList[0].group_id,
       currThumbImageId: props.imageId,

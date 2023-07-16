@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useRecoilState, useSetRecoilState } from 'recoil'
+import { workspaceAtom } from './recoil/workspaceAtom'
 import { MenuMode, menuModeAtom } from './recoil/menuModeAtom'
 import { tagListAtom } from './recoil/tagListAtom'
 import { tagGroupListAtom } from './recoil/tagGroupListAtom'
@@ -20,10 +21,7 @@ export function UzumeMain() {
 
   const setTagAllList = useSetRecoilState(tagListAtom)
   const setTagGroupList = useSetRecoilState(tagGroupListAtom)
-  const [currentWorkspaceState, setCurrentWorkspace] = useState<CurrentWorkspace>({
-    workspace_name: '',
-    workspace_id: '',
-  })
+  const [currentWorkspaceState, setCurrentWorkspace] = useRecoilState(workspaceAtom)
   const [currMode, setCurrMode] = useRecoilState(menuModeAtom)
   const [_singleTagClickEvent, raiseSingleTagClickEvent] = useRecoilEvent(singleTagClickEventAtom, null)
 
@@ -89,16 +87,9 @@ export function UzumeMain() {
   return (
     <>
       <WorkspaceList />
-      <MainMenu
-        workspaceId={currentWorkspaceState.workspace_id}
-        workspaceName={currentWorkspaceState.workspace_name}
-        currMode={currMode}
-        onAction={onMenuAction}
-        onSingleTagClick={onSingleTagClick}
-        dsb_ref={dsb_left}
-      />
+      <MainMenu currMode={currMode} onAction={onMenuAction} onSingleTagClick={onSingleTagClick} dsb_ref={dsb_left} />
       <div id="before-main" className="split-bar" ref={dsb_split_bar}></div>
-      <ContentsArea workspaceId={currentWorkspaceState.workspace_id} dsb_ref={dsb_right} />
+      <ContentsArea dsb_ref={dsb_right} />
       <Footer />
     </>
   )

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../recoil/workspaceAtom'
 import { imageInfoListAtom } from '../recoil/imageListAtom'
 import { tagListAtom } from '../recoil/tagListAtom'
 import { useTags } from '../lib/tagCustomHooks'
@@ -16,19 +17,20 @@ type ImageSideBarProps = {
 }
 
 export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
 
   const [isShowTagCtrlPanel, setIsShowTagCtrlPanel] = useState(false)
-  const [tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(props.workspaceId)
+  const [tagListState, _showingTagAllListState, _resetTagList, _selectingMenu, _selectMenu] = useTags(workspaceId)
 
   useEffect(() => {
     if (props.imageIds.length == 0) setIsShowTagCtrlPanel(false)
   }, [props.imageIds])
 
   useEffect(() => {
-    sendIpcGetAllTags(props.workspaceId, setTagAllList)
-  }, [props.workspaceId])
+    sendIpcGetAllTags(workspaceId, setTagAllList)
+  }, [workspaceId])
 
   const onTagAreaClick = () => {
     setIsShowTagCtrlPanel(prev => !prev && props.imageIds.length > 0)
@@ -67,7 +69,7 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
 
   const removeTag = (tagId: string) => {
     const req: RemoveTagFromImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: props.imageIds,
       tagId: tagId,
     }
@@ -117,7 +119,6 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
             {linkedTagList.map(t => {
               return (
                 <Tag
-                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}
@@ -173,7 +174,6 @@ export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
       </section>
 
       <TagCtrlPanel
-        workspaceId={props.workspaceId}
         display={isShowTagCtrlPanel}
         imageIds={props.imageIds}
         alreadyLinkedTag={linkedTagList}

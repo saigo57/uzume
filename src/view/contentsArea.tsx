@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from './recoil/workspaceAtom'
 import { BrowseImage } from './contents/browseImage'
 import { TagManage } from './contents/tagManage'
 import { MenuMode, menuModeAtom } from './recoil/menuModeAtom'
 
 type contentsAreaProps = {
-  workspaceId: string
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
 export const ContentsArea: React.VFC<contentsAreaProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const [showAImageState, setShowAImage] = useState(null as string | null)
   const [currMode, _] = useRecoilState(menuModeAtom)
 
   useEffect(() => {
     setShowAImage(null)
-  }, [props.workspaceId, currMode])
+  }, [workspaceId, currMode])
 
   const onBrowseImageModeChange = (imageId: string | null) => {
     setShowAImage(imageId)
@@ -28,17 +29,12 @@ export const ContentsArea: React.VFC<contentsAreaProps> = props => {
   return (
     <>
       {(() => {
-        return currMode == MenuMode.TAG_MANAGE ? (
-          <TagManage workspaceId={props.workspaceId} dsb_ref={props.dsb_ref} />
-        ) : (
-          <></>
-        )
+        return currMode == MenuMode.TAG_MANAGE ? <TagManage workspaceId={workspaceId} dsb_ref={props.dsb_ref} /> : <></>
       })()}
 
       {/* tag_manage表示時にレンダリングしない場合、stateが消えてしまうのでcomponent内で非表示にすることでstateを保持するようにする */}
       <BrowseImage
         display={currMode == MenuMode.HOME || currMode == MenuMode.UNCATEGORIZED}
-        workspaceId={props.workspaceId}
         imageId={showAImageState}
         onModeChange={onBrowseImageModeChange}
         onPrevClick={onPrevClick}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { workspaceIdAtom } from '../../recoil/workspaceAtom'
 import { imageInfoListAtom } from '../../recoil/imageListAtom'
 import { tagListAtom } from '../../recoil/tagListAtom'
 import { tagGroupListAtom } from '../../recoil/tagGroupListAtom'
@@ -20,7 +21,6 @@ import './tagGroupMenu.scss'
 
 type TagCtrlPanelProps = {
   display: boolean
-  workspaceId: string
   imageIds: string[]
   alreadyLinkedTag: TagInfo[]
   onClose: () => void
@@ -28,12 +28,11 @@ type TagCtrlPanelProps = {
 }
 
 export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [searchTagText, setSearchTagText] = useState('')
-  const [_tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(
-    props.workspaceId
-  )
+  const [_tagAllListState, showingTagAllListState, _resetTagList, selectingMenu, selectMenu] = useTags(workspaceId)
   const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)
 
   useEffect(() => {
@@ -49,7 +48,7 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
     if (tagName.length == 0) return
 
     const req: CreateTagToImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: props.imageIds,
       tagName: tagName,
     }
@@ -57,7 +56,7 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
     window.api.invoke(TagsIpcId.Invoke.CREATE_NEW_TAG_TO_IMAGE, JSON.stringify(req)).then((createdTagStr: string) => {
       // タグ再取得
       const reqTags = {
-        workspaceId: props.workspaceId,
+        workspaceId: workspaceId,
       } as GetAllTags
 
       window.api.invoke(TagsIpcId.Invoke.GET_ALL_TAGS, JSON.stringify(reqTags)).then(arg => {
@@ -85,7 +84,7 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
 
   const addTagToImage = (tagId: string) => {
     const req: AddTagToImage = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: props.imageIds,
       tagId: tagId,
     }
@@ -184,7 +183,6 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
               return (
                 <div>
                   <Tag
-                    workspaceId={props.workspaceId}
                     tagId={null}
                     tagName={`追加:${searchTagText}`}
                     favorite={false}
@@ -204,7 +202,6 @@ export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
             if (searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1) {
               return (
                 <Tag
-                  workspaceId={props.workspaceId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}

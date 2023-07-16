@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
+import { workspaceIdAtom } from '../recoil/workspaceAtom'
 import ReactModal from 'react-modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
@@ -13,7 +14,6 @@ import { searchTagIdsAtom, searchTypeAtom } from '../recoil/searchAtom'
 import { isUncategorizedModeAtom } from '../recoil/menuModeAtom'
 
 type ImageIndexViewProps = {
-  workspaceId: string
   onChangeSelectedImages: (imageIds: string[]) => void
   onImageDoubleClick: (imageId: string) => void
   clearSearchTags: () => void
@@ -30,6 +30,7 @@ type SelectedSingleImageId = {
 }
 
 export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
+  const workspaceId = useRecoilValue(workspaceIdAtom)
   const [selectedImageId, setSelectedImageId] = useState([] as string[])
   // api.onの中でselectedImageIdを使うと最初の参照しか見れないので、参照が変わらないstateに都度コピーする
   const [_selectedSingleImageId, setSelectedSingleImageId] = useState({ imageId: null } as SelectedSingleImageId)
@@ -37,11 +38,11 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const searchType = useRecoilValue(searchTypeAtom)
   const isUncategorizedMode = useRecoilValue(isUncategorizedModeAtom)
   const [imageList, nextPageRequestableState, infScrollRef, reloadImageInfo] = useCollectImage(
-    props.workspaceId,
+    workspaceId,
     isUncategorizedMode,
     () => setSelectedImageId([])
   )
-  const [previewStatus, onLeaveThumbneil, iconEnter] = usePreview(props.workspaceId)
+  const [previewStatus, onLeaveThumbneil, iconEnter] = usePreview(workspaceId)
   const [isDragOverState, setIsDragOver] = useState(false)
   const [lastClickImageId, setLastClickImageId] = useState('')
   const [isShowImageUploadModal, setIsShowImageUploadModal] = useState(false)
@@ -149,7 +150,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
   const showContextMenu = (e: any) => {
     e.preventDefault()
     const msg = JSON.stringify({
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageIds: selectedImageId,
     } as ShowContextMenu)
     window.api.send(ImagesIpcId.ImageContextMenu.SHOW_CONTEXT_MENU, msg)
@@ -190,7 +191,7 @@ export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
     if (e.dataTransfer.files.length == 0) return
 
     const imageFiles: ImageFiles = {
-      workspaceId: props.workspaceId,
+      workspaceId: workspaceId,
       imageFileList: [],
       tagIds: searchTagIds,
       searchType: searchType,
