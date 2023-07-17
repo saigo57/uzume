@@ -163,6 +163,7 @@ export const BrowseImage: React.FC<BrowseImageProps> = props => {
             {searchTags.map(t => {
               return (
                 <Tag
+                  key={t.tagId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}

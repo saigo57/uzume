@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+
     <!-- CSP の設定 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:;" />
     <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self';"
-    />
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;"
+    >
 
     <title>uzume</title>
   </head>

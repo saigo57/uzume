@@ -240,7 +240,10 @@ export const WorkspaceList = () => {
     <section id="workspace-list" className="workspace-list">
       {workspaceListState.map(s => {
         return (
-          <div className={`workspace-icon ${selectedClassName(s.isSelected)} ${availableClassName(s.isAvailable)}`}>
+          <div
+            key={s.workspaceId}
+            className={`workspace-icon ${selectedClassName(s.isSelected)} ${availableClassName(s.isAvailable)}`}
+          >
             <img
               id={`icon-image-${s.workspaceId}`}
               className={`actually-workspace-icon`}

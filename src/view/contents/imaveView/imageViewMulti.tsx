@@ -19,12 +19,13 @@ export const ImageViewMulti: React.FC<ImageViewMultiProps> = props => {
             height: `${imageBulk.imageInfo.height}px`,
           } as React.CSSProperties
 
-          return <img src={dummyImageBase64} style={style}></img>
+          return <img key={imageBulk.imageInfo.image_id} src={dummyImageBase64} style={style}></img>
         }
 
         const selected = props.selectedImageId == imageBulk.imageData.imageId ? 'selected' : ''
         return (
           <img
+            key={imageBulk.imageInfo.image_id}
             id={`image-orig-${imageBulk.imageData.imageId}`}
             className={selected}
             src={'data:image;base64,' + imageBulk.imageData.imageBase64}
