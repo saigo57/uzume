@@ -29,7 +29,7 @@ type SelectedSingleImageId = {
   imageId: string | null
 }
 
-export const ImageIndexView: React.VFC<ImageIndexViewProps> = props => {
+export const ImageIndexView: React.FC<ImageIndexViewProps> = props => {
   const SEND_IMAGE_COUNT_MAX = 5
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const [selectedImageId, setSelectedImageId] = useState([] as string[])

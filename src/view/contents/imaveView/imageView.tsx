@@ -15,7 +15,7 @@ type ImageViewProps = {
   onPrevImageEvent: Event
 }
 
-export const ImageView: React.VFC<ImageViewProps> = props => {
+export const ImageView: React.FC<ImageViewProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const [imageInfoList, setImageInfoList] = useState([] as ImageInfo[])
   const [imageDataList, setImageDataList] = useState([] as ImageData[])

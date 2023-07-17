@@ -13,7 +13,7 @@ type Point = {
   y: number
 }
 
-export const ImageViewSingle: React.VFC<ImageViewSingleProps> = props => {
+export const ImageViewSingle: React.FC<ImageViewSingleProps> = props => {
   const [isHoming, setIsHoming] = useState(false)
   const [dragStartPagePoint, setDragStartPagePoint] = useState(null as null | Point)
   const [dragStartScrollPoint, setDragStartScrollPoint] = useState(null as null | Point)

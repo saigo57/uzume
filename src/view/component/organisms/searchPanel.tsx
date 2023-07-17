@@ -16,7 +16,7 @@ type SearchPanelProps = {
   onTagDeleteClick: (tagId: string) => void
 }
 
-export const SearchPanel: React.VFC<SearchPanelProps> = props => {
+export const SearchPanel: React.FC<SearchPanelProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const selectedTagIds = useRecoilValue(searchTagIdsAtom)

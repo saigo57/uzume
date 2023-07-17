@@ -15,7 +15,7 @@ type ImageSideBarProps = {
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
-export const ImageSideBar: React.VFC<ImageSideBarProps> = props => {
+export const ImageSideBar: React.FC<ImageSideBarProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [imageInfoList, setImageInfoList] = useRecoilState(imageInfoListAtom)

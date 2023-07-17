@@ -22,7 +22,7 @@ type MainMenuProps = {
   dsb_ref: React.RefObject<HTMLElement>
 }
 
-export const MainMenu: React.VFC<MainMenuProps> = props => {
+export const MainMenu: React.FC<MainMenuProps> = props => {
   const workspace = useRecoilValue(workspaceAtom)
   const tagGroupListState = useRecoilValue(tagGroupListAtom)
   const [FavoriteTagListState, setFavoriteTagList] = useState([] as TagInfo[])

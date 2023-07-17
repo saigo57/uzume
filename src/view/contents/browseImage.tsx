@@ -26,7 +26,7 @@ type BrowseImageProps = {
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
-export const BrowseImage: React.VFC<BrowseImageProps> = props => {
+export const BrowseImage: React.FC<BrowseImageProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [selectedImageIds, setSelectedImageIds] = useState([] as string[])
