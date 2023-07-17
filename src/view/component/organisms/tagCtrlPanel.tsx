@@ -27,7 +27,7 @@ type TagCtrlPanelProps = {
   onRemoveTag: ((tagId: string) => void) | null
 }
 
-export const TagCtrlPanel: React.VFC<TagCtrlPanelProps> = props => {
+export const TagCtrlPanel: React.FC<TagCtrlPanelProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const tagGroupListState = useRecoilValue(tagGroupListAtom)

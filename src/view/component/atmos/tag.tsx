@@ -20,7 +20,7 @@ type TagProps = {
   onDeleteClick: ((tagId: string) => void) | null
 }
 
-export const Tag: React.VFC<TagProps> = props => {
+export const Tag: React.FC<TagProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const [{ isDragging }, dragRef] = useDrag({

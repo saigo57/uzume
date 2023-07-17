@@ -49,7 +49,7 @@ const reactModalStyle: ReactModal.Styles = {
   },
 }
 
-const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
+const TagGroupMenu: React.FC<TagGroupMenuProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const onDrop = (item: any) => {
@@ -99,7 +99,7 @@ const TagGroupMenu: React.VFC<TagGroupMenuProps> = props => {
   )
 }
 
-export const TagManage: React.VFC<TagManageProps> = props => {
+export const TagManage: React.FC<TagManageProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const setTagAllList = useSetRecoilState(tagListAtom)
   const [tagGroupListState, setTagGroupList] = useRecoilState(tagGroupListAtom)

@@ -9,7 +9,7 @@ type ImageViewMultiProps = {
   onImageSelect: (imageId: string) => void
 }
 
-export const ImageViewMulti: React.VFC<ImageViewMultiProps> = props => {
+export const ImageViewMulti: React.FC<ImageViewMultiProps> = props => {
   return (
     <div className={`images-area images-area-multi ${props.isShowSidePanel ? 'show-side-panel' : ''}`}>
       {props.images.map(imageBulk => {

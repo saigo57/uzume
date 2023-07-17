@@ -6,7 +6,7 @@ type BackendSetupProps = {
   backendState: BackendState
 }
 
-export const BackendSetup: React.VFC<BackendSetupProps> = props => {
+export const BackendSetup: React.FC<BackendSetupProps> = props => {
   const backendDownload = () => {
     window.api.send(BackendSetupIpcId.ToMainProc.BACKEND_DOWNLOAD)
   }

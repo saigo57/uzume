@@ -10,7 +10,7 @@ type ConfirmModalProps = {
   onClose: () => void
 }
 
-export const ConfirmModal: React.VFC<ConfirmModalProps> = props => {
+export const ConfirmModal: React.FC<ConfirmModalProps> = props => {
   const reactModalStyle: ReactModal.Styles = {
     content: {
       top: '50%',

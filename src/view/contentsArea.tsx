@@ -9,7 +9,7 @@ type contentsAreaProps = {
   dsb_ref: React.RefObject<HTMLDivElement>
 }
 
-export const ContentsArea: React.VFC<contentsAreaProps> = props => {
+export const ContentsArea: React.FC<contentsAreaProps> = props => {
   const workspaceId = useRecoilValue(workspaceIdAtom)
   const [showAImageState, setShowAImage] = useState(null as string | null)
   const [currMode, _] = useRecoilState(menuModeAtom)
