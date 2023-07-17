@@ -189,6 +189,7 @@ export const TagManage: React.FC<TagManageProps> = props => {
         {tagGroupListState.map(tg => {
           return (
             <TagGroupMenu
+              key={tg.tagGroupId}
               name={tg.name}
               tagGroupId={tg.tagGroupId}
               isSelected={selectingMenu == tg.tagGroupId}
@@ -204,6 +205,7 @@ export const TagManage: React.FC<TagManageProps> = props => {
         {showingTagAllListState.map(t => {
           return (
             <Tag
+              key={t.tagId}
               tagId={t.tagId}
               tagName={t.name}
               favorite={t.favorite}

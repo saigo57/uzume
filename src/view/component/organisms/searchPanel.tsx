@@ -101,7 +101,11 @@ export const SearchPanel: React.FC<SearchPanelProps> = props => {
         </div>
         {tagGroupListState.map((tg: any) => {
           return (
-            <div className={`menu-item ${menuSelected(tg.tagGroupId)}`} onClick={() => onMenuClick(tg.tagGroupId)}>
+            <div
+              key={tg.tagGroupId}
+              className={`menu-item ${menuSelected(tg.tagGroupId)}`}
+              onClick={() => onMenuClick(tg.tagGroupId)}
+            >
               {tg.name}
             </div>
           )
@@ -123,6 +127,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = props => {
             if (searchTagText.length == 0 || t.name.indexOf(searchTagText) != -1) {
               return (
                 <Tag
+                  key={t.tagId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}

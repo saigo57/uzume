@@ -311,6 +311,7 @@ export const ImageIndexView: React.FC<ImageIndexViewProps> = props => {
       {imageList.images.map(image => {
         return (
           <div
+            key={image.image_id}
             id={`thumbnail-${image.image_id}`}
             className={`thumbnail ${selectedImageId.includes(image.image_id) ? 'selected' : ''}`}
             onClick={e => {

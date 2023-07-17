@@ -96,6 +96,7 @@ export const MainMenu: React.FC<MainMenuProps> = props => {
         {FavoriteTagListState.map(tag => {
           return (
             <li
+              key={tag.tagId}
               className="tag-item"
               onClick={() => {
                 props.onSingleTagClick(tag.tagId)
@@ -115,7 +116,7 @@ export const MainMenu: React.FC<MainMenuProps> = props => {
       <ul>
         {tagGroupListState.map(tag_group => {
           return (
-            <>
+            <React.Fragment key={tag_group.tagGroupId}>
               <li
                 className="tag-group-item"
                 onClick={() => {
@@ -132,6 +133,7 @@ export const MainMenu: React.FC<MainMenuProps> = props => {
                     if (tag.tagGroupId != tag_group.tagGroupId) return
                     return (
                       <li
+                        key={tag.tagId}
                         className="tag-item"
                         onClick={() => {
                           props.onSingleTagClick(tag.tagId)
@@ -145,7 +147,7 @@ export const MainMenu: React.FC<MainMenuProps> = props => {
                   })
                 }
               })()}
-            </>
+            </React.Fragment>
           )
         })}
       </ul>

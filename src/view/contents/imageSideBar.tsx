@@ -118,6 +118,7 @@ export const ImageSideBar: React.FC<ImageSideBarProps> = props => {
             {linkedTagList.map(t => {
               return (
                 <Tag
+                  key={t.tagId}
                   tagId={t.tagId}
                   tagName={t.name}
                   favorite={t.favorite}
