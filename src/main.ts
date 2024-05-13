@@ -1,5 +1,5 @@
 import path from 'path'
-import electron, { app, BrowserWindow, autoUpdater, Menu, dialog, shell } from 'electron'
+import { app, BrowserWindow, autoUpdater, Menu, dialog, shell } from 'electron'
 import { BackendConnector } from 'uzume-backend-connector'
 import { showFooterMessageByBrowserWindow } from './ipc/footer'
 import { IpcId as backendSetupIpcId } from './ipc/backendSetup'
@@ -171,12 +171,6 @@ function createWindow() {
   if (process.env.NODE_ENV === 'development' && process.env['E2E_TEST'] != 'true') {
     win.webContents.openDevTools({ mode: 'detach' })
   }
-
-  // 外部リンククリック時にデフォルトブラウザで開くように
-  win.webContents.on('new-window', (event, url) => {
-    event.preventDefault()
-    electron.shell.openExternal(url)
-  })
 
   win.loadFile(path.join(__dirname, 'app.html'))
 
