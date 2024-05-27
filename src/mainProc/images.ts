@@ -1,4 +1,5 @@
-import Electron, { ipcMain, BrowserWindow, Menu } from 'electron'
+import * as fs from 'fs'
+import Electron, { ipcMain, BrowserWindow, dialog, Menu } from 'electron'
 import {
   IpcId,
   ShowContextMenu,
@@ -16,6 +17,10 @@ import { BackendConnector } from 'uzume-backend-connector'
 import ImageUseCase from './useCase/imageUseCase'
 import { showFooterMessage } from '../ipc/footer'
 import { Globals } from './globals'
+
+function base64decode(data:string){
+  return new Uint8Array([...atob(data)].map(s => s.charCodeAt(0)));
+}
 
 ipcMain.handle(IpcId.Invoke.FETCH_IMAGE, async (e, arg) => {
   const fetchImage: FetchImage = JSON.parse(arg)
@@ -105,6 +110,7 @@ ipcMain.on(IpcId.ImageContextMenu.SHOW_CONTEXT_MENU, (e, arg) => {
 
   if (msg.imageIds.length == 1) {
     const image = Globals.imageInfoList[msg.workspaceId][msg.imageIds[0]]
+
     if (image.is_group_thumb_nail) {
       template.push({
         label: 'グループ解除',
@@ -117,6 +123,35 @@ ipcMain.on(IpcId.ImageContextMenu.SHOW_CONTEXT_MENU, (e, arg) => {
         },
       })
     }
+
+    template.push({
+      label: 'ダウンロード',
+      click: async () => {
+        const ret = await dialog.showSaveDialog(
+          null as any,
+          {
+            properties: ['createDirectory', 'showOverwriteConfirmation'],
+            filters: [
+              {
+                name: '',
+                extensions: [image.ext],
+              }
+            ],
+            defaultPath: image.file_name,
+          }
+        );
+
+        if (ret.canceled) return;
+
+        const imageData = await ImageUseCase.fetchImage(msg.workspaceId, image.image_id, false)
+        const imageByteData = base64decode(imageData.imageBase64);
+        fs.writeFile(ret.filePath, imageByteData, (error: any) => {
+          if (error != null) {
+            console.log(error)
+          }
+        })
+      },
+    })
   }
 
   if (msg.imageIds.length >= 2) {
@@ -131,13 +166,6 @@ ipcMain.on(IpcId.ImageContextMenu.SHOW_CONTEXT_MENU, (e, arg) => {
       },
     })
   }
-
-  template.push({
-    label: 'ダウンロード(未実装)',
-    click: () => {
-      console.log('ダウンロード')
-    },
-  })
 
   const menu = Menu.buildFromTemplate(template)
   const contents: any = BrowserWindow.fromWebContents(e.sender)
