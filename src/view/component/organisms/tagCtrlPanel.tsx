@@ -76,6 +76,7 @@ export const TagCtrlPanel: React.FC<TagCtrlPanelProps> = props => {
       window.api.invoke(ImagesIpcId.Invoke.ADD_TAG, JSON.stringify(reqAddTag)).then(arg => {
         const imageInfoList = JSON.parse(arg) as ImageInfo[]
         setImageInfoList(imageInfoList)
+        setSearchTagText('') // 検索窓をクリア
       })
     })
 
