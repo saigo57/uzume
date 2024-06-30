@@ -9,11 +9,11 @@ uzumeは、LAN内の1箇所に保存されている画像をPCやスマートフ
 そのため、frontendとbackendを分けることでLAN内に存在するマシン1台にbackendを配置、frontendをそれぞれの端末で起動し1箇所のリソースに複数からアクセスできるように設計しています。
 
 ## 関連リポジトリ
-* [uzumeBackend](https://github.com/Saigo1997/uzume-backend)<br>
+* [uzumeBackend](https://github.com/saigo57/uzume-backend)<br>
 Goで作成された、uzumeのバックエンド
-* [BackendConnector](https://github.com/Saigo1997/uzume-backend-connector)<br>
+* [BackendConnector](https://github.com/saigo57/uzume-backend-connector)<br>
 uzumeBackendに接続するためのTypeScriptライブラリ
-* [uzumeLP(private)](https://github.com/Saigo1997/uzume-LP)<br>
+* [uzumeLP(private)](https://github.com/saigo57/uzume-LP)<br>
 前述のランディングページのソース
 
 

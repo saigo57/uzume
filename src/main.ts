@@ -14,7 +14,7 @@ import './mainProc/tagManage'
 import uzume_icon from './images/uzume-icon-radius.png'
 
 function githubBaseUrlWithVersion() {
-  return `https://github.com/Saigo1997/uzume/blob/v${app.getVersion()}`
+  return `https://github.com/saigo57/uzume/blob/v${app.getVersion()}`
 }
 
 function aboutPanel() {
